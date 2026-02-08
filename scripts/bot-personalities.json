@@ -1,0 +1,124 @@
+{
+  "personalities": [
+    {
+      "name": "DegenBot3000",
+      "strategy": "berzerker",
+      "wagerPercent": 0.20,
+      "personality": "Aggressive high-roller, never backs down"
+    },
+    {
+      "name": "PaperHands_Pete",
+      "strategy": "merchant",
+      "wagerPercent": 0.03,
+      "personality": "Cautious trader, exits at first sign of loss"
+    },
+    {
+      "name": "HODL_Monk",
+      "strategy": "disciple",
+      "wagerPercent": 0.0,
+      "personality": "Never gambles, only stakes and prays"
+    },
+    {
+      "name": "Whale_Hunter",
+      "strategy": "berzerker",
+      "wagerPercent": 0.25,
+      "personality": "Goes all-in against big players"
+    },
+    {
+      "name": "Smart_Money_42",
+      "strategy": "merchant",
+      "wagerPercent": 0.08,
+      "personality": "Calculated moves, never emotional"
+    },
+    {
+      "name": "Rage_Quitter_9000",
+      "strategy": "berzerker",
+      "wagerPercent": 0.15,
+      "personality": "Bets big after losses, chases wins"
+    },
+    {
+      "name": "The_Accountant",
+      "strategy": "merchant",
+      "wagerPercent": 0.05,
+      "personality": "Spreadsheets and probabilities only"
+    },
+    {
+      "name": "Faithful_Servant",
+      "strategy": "disciple",
+      "wagerPercent": 0.0,
+      "personality": "Believes in compound interest, not luck"
+    },
+    {
+      "name": "Chaos_Monkey",
+      "strategy": "berzerker",
+      "wagerPercent": 0.30,
+      "personality": "Random moves, pure entropy"
+    },
+    {
+      "name": "Value_Investor",
+      "strategy": "merchant",
+      "wagerPercent": 0.06,
+      "personality": "Waits for favorable odds"
+    },
+    {
+      "name": "Moon_or_Bust",
+      "strategy": "berzerker",
+      "wagerPercent": 0.18,
+      "personality": "Either 10x or zero, no in-between"
+    },
+    {
+      "name": "Risk_Manager",
+      "strategy": "merchant",
+      "wagerPercent": 0.04,
+      "personality": "Stop-loss at 10%, never exceeds"
+    },
+    {
+      "name": "Tilted_Trader",
+      "strategy": "berzerker",
+      "wagerPercent": 0.22,
+      "personality": "Doubles down after every loss"
+    },
+    {
+      "name": "Archbishop_Alpha",
+      "strategy": "disciple",
+      "wagerPercent": 0.0,
+      "personality": "Staking is the only true path"
+    },
+    {
+      "name": "Sigma_Grindset",
+      "strategy": "merchant",
+      "wagerPercent": 0.07,
+      "personality": "Optimization over emotion"
+    },
+    {
+      "name": "Gambler_Fallacy",
+      "strategy": "berzerker",
+      "wagerPercent": 0.16,
+      "personality": "Believes in hot streaks"
+    },
+    {
+      "name": "Bot_Ross",
+      "strategy": "merchant",
+      "wagerPercent": 0.05,
+      "personality": "Happy little trades, no mistakes"
+    },
+    {
+      "name": "Degen_Supreme",
+      "strategy": "berzerker",
+      "wagerPercent": 0.28,
+      "personality": "Maximum risk, maximum reward"
+    },
+    {
+      "name": "Index_Fund_Andy",
+      "strategy": "disciple",
+      "wagerPercent": 0.0,
+      "personality": "Set it and forget it"
+    },
+    {
+      "name": "Martingale_Master",
+      "strategy": "berzerker",
+      "wagerPercent": 0.12,
+      "personality": "Double or nothing strategy"
+    }
+  ]
+}
