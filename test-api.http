@@ -1,0 +1,43 @@
+### Health Check
+GET http://localhost:3001/health
+
+###
+
+### Test Scanner Only
+GET http://localhost:3001/api/scan/0x1234567890123456789012345678901234567890
+
+###
+
+### Test Full Confession (Scanner + Roaster + Image)
+POST http://localhost:3001/api/confess
+Content-Type: application/json
+
+{
+  "walletAddress": "0x1234567890123456789012345678901234567890"
+}
+
+###
+
+### Test Roast Preview (A/B Testing)
+POST http://localhost:3001/api/roast/preview
+Content-Type: application/json
+
+{
+  "walletAddress": "0x1234567890123456789012345678901234567890",
+  "count": 3
+}
+
+###
+
+### Test Price Service
+GET http://localhost:3001/test/prices
+
+###
+
+### Test with Real Wallet (From CTO)
+POST http://localhost:3001/api/confess
+Content-Type: application/json
+
+{
+  "walletAddress": "0x84d1742e421bd5e8b7d44d7da3288fcd4a516385"
+}

@@ -1,0 +1,102 @@
+{
+  "Iron Beard": {
+    "address": "0xe6e8F972a4A36b9FE476Cbd373e5E347DF3A286B",
+    "privateKey": "0xb58c108a9a79eccfa3ad1311c5819367aec60779645761183271578cfbe8ee99",
+    "personality": "Iron Beard"
+  },
+  "Greedy Guts": {
+    "address": "0xE1776D6117cc07f36de3c7D308640cE4c6cB5Af2",
+    "privateKey": "0x2141761bc9fa7cb5e2e6c7c3553a19c980bf2896a0993a696b701f685e62bf56",
+    "personality": "Greedy Guts"
+  },
+  "Saint Peter": {
+    "address": "0xa5649a0E4c09A0c132c043c97e901443942182a7",
+    "privateKey": "0x213309d7f5c0f073bbd2d36fa202d2dd623482c783e3ce4f4934a7208bef0d03",
+    "personality": "Saint Peter"
+  },
+  "Mad Max": {
+    "address": "0xABE105EEA55CC54E0E6A9E09b894A4d1686bc5b1",
+    "privateKey": "0x238c129842a1eb1c8659b9a3683c4db4621d625ec9353eddbb1bb9e382db2e78",
+    "personality": "Mad Max"
+  },
+  "Thrifty Theo": {
+    "address": "0xe43024ee26e2196Ce88E37d582f2f228cC052ab8",
+    "privateKey": "0x5af980babe55a2b400c019b2e1f13aa00fa734a8d2c862f61ea083bea2293d67",
+    "personality": "Thrifty Theo"
+  },
+  "Faithful Fred": {
+    "address": "0x8EDA7087A6D4137580eb731f38d4025d379D22c7",
+    "privateKey": "0xc62b2e58fd434e655ccabc3f1ca052f55c7406ad3ac7a66ea9687304572fd19f",
+    "personality": "Faithful Fred"
+  },
+  "Chaos Carl": {
+    "address": "0xC087c02E3Fa14ac6645465F9c1bEB7915CFA86aF",
+    "privateKey": "0x65b4695ab0342048052149f3374bdd0210fbafc2da6acdfcb0e205344964db4a",
+    "personality": "Chaos Carl"
+  },
+  "Penny Pincher": {
+    "address": "0x95A6F73119d317c1fa5d7D5a39B9895F0d914A71",
+    "privateKey": "0x48581649231776c4b23ec4a26a0d02f858eefab7fcc5ae306e3a09e88f269ecc",
+    "personality": "Penny Pincher"
+  },
+  "Holy Roller": {
+    "address": "0x26aE7D38b5741717d2F0c42D031817fd38777943",
+    "privateKey": "0xbe73d29744897cd1bc9de6ba4de3a27e704ea00a67d68cf6953efdc3324276ea",
+    "personality": "Holy Roller"
+  },
+  "Rage Quit": {
+    "address": "0xa883d98dd2988be435353625aC3b7b04BD95Ae55",
+    "privateKey": "0xf03ff1b56bbdbcb7bda14c3627619ca315619ba6ee365b67060b178dc3e81767",
+    "personality": "Rage Quit"
+  },
+  "Market Maker": {
+    "address": "0x924955f144e343FeC7919A55c1f3C2544e354d82",
+    "privateKey": "0xb7afa69adee600c9bc6c7adadd8e5e1ef5d2a139f467ead068e032c15c637606",
+    "personality": "Market Maker"
+  },
+  "The Believer": {
+    "address": "0xB53A4384a4862D67AA866256beb9808B9d392eE9",
+    "privateKey": "0xca8ec8213f186be241d0d415d4f837de7d8118b2779d3fbc3c65b4d455c67247",
+    "personality": "The Believer"
+  },
+  "Smash Bros": {
+    "address": "0x2086FF04996D150919F9bb1E1E9e7CB19856D2eb",
+    "privateKey": "0xf4b34b5aec94c5c06178c9be79a7fbf4b0f2187da58acc29e0047c9b8592522e",
+    "personality": "Smash Bros"
+  },
+  "Coin Keeper": {
+    "address": "0xCCae5fCb6517d35d27D1d9cA96CeD4594D2ddD24",
+    "privateKey": "0xc0c7b2a99263aacc08b9d558df75744af4c11bbbf690ccae7e5959706725b0f1",
+    "personality": "Coin Keeper"
+  },
+  "Devout Dave": {
+    "address": "0xB0A9b07d30ceCbe98f11486F6134fa7a65463eb1",
+    "privateKey": "0x02ce9425f27699cbf6ef28ec42a8a86efb203bc32f1bf414caad8c90707f017b",
+    "personality": "Devout Dave"
+  },
+  "Yolo Baggins": {
+    "address": "0x9E074769E04fD5Cb5C7Dc55C06f260674d6E41eF",
+    "privateKey": "0xea9ded254298c6c42efb84850b4b101201973d61f90ee066af450a2ff89e70de",
+    "personality": "Yolo Baggins"
+  },
+  "Safe Bet": {
+    "address": "0x215aa5246dcbFF4660D2a9d4D0A15a7123513F13",
+    "privateKey": "0x44b5afa12c152b828f49e082c663ddde27df336ba21e48a84ba428a6c7da9d67",
+    "personality": "Safe Bet"
+  },
+  "Pious Paul": {
+    "address": "0xD5Bf01408EbD8605d82eF75012442fD226075bf4",
+    "privateKey": "0xb07a3c01beda9f35fa6efc776bbc1c4d7e76830d31d3e979909c403df7637570",
+    "personality": "Pious Paul"
+  },
+  "Aggro Andy": {
+    "address": "0xeaba1801f864E753BF47214A43A6B8042Fd49E91",
+    "privateKey": "0xa833e6ff51d818161e71fccefa64904f89ba9abb839a16cf7e4f9d8227c323ac",
+    "personality": "Aggro Andy"
+  },
+  "Stable Stan": {
+    "address": "0x5648A7e0676A85ab472D8bCA9821429D5D7c1bEF",
+    "privateKey": "0x9f9d698f4eb076b0aff2eae982a389d7cb329cd9c74f7185e86bbb8dd2c42096",
+    "personality": "Stable Stan"
+  }
+}

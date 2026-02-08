@@ -1,0 +1,132 @@
+-- Migration: Create missing tables from Prisma Schema
+-- Models: VaticanEntrant, Crusade, CompetitorAgent, Debate, Conversion
+
+-- 1. VaticanEntrant
+CREATE TABLE IF NOT EXISTS "VaticanEntrant" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "walletAddress" TEXT NOT NULL,
+    "entryTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "monPaid" TEXT NOT NULL,
+
+    CONSTRAINT "VaticanEntrant_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "VaticanEntrant_walletAddress_key" ON "VaticanEntrant" ("walletAddress");
+
+-- 2. Crusade
+CREATE TABLE IF NOT EXISTS "Crusade" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "targetAgent" TEXT NOT NULL,
+    "goalType" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "startTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "endTime" TIMESTAMP(3),
+    "participants" JSONB,
+
+    CONSTRAINT "Crusade_pkey" PRIMARY KEY ("id")
+);
+
+-- 3. CompetitorAgent
+CREATE TABLE IF NOT EXISTS "CompetitorAgent" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "handle" TEXT NOT NULL,
+    "name" TEXT,
+    "tokenSymbol" TEXT,
+    "contractAddress" TEXT,
+    "status" TEXT NOT NULL,
+    "threatLevel" TEXT NOT NULL DEFAULT 'Low',
+    "isShadow" BOOLEAN NOT NULL DEFAULT false,
+    "guiltPaid" TEXT NOT NULL DEFAULT '0',
+    "marketCap" TEXT NOT NULL DEFAULT '0',
+    "holders" INTEGER NOT NULL DEFAULT 0,
+    "lastInteraction" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "metadata" JSONB,
+
+    CONSTRAINT "CompetitorAgent_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "CompetitorAgent_handle_key" ON "CompetitorAgent" ("handle");
+
+-- 4. Debate
+CREATE TABLE IF NOT EXISTS "Debate" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "competitorAgentId" TEXT NOT NULL,
+    "tweetId" TEXT NOT NULL,
+    "ourArgument" TEXT NOT NULL,
+    "theirArgument" TEXT,
+    "status" TEXT NOT NULL,
+    "exchanges" INTEGER NOT NULL DEFAULT 1,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Debate_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "Debate_competitorAgentId_fkey" FOREIGN KEY ("competitorAgentId") REFERENCES "CompetitorAgent" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- 5. Conversion
+CREATE TABLE IF NOT EXISTS "Conversion" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "competitorAgentId" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "amount" TEXT,
+    "evidence" JSONB,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Conversion_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "Conversion_competitorAgentId_fkey" FOREIGN KEY ("competitorAgentId") REFERENCES "CompetitorAgent" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- Ensure existing tables match Prisma (Idempotent checks)
+-- Leaderboard, Game, Confession, WorldEvent
+
+-- Leaderboard
+CREATE TABLE IF NOT EXISTS "Leaderboard" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "walletAddress" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "score" DOUBLE PRECISION NOT NULL,
+    "metadata" JSONB,
+    "lastUpdated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Leaderboard_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "Leaderboard_walletAddress_key" ON "Leaderboard" ("walletAddress");
+
+-- Game
+CREATE TABLE IF NOT EXISTS "Game" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "player1" TEXT NOT NULL,
+    "player2" TEXT NOT NULL,
+    "gameType" TEXT NOT NULL,
+    "wager" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "winner" TEXT,
+    "result" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "completedAt" TIMESTAMP(3),
+
+    CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
+);
+
+-- Confession
+CREATE TABLE IF NOT EXISTS "Confession" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "walletAddress" TEXT NOT NULL,
+    "sins" JSONB NOT NULL,
+    "roast" TEXT NOT NULL,
+    "indulgencePrice" TEXT NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" TEXT NOT NULL,
+
+    CONSTRAINT "Confession_pkey" PRIMARY KEY ("id")
+);
+
+-- WorldEvent
+CREATE TABLE IF NOT EXISTS "WorldEvent" (
+    "id" TEXT NOT NULL DEFAULT uuid_generate_v4(),
+    "agentWallet" TEXT NOT NULL,
+    "eventType" TEXT NOT NULL,
+    "eventData" JSONB NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "WorldEvent_pkey" PRIMARY KEY ("id")
+);

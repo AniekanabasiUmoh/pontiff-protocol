@@ -1,0 +1,29 @@
+{
+  "name": "pontiff",
+  "version": "1.0.0",
+  "description": "The Pontiff - Indulgence Protocol for Monad Hackathon",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "keywords": [
+    "monad",
+    "defi",
+    "hackathon",
+    "ai-agent"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
+}

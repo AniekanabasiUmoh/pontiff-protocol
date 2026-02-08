@@ -1,0 +1,122 @@
+[
+    {
+        "name": "Iron Beard",
+        "strategy": "berzerker",
+        "riskProfile": "high",
+        "initialDeposit": 100
+    },
+    {
+        "name": "Greedy Guts",
+        "strategy": "merchant",
+        "riskProfile": "low",
+        "initialDeposit": 200
+    },
+    {
+        "name": "Saint Peter",
+        "strategy": "disciple",
+        "riskProfile": "medium",
+        "initialDeposit": 150
+    },
+    {
+        "name": "Mad Max",
+        "strategy": "berzerker",
+        "riskProfile": "high",
+        "initialDeposit": 100
+    },
+    {
+        "name": "Thrifty Theo",
+        "strategy": "merchant",
+        "riskProfile": "low",
+        "initialDeposit": 300
+    },
+    {
+        "name": "Faithful Fred",
+        "strategy": "disciple",
+        "riskProfile": "medium",
+        "initialDeposit": 150
+    },
+    {
+        "name": "Chaos Carl",
+        "strategy": "berzerker",
+        "riskProfile": "high",
+        "initialDeposit": 120
+    },
+    {
+        "name": "Penny Pincher",
+        "strategy": "merchant",
+        "riskProfile": "low",
+        "initialDeposit": 250
+    },
+    {
+        "name": "Holy Roller",
+        "strategy": "disciple",
+        "riskProfile": "medium",
+        "initialDeposit": 180
+    },
+    {
+        "name": "Rage Quit",
+        "strategy": "berzerker",
+        "riskProfile": "high",
+        "initialDeposit": 100
+    },
+    {
+        "name": "Market Maker",
+        "strategy": "merchant",
+        "riskProfile": "low",
+        "initialDeposit": 500
+    },
+    {
+        "name": "The Believer",
+        "strategy": "disciple",
+        "riskProfile": "medium",
+        "initialDeposit": 200
+    },
+    {
+        "name": "Smash Bros",
+        "strategy": "berzerker",
+        "riskProfile": "high",
+        "initialDeposit": 110
+    },
+    {
+        "name": "Coin Keeper",
+        "strategy": "merchant",
+        "riskProfile": "low",
+        "initialDeposit": 220
+    },
+    {
+        "name": "Devout Dave",
+        "strategy": "disciple",
+        "riskProfile": "medium",
+        "initialDeposit": 160
+    },
+    {
+        "name": "Yolo Baggins",
+        "strategy": "berzerker",
+        "riskProfile": "high",
+        "initialDeposit": 100
+    },
+    {
+        "name": "Safe Bet",
+        "strategy": "merchant",
+        "riskProfile": "low",
+        "initialDeposit": 350
+    },
+    {
+        "name": "Pious Paul",
+        "strategy": "disciple",
+        "riskProfile": "medium",
+        "initialDeposit": 170
+    },
+    {
+        "name": "Aggro Andy",
+        "strategy": "berzerker",
+        "riskProfile": "high",
+        "initialDeposit": 130
+    },
+    {
+        "name": "Stable Stan",
+        "strategy": "merchant",
+        "riskProfile": "low",
+        "initialDeposit": 280
+    }
+]

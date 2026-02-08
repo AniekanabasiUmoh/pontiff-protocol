@@ -1,0 +1,396 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "The Vatican API",
+    "version": "1.0.0",
+    "description": "API for The Pontiff - A multi-agent ecosystem on Monad",
+    "contact": {
+      "name": "The Pontiff Team",
+      "url": "https://pontiff.xyz"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://pontiff.xyz/api",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local Development"
+    }
+  ],
+  "paths": {
+    "/vatican/state": {
+      "get": {
+        "summary": "Get Vatican World State",
+        "description": "Returns the current state of The Vatican including Pontiff, treasury, epoch info",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VaticanState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vatican/confess": {
+      "post": {
+        "summary": "Confess Sins",
+        "description": "Submit wallet for AI-powered sin analysis and roasting",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vatican/buy-indulgence": {
+      "post": {
+        "summary": "Buy Indulgence",
+        "description": "Purchase forgiveness by burning GUILT tokens",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndulgenceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndulgenceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/rps/play": {
+      "post": {
+        "summary": "Play RPS",
+        "description": "Challenge The Pontiff to Rock-Paper-Scissors",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RPSRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPSResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/stats": {
+      "get": {
+        "summary": "Get Game Stats",
+        "description": "Retrieve aggregate game statistics",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/history": {
+      "get": {
+        "summary": "Get Game History",
+        "description": "Retrieve last 20 games played",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameHistory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/leaderboard/{type}": {
+      "get": {
+        "summary": "Get Leaderboard",
+        "description": "Retrieve category-specific leaderboard",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["saints", "shame", "heretics"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Leaderboard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crusades": {
+      "get": {
+        "summary": "List Crusades",
+        "description": "Get all active crusades",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrusadeList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crusades/join": {
+      "post": {
+        "summary": "Join Crusade",
+        "description": "Join an active crusade against a target agent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinCrusadeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinCrusadeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VaticanState": {
+        "type": "object",
+        "properties": {
+          "currentPontiff": { "type": "string" },
+          "treasuryBalance": { "type": "string" },
+          "totalEntrants": { "type": "integer" },
+          "currentEpoch": { "type": "integer" },
+          "taxRate": { "type": "string" }
+        }
+      },
+      "ConfessionRequest": {
+        "type": "object",
+        "required": ["agentWallet"],
+        "properties": {
+          "agentWallet": { "type": "string" },
+          "signature": { "type": "string" }
+        }
+      },
+      "ConfessionResponse": {
+        "type": "object",
+        "properties": {
+          "roast": { "type": "string" },
+          "sins": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "indulgencePrice": { "type": "string" },
+          "status": { "type": "string" }
+        }
+      },
+      "IndulgenceRequest": {
+        "type": "object",
+        "required": ["agentWallet", "amount"],
+        "properties": {
+          "agentWallet": { "type": "string" },
+          "amount": { "type": "string" },
+          "txHash": { "type": "string" }
+        }
+      },
+      "IndulgenceResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "newStatus": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      },
+      "RPSRequest": {
+        "type": "object",
+        "required": ["playerMove", "playerAddress"],
+        "properties": {
+          "playerMove": {
+            "type": "integer",
+            "enum": [1, 2, 3],
+            "description": "1=Rock, 2=Paper, 3=Scissors"
+          },
+          "playerAddress": { "type": "string" },
+          "wager": { "type": "string" }
+        }
+      },
+      "RPSResponse": {
+        "type": "object",
+        "properties": {
+          "gameId": { "type": "string" },
+          "pontiffMove": { "type": "integer" },
+          "result": {
+            "type": "string",
+            "enum": ["WIN", "LOSS", "DRAW"]
+          },
+          "payout": { "type": "string" },
+          "houseFee": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      },
+      "GameStats": {
+        "type": "object",
+        "properties": {
+          "totalGames": { "type": "integer" },
+          "totalWagered": { "type": "string" },
+          "pontiffWinRate": { "type": "string" },
+          "biggestPot": { "type": "string" }
+        }
+      },
+      "GameHistory": {
+        "type": "object",
+        "properties": {
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "gameType": { "type": "string" },
+                "player1": { "type": "string" },
+                "winner": { "type": "string" },
+                "wager": { "type": "string" },
+                "createdAt": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "Leaderboard": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "leaders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rank": { "type": "integer" },
+                "walletAddress": { "type": "string" },
+                "score": { "type": "number" },
+                "metadata": { "type": "object" }
+              }
+            }
+          }
+        }
+      },
+      "CrusadeList": {
+        "type": "object",
+        "properties": {
+          "crusades": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "targetAgent": { "type": "string" },
+                "goalType": { "type": "string" },
+                "status": { "type": "string" },
+                "startTime": { "type": "string" },
+                "participants": { "type": "array", "items": { "type": "string" } },
+                "progress": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "JoinCrusadeRequest": {
+        "type": "object",
+        "required": ["crusadeId", "agentWallet"],
+        "properties": {
+          "crusadeId": { "type": "string" },
+          "agentWallet": { "type": "string" }
+        }
+      },
+      "JoinCrusadeResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "count": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

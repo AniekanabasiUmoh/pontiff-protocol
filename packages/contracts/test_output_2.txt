@@ -1,0 +1,41 @@
+DEBUG: Loading Hardhat Config
+RPC URL: Found
+Deployer Key: Found
+
+
+  JudasProtocol (Tournament & Reputation)
+    1) "before each" hook for "Should start with Tournament 1, Round 1"
+
+
+  0 passing (221ms)
+  1 failing
+
+  1) JudasProtocol (Tournament & Reputation)
+       "before each" hook for "Should start with Tournament 1, Round 1":
+     HardhatError: HH700: Artifact for contract "GuiltToken" not found. 
+      at Artifacts._handleWrongArtifactForContractName (C:\Dev\Pontiff\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (C:\Dev\Pontiff\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (C:\Dev\Pontiff\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at async Artifacts.readArtifact (C:\Dev\Pontiff\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at async getContractFactory (C:\Dev\Pontiff\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at async Context.<anonymous> (C:\Dev\Pontiff\packages\contracts\test\Judas.test.ts:16:35)
+
+
+
+·············································································································
+|  [32m[1mSolidity and Network Configuration[22m[39m                                                                       │
+························|·················|················|·················|·······························
+|  [36mSolidity: 0.8.20[39m     ·  [36mOptim: true[39m    ·  [36mRuns: 200[39m     ·  [36mviaIR: true[39m    ·    [36mBlock: 60,000,000 gas[39m     │
+························|·················|················|·················|·······························
+|  [32m[1mMethods[22m[39m                                                                                                  │
+························|·················|················|·················|··············|················
+|  [32m[1mContracts / Methods[22m[39m  ·  [1mMin[22m            ·  [1mMax[22m           ·  [1mAvg[22m            ·  [1m# calls[22m     ·  [1musd (avg)[22m    │
+························|·················|················|·················|··············|················
+|  [32m[1mKey[22m[39m                                                                                                      │
+·············································································································
+|  [35m[1m◯[22m[39m  Execution gas for this method does not include intrinsic gas overhead                                 │
+·············································································································
+|  [35m[1m△[22m[39m  Cost was non-zero but below the precision setting for the currency display (see options)              │
+·············································································································
+|  [35mToolchain:[39m  hardhat                                                                                      │
+·············································································································

@@ -1,0 +1,91 @@
+[Redis] Using Mock: true (Env: true)
+--- Testing World State API ---
+Cleared Redis cache.
+Skipping seed check (DB seeded via seed-data.ts).
+Fetching state (Cache Miss expected)...
+Failed to fetch totalEntrants: ContractFunctionExecutionError: The contract function "getTotalEntrants" returned no data ("0x").
+
+This could be due to any of the following:
+  - The contract does not have the function "getTotalEntrants",
+  - The parameters passed to the contract function may be invalid, or
+  - The address is not a contract.
+ 
+Contract Call:
+  address:   0x0000000000000000000000000000000000000001
+  function:  getTotalEntrants()
+
+Docs: https://viem.sh/docs/contract/readContract
+Version: viem@2.45.1
+    at getContractError (C:\Dev\Pontiff\node_modules\viem\utils\errors\getContractError.ts:81:10)
+    at readContract (C:\Dev\Pontiff\node_modules\viem\actions\public\readContract.ts:138:27)
+    ... 3 lines matching cause stack trace ...
+    at async main (C:\Dev\Pontiff\apps\web\scripts\test-world-state.ts:19:20) {
+  cause: ContractFunctionZeroDataError: The contract function "getTotalEntrants" returned no data ("0x").
+  
+  This could be due to any of the following:
+    - The contract does not have the function "getTotalEntrants",
+    - The parameters passed to the contract function may be invalid, or
+    - The address is not a contract.
+  
+  Version: viem@2.45.1
+      at <anonymous> (C:\Dev\Pontiff\node_modules\viem\utils\errors\getContractError.ts:60:14)
+      at getContractError (C:\Dev\Pontiff\node_modules\viem\utils\errors\getContractError.ts:79:5)
+      at readContract (C:\Dev\Pontiff\node_modules\viem\actions\public\readContract.ts:138:27)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Promise.all (index 0)
+      at async getVaticanState (C:\Dev\Pontiff\apps\web\lib\services\world-state-service.ts:52:50)
+      at async main (C:\Dev\Pontiff\apps\web\scripts\test-world-state.ts:19:20) {
+    details: undefined,
+    docsPath: undefined,
+    metaMessages: [
+      'This could be due to any of the following:',
+      '  - The contract does not have the function "getTotalEntrants",',
+      '  - The parameters passed to the contract function may be invalid, or',
+      '  - The address is not a contract.'
+    ],
+    shortMessage: 'The contract function "getTotalEntrants" returned no data ("0x").',
+    version: '2.45.1'
+  },
+  details: undefined,
+  docsPath: '/docs/contract/readContract',
+  metaMessages: [
+    'This could be due to any of the following:',
+    '  - The contract does not have the function "getTotalEntrants",',
+    '  - The parameters passed to the contract function may be invalid, or',
+    '  - The address is not a contract.',
+    ' ',
+    'Contract Call:',
+    '  address:   0x0000000000000000000000000000000000000001\n' +
+      '  function:  getTotalEntrants()'
+  ],
+  shortMessage: 'The contract function "getTotalEntrants" returned no data ("0x").',
+  version: '2.45.1',
+  abi: [
+    {
+      name: 'getTotalEntrants',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [],
+      outputs: [Array]
+    },
+    {
+      name: 'entryFee',
+      type: 'function',
+      stateMutability: 'view',
+      inputs: [],
+      outputs: [Array]
+    }
+  ],
+  args: undefined,
+  contractAddress: '0x0000000000000000000000000000000000000001',
+  formattedArgs: undefined,
+  functionName: 'getTotalEntrants',
+  sender: undefined
+}
+Fetch 1 took 2398ms
+State 1 Betrayal %: 15
+Fetching state again (Cache Hit expected)...
+Fetch 2 took 0ms
+SUCCESS: Cache hit appears to work (sub-50ms).
+SUCCESS: States match.
+Redis Key TTL: 10s

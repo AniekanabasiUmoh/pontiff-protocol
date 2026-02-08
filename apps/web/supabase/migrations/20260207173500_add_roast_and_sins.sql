@@ -1,0 +1,2 @@
+ALTER TABLE "confessions" ADD COLUMN IF NOT EXISTS "roast" TEXT;
+ALTER TABLE "confessions" ADD COLUMN IF NOT EXISTS "sins" JSONB;

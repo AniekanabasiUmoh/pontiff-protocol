@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Production
+build/
+dist/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Turbo
+.turbo/
+
+# Foundry
+cache/
+out/
+broadcast/
+artifacts/
+
+# Supabase
+.supabase/
+
+# Hardhat
+typechain-types/
+
+# Secrets and Keys
+*.key
+*.pem
+secrets/
+.secrets/
+deployment-state.json
+funding-state.json
+
+# Temporary files
+*.tmp
+.tmp/
+temp/
+.cache/
+
+# Claude Code
+.claude/

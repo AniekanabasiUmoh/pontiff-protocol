@@ -1,0 +1,9 @@
+// Contract addresses deployed to Monad Testnet
+export const CONTRACTS = {
+    GUILT_TOKEN: '0x71a0016b50E3d846ce17A15DdfA957e4b0885369',
+    STAKING_CATHEDRAL: '0x3B11E2E0eCCC2fe3979307386A34ccf86722d1dF',
+    JUDAS_PROTOCOL: '0x9571A8121FdB6F73c4e94AF516Ba28A095ccCCD6',
+    INDULGENCE_NFT: '0x9447c5ec650e150B90b73de1b6120597dCC77471',
+} as const
+
+export type ContractName = keyof typeof CONTRACTS

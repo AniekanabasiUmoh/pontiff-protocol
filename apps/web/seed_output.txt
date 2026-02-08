@@ -1,0 +1,26 @@
+🌱 Seeding Database via HTTPS...
+Error seeding Leaderboard: {
+  code: '23502',
+  details: 'Failing row contains (null, 0xSinner0000000000000000000, Sinner, 1000, {"title": "Heretic"}, 2026-02-07 07:08:00.771).',
+  hint: null,
+  message: 'null value in column "id" of relation "Leaderboard" violates not-null constraint'
+}
+Error seeding Games: {
+  code: '23502',
+  details: 'Failing row contains (null, 0xPlayer0, ThePontiff, RPS, 1000000000000000000, active, null, null, 2026-02-07 07:08:02.239, null).',
+  hint: null,
+  message: 'null value in column "id" of relation "Game" violates not-null constraint'
+}
+Error seeding Confessions: {
+  code: '23502',
+  details: 'Failing row contains (null, 0xSinner0, ["Greed", "Sloth"], You are unworthy., 500, 2026-02-07 07:08:03.206, Sinner).',
+  hint: null,
+  message: 'null value in column "id" of relation "Confession" violates not-null constraint'
+}
+Error seeding WorldEvents: {
+  code: '23502',
+  details: 'Failing row contains (null, 0xAgent44, betray, {}, 2026-02-07 07:08:03.453, 1).',
+  hint: null,
+  message: 'null value in column "id" of relation "WorldEvent" violates not-null constraint'
+}
+🌱 Seeding Complete!

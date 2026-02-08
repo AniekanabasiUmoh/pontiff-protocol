@@ -1,0 +1,6 @@
+-- SQL to run in Supabase SQL Editor
+ALTER TABLE "confessions" ADD COLUMN IF NOT EXISTS "indulgencePrice" TEXT;
+ALTER TABLE "confessions" ADD COLUMN IF NOT EXISTS "roast" TEXT;
+ALTER TABLE "confessions" ADD COLUMN IF NOT EXISTS "sins" JSONB;
+ALTER TABLE "confessions" ADD COLUMN IF NOT EXISTS "status" TEXT;
+ALTER TABLE "confessions" ADD COLUMN IF NOT EXISTS "timestamp" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP;

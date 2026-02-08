@@ -1,0 +1,13 @@
+DEBUG: Loading Hardhat Config
+RPC URL: Found
+Deployer Key: Found
+[1m[31mParserError:[39m[22m Expected identifier but got 'public'
+  --> src/JudasProtocol.sol:32:13:
+   |
+32 |     uint256 public constant ROUNDS_PER_TOURNAMENT = 5;
+   |             ^^^^^^
+
+
+[31m[1mError[22m[39m [31m[1mHH600:[22m[39m Compilation failed
+
+For more info go to https://v2.hardhat.org/HH600 or run Hardhat with --show-stack-traces

@@ -1,0 +1,6 @@
+🌱 Seeding Database via HTTPS...
+✅ Seeded 10 Sinners to Leaderboard
+✅ Seeded 5 Active Games
+✅ Seeded 20 Confessions
+✅ Seeded 100 WorldEvents
+🌱 Seeding Complete!

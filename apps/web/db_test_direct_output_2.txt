@@ -1,0 +1,32 @@
+Testing Prisma Connection (Direct)...
+prisma:info Starting a postgresql pool with 9 connections.
+prisma:error 
+Invalid `prisma.leaderboard.count()` invocation in
+C:\Dev\Pontiff\apps\web\scripts\test-db-connection.ts:15:48
+
+  12 async function main() {
+  13     console.log('Testing Prisma Connection (Direct)...');
+  14     try {
+→ 15         const count = await prisma.leaderboard.count(
+Can't reach database server at `db.rwilifqotgmqkbzkzudh.supabase.co:5432`
+
+Please make sure your database server is running at `db.rwilifqotgmqkbzkzudh.supabase.co:5432`.
+Connection failed: PrismaClientInitializationError: 
+Invalid `prisma.leaderboard.count()` invocation in
+C:\Dev\Pontiff\apps\web\scripts\test-db-connection.ts:15:48
+
+  12 async function main() {
+  13     console.log('Testing Prisma Connection (Direct)...');
+  14     try {
+→ 15         const count = await prisma.leaderboard.count(
+Can't reach database server at `db.rwilifqotgmqkbzkzudh.supabase.co:5432`
+
+Please make sure your database server is running at `db.rwilifqotgmqkbzkzudh.supabase.co:5432`.
+    at $n.handleRequestError (C:\Dev\Pontiff\node_modules\@prisma\client\runtime\library.js:121:7615)
+    at $n.handleAndLogRequestError (C:\Dev\Pontiff\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Dev\Pontiff\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Dev\Pontiff\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async main (C:\Dev\Pontiff\apps\web\scripts\test-db-connection.ts:15:23) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}

@@ -1,0 +1,167 @@
+﻿DEBUG: Loading Hardhat Config
+RPC URL: Found
+Deployer Key: Found
+node.exe : [1m[31mDeclar
+ationError:[39m[22m 
+Undeclared identifier.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (  
+  [1m[31mDeclar...red    
+ identifier.:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+  --> src/JudasProtocol.so
+l:67:9:
+   |
+67 |         
+currentEpochId++; // We 
+keep epochId as a global 
+counter for unique IDs
+   |         
+^^^^^^^^^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:69:9:
+   |
+69 |         
+epochs[currentEpochId] = 
+Epoch({
+   |         ^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:69:16:
+   |
+69 |         
+epochs[currentEpochId] = 
+Epoch({
+   |                
+^^^^^^^^^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:69:34:
+   |
+69 |         
+epochs[currentEpochId] = 
+Epoch({
+   |                      
+            ^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:71:40:
+   |
+71 |             endTime: 
+block.timestamp + 
+EPOCH_DURATION,
+   |                      
+                  
+^^^^^^^^^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:79:14:
+   |
+79 |         emit EpochSta
+rted(currentEpochId, 
+block.timestamp + 
+EPOCH_DURATION);
+   |              
+^^^^^^^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:79:27:
+   |
+79 |         emit EpochSta
+rted(currentEpochId, 
+block.timestamp + 
+EPOCH_DURATION);
+   |                      
+     ^^^^^^^^^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:79:61:
+   |
+79 |         emit EpochSta
+rted(currentEpochId, 
+block.timestamp + 
+EPOCH_DURATION);
+   |                      
+                          
+             
+^^^^^^^^^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Undeclared 
+identifier.
+  --> src/JudasProtocol.so
+l:80:80:
+   |
+80 |         emit RoundSta
+rted(currentTournamentId, 
+currentRound, 
+block.timestamp + 
+EPOCH_DURATION);
+   |                      
+                          
+                          
+      ^^^^^^^^^^^^^^
+
+
+[1m[31mDeclarationError:
+[39m[22m Identifier not 
+found or not unique.
+  --> src/JudasProtocol.so
+l:96:9:
+   |
+96 |         UserInfo 
+storage user = 
+userInfo[msg.sender];
+   |         ^^^^^^^^
+
+
+[31m[1mError[22m[39m 
+[31m[1mHH600:[22m[39m 
+Compilation failed
+
+For more info go to https:
+//v2.hardhat.org/HH600 or 
+run Hardhat with 
+--show-stack-traces
