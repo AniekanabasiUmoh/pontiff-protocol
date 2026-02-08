@@ -25,6 +25,19 @@ CREATE TABLE IF NOT EXISTS confessions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add columns if they don't exist (for idempotency)
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS confession_type VARCHAR(50) DEFAULT 'penance_stake';
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS stake_amount VARCHAR(50);
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'pending';
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS sin_reduction INTEGER DEFAULT 0;
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS previous_sin_score INTEGER DEFAULT 0;
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS new_sin_score INTEGER DEFAULT 0;
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS transaction_hash VARCHAR(66);
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS nft_minted BOOLEAN DEFAULT FALSE;
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS nft_token_id INTEGER;
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS nft_mint_tx VARCHAR(66);
+ALTER TABLE confessions ADD COLUMN IF NOT EXISTS nft_metadata JSONB;
+
 CREATE INDEX IF NOT EXISTS idx_confessions_wallet ON confessions(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_confessions_status ON confessions(status);
 CREATE INDEX IF NOT EXISTS idx_confessions_created ON confessions(created_at DESC);
@@ -47,6 +60,13 @@ CREATE TABLE IF NOT EXISTS roast_tweets (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add columns if they don't exist
+ALTER TABLE roast_tweets ADD COLUMN IF NOT EXISTS sin_score INTEGER;
+ALTER TABLE roast_tweets ADD COLUMN IF NOT EXISTS posted BOOLEAN DEFAULT FALSE;
+ALTER TABLE roast_tweets ADD COLUMN IF NOT EXISTS mock_mode BOOLEAN DEFAULT TRUE;
+ALTER TABLE roast_tweets ADD COLUMN IF NOT EXISTS twitter_tweet_id VARCHAR(100);
+ALTER TABLE roast_tweets ADD COLUMN IF NOT EXISTS error_message TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_roast_tweets_wallet ON roast_tweets(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_roast_tweets_posted ON roast_tweets(posted);
 CREATE INDEX IF NOT EXISTS idx_roast_tweets_created ON roast_tweets(created_at DESC);
@@ -65,6 +85,10 @@ CREATE TABLE IF NOT EXISTS treasury_revenue (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add columns if they don't exist
+ALTER TABLE treasury_revenue ADD COLUMN IF NOT EXISTS distributed BOOLEAN DEFAULT FALSE;
+ALTER TABLE treasury_revenue ADD COLUMN IF NOT EXISTS distributed_at TIMESTAMP WITH TIME ZONE;
+
 CREATE INDEX IF NOT EXISTS idx_treasury_revenue_source ON treasury_revenue(source);
 CREATE INDEX IF NOT EXISTS idx_treasury_revenue_distributed ON treasury_revenue(distributed);
 CREATE INDEX IF NOT EXISTS idx_treasury_revenue_created ON treasury_revenue(created_at DESC);
@@ -79,6 +103,13 @@ CREATE TABLE IF NOT EXISTS revenue_distributions (
     transaction_hash VARCHAR(66),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add columns if they don't exist
+ALTER TABLE revenue_distributions ADD COLUMN IF NOT EXISTS total_amount VARCHAR(50) NOT NULL;
+ALTER TABLE revenue_distributions ADD COLUMN IF NOT EXISTS staking_amount VARCHAR(50) NOT NULL;
+ALTER TABLE revenue_distributions ADD COLUMN IF NOT EXISTS team_amount VARCHAR(50) NOT NULL;
+ALTER TABLE revenue_distributions ADD COLUMN IF NOT EXISTS ops_amount VARCHAR(50) NOT NULL;
+ALTER TABLE revenue_distributions ADD COLUMN IF NOT EXISTS transaction_hash VARCHAR(66);
 
 CREATE INDEX IF NOT EXISTS idx_revenue_distributions_created ON revenue_distributions(created_at DESC);
 
@@ -103,6 +134,12 @@ CREATE TABLE IF NOT EXISTS bot_sessions (
     last_game_at TIMESTAMP WITH TIME ZONE
 );
 
+-- Add columns if they don't exist
+ALTER TABLE bot_sessions ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
+ALTER TABLE bot_sessions ADD COLUMN IF NOT EXISTS total_wagered VARCHAR(50) DEFAULT '0';
+ALTER TABLE bot_sessions ADD COLUMN IF NOT EXISTS total_profit VARCHAR(50) DEFAULT '0';
+ALTER TABLE bot_sessions ADD COLUMN IF NOT EXISTS last_game_at TIMESTAMP WITH TIME ZONE;
+
 CREATE INDEX IF NOT EXISTS idx_bot_sessions_wallet ON bot_sessions(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_bot_sessions_status ON bot_sessions(status);
 CREATE INDEX IF NOT EXISTS idx_bot_sessions_type ON bot_sessions(bot_type);
@@ -124,6 +161,11 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add columns if they don't exist
+ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS sound_volume DECIMAL(3,2) DEFAULT 0.5;
+ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS animations_enabled BOOLEAN DEFAULT TRUE;
+ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
 CREATE INDEX IF NOT EXISTS idx_user_preferences_wallet ON user_preferences(wallet_address);
 
 -- Analytics: Game result animations viewed
@@ -134,6 +176,10 @@ CREATE TABLE IF NOT EXISTS animation_views (
     game_id BIGINT,
     viewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add columns if they don't exist
+ALTER TABLE animation_views ADD COLUMN IF NOT EXISTS animation_type VARCHAR(50) NOT NULL;
+ALTER TABLE animation_views ADD COLUMN IF NOT EXISTS game_id BIGINT;
 
 CREATE INDEX IF NOT EXISTS idx_animation_views_wallet ON animation_views(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_animation_views_type ON animation_views(animation_type);
@@ -204,12 +250,11 @@ BEGIN
     RETURN QUERY
     SELECT
         COUNT(*)::BIGINT as total_confessions,
-        SUM(CAST(stake_amount AS NUMERIC)) as total_stake_amount,
-        SUM(sin_reduction)::BIGINT as total_sin_reduction,
+        COALESCE(SUM(CAST(stake_amount AS NUMERIC)), 0) as total_stake_amount,
+        COALESCE(SUM(sin_reduction), 0)::BIGINT as total_sin_reduction,
         COUNT(*) FILTER (WHERE nft_minted = TRUE)::BIGINT as nfts_minted,
-        AVG(sin_reduction) as avg_sin_reduction
-    FROM confessions
-    WHERE status = 'completed';
+        COALESCE(AVG(sin_reduction), 0) as avg_sin_reduction
+    FROM confessions;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -222,11 +267,10 @@ CREATE OR REPLACE VIEW daily_confession_activity AS
 SELECT
     DATE(created_at) as date,
     COUNT(*) as total_confessions,
-    SUM(CAST(stake_amount AS NUMERIC)) as total_staked,
-    SUM(sin_reduction) as total_sin_reduction,
+    COALESCE(SUM(CAST(stake_amount AS NUMERIC)), 0) as total_staked,
+    COALESCE(SUM(sin_reduction), 0) as total_sin_reduction,
     COUNT(*) FILTER (WHERE nft_minted = TRUE) as nfts_minted
 FROM confessions
-WHERE status = 'completed'
 GROUP BY DATE(created_at)
 ORDER BY date DESC;
 
