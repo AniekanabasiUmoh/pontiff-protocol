@@ -28,7 +28,8 @@ contract RPSGame is Ownable, ReentrancyGuard {
         uint256 createdAt;
     }
 
-    IERC20 public immutable monToken;
+    IERC20 public immutable guiltToken;
+    address public treasury; // Treasury contract for house fees
     uint256 public gameIdCounter;
     mapping(uint256 => Game) public games;
 
@@ -41,8 +42,19 @@ contract RPSGame is Ownable, ReentrancyGuard {
     event GameResult(uint256 indexed gameId, address winner, uint256 payout);
     event GameCancelled(uint256 indexed gameId);
 
-    constructor(address _monToken) Ownable(msg.sender) {
-        monToken = IERC20(_monToken);
+    constructor(address _guiltToken, address _treasury) Ownable(msg.sender) {
+        require(_guiltToken != address(0), "Invalid token");
+        require(_treasury != address(0), "Invalid treasury");
+        guiltToken = IERC20(_guiltToken);
+        treasury = _treasury;
+    }
+
+    /**
+     * @notice Update treasury address (owner only)
+     */
+    function setTreasury(address _treasury) external onlyOwner {
+        require(_treasury != address(0), "Invalid treasury");
+        treasury = _treasury;
     }
 
     /**
@@ -53,7 +65,7 @@ contract RPSGame is Ownable, ReentrancyGuard {
      */
     function createGame(bytes32 _commitment, uint256 _wager, address _opponent) external nonReentrant {
         require(_wager > 0, "Wager must be > 0");
-        require(monToken.transferFrom(msg.sender, address(this), _wager), "Transfer failed");
+        require(guiltToken.transferFrom(msg.sender, address(this), _wager), "Transfer failed");
 
         gameIdCounter++;
         games[gameIdCounter] = Game({
@@ -81,7 +93,7 @@ contract RPSGame is Ownable, ReentrancyGuard {
         require(_move != Move.Null, "Invalid move");
         
         // P2 matches wagering
-        require(monToken.transferFrom(msg.sender, address(this), game.wager), "Transfer failed");
+        require(guiltToken.transferFrom(msg.sender, address(this), game.wager), "Transfer failed");
 
         game.player2Move = _move;
         game.status = GameStatus.Active;
@@ -118,7 +130,7 @@ contract RPSGame is Ownable, ReentrancyGuard {
         game.winner = game.player2; // P2 wins by default
 
         uint256 payout = game.wager * 2;
-        require(monToken.transfer(game.player2, payout), "Payout failed");
+        require(guiltToken.transfer(game.player2, payout), "Payout failed");
 
         emit GameResult(_gameId, game.player2, payout);
     }
@@ -148,8 +160,8 @@ contract RPSGame is Ownable, ReentrancyGuard {
             // Requirement said "House fee mismatch: API takes 5%, contract takes 0%".
             // If it's a draw, neither wins, so no "pot" is won.
             // Refund original wagers.
-            require(monToken.transfer(game.player1, game.wager), "Refund P1 failed");
-            require(monToken.transfer(game.player2, game.wager), "Refund P2 failed");
+            require(guiltToken.transfer(game.player1, game.wager), "Refund P1 failed");
+            require(guiltToken.transfer(game.player2, game.wager), "Refund P2 failed");
             emit GameResult(_gameId, address(0), 0);
             return;
         }
@@ -164,14 +176,14 @@ contract RPSGame is Ownable, ReentrancyGuard {
             winner = game.player2;
         }
 
-        // Transfer House Fee
+        // Transfer House Fee to Treasury
         if (houseFee > 0) {
-            require(monToken.transfer(owner(), houseFee), "Fee transfer failed");
+            require(guiltToken.transfer(treasury, houseFee), "Fee transfer failed");
         }
 
         game.winner = winner;
         game.status = GameStatus.Completed;
-        require(monToken.transfer(winner, payout), "Payout failed");
+        require(guiltToken.transfer(winner, payout), "Payout failed");
 
         emit GameResult(_gameId, winner, payout);
     }
