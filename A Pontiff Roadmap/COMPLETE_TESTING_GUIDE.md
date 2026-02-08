@@ -13,6 +13,8 @@
    - [Module 9: AI Debate Judging & Scoring](#module-9-ai-debate-judging--scoring)
    - [Module 10: NFT Minting & Cardinal Membership](#module-10-nft-minting--cardinal-membership)
    - [Module 11: WebSocket Live Feed](#module-11-websocket-live-feed)
+   - [Module 12-15: Confession, Treasury, Bots, Frontend Polish](#module-12-15-confession-treasury-bots-frontend-polish)
+   - [Module 16: Holy Tournament System](#module-16-holy-tournament-system)
 5. [Frontend Testing](#frontend-testing)
 6. [Integration Testing](#integration-testing)
 7. [Troubleshooting](#troubleshooting)
@@ -797,6 +799,168 @@ curl "http://localhost:3000/api/membership/cardinal?address=0x742d35Cc6634C05329
 
 ---
 
+---
+
+### Module 12-15: Confession, Treasury, Bots, Frontend Polish
+
+**Endpoints:**
+- `POST /api/confession/stake` - Stake GUILT for penance
+- `POST /api/confession/mint-nft` - Mint Proof of Penance NFT
+- `POST /api/confession/tweet-roast` - Public roasting via Twitter
+
+**Test Confession System:**
+```bash
+# 1. Stake GUILT for Penance
+curl -X POST http://localhost:3000/api/confession/stake \
+  -H "Content-Type: application/json" \
+  -d '{
+    "walletAddress": "0x1234567890123456789012345678901234567890",
+    "stakeAmount": "100000000000000000000",
+    "txHash": "0xabc..."
+  }'
+
+# Expected: {success: true, sinReduction: 10, newSinScore: ...}
+
+# 2. Mint Confession NFT
+curl -X POST http://localhost:3000/api/confession/mint-nft \
+  -H "Content-Type: application/json" \
+  -d '{
+    "walletAddress": "0x1234567890123456789012345678901234567890",
+    "confessionId": 1
+  }'
+
+# Expected: {success: true, nftTokenId: ..., txHash: ...}
+
+# 3. Tweet Roast (Mock Mode)
+curl -X POST http://localhost:3000/api/confession/tweet-roast \
+  -H "Content-Type: application/json" \
+  -d '{
+    "walletAddress": "0x1234567890123456789012345678901234567890",
+    "roast": "You bought $PEPE at ATH. Your greed is palpable.",
+    "sinScore": 437,
+    "optInPublic": true
+  }'
+
+# Expected: {success: true, mockMode: true, tweetText: "...", tweetUrl: "..."}
+```
+
+**Frontend Components (Module 15):**
+- GameResultAnimation.tsx - Win/loss confetti overlays
+- HolyLightEffect.tsx - Vatican light rays background
+- LoadingSpinner.tsx - Themed loading states
+- useSoundEffects.ts - Audio system for game events
+
+**Bot Examples (Module 14):**
+```bash
+# Run Python RPS Bot
+cd examples/bots/python-rps-bot
+pip install -r requirements.txt
+python rps_bot.py --wallet 0x... --api-url http://localhost:3000 --strategy counter
+
+# Run JavaScript Poker Bot
+cd examples/bots/js-poker-bot
+npm install
+node poker-bot.js --wallet 0x... --api-url http://localhost:3000 --strategy aggressive
+```
+
+---
+
+### Module 16: Holy Tournament System
+
+**Endpoints:**
+- `POST /api/tournaments/create` - Create new tournament
+- `POST /api/tournaments/register` - Register for tournament
+- `POST /api/tournaments/start` - Generate bracket and start
+- `GET /api/tournaments/:id/bracket` - View bracket
+- `POST /api/tournaments/:id/match-result` - Record match result
+- `GET /api/tournaments/:id/results` - Final leaderboard
+- `GET /api/tournaments/list?status=active` - List tournaments
+
+**Test Tournament Flow:**
+```bash
+# 1. Create Holy Tournament
+curl -X POST http://localhost:3000/api/tournaments/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Holy Tournament - Week 1",
+    "type": "Holy",
+    "maxParticipants": 16,
+    "prizePool": "1000",
+    "startDate": "2026-02-15T00:00:00Z",
+    "endDate": "2026-02-22T00:00:00Z"
+  }'
+
+# Expected: {success: true, tournamentId: "...", status: "pending"}
+
+# 2. Register Players
+curl -X POST http://localhost:3000/api/tournaments/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tournamentId": "...",
+    "walletAddress": "0x1234...",
+    "agentName": "DegenBot3000",
+    "agentStrategy": "berzerker"
+  }'
+
+# Expected: {success: true, seedNumber: 1, bracketPosition: "..."}
+
+# 3. Start Tournament (after registration closes)
+curl -X POST http://localhost:3000/api/tournaments/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tournamentId": "..."
+  }'
+
+# Expected: {success: true, status: "active", bracket: [...]}
+
+# 4. View Bracket
+curl http://localhost:3000/api/tournaments/{tournamentId}/bracket
+
+# Expected: {success: true, rounds: [{roundNumber: 1, matches: [...]}]}
+
+# 5. Record Match Result
+curl -X POST http://localhost:3000/api/tournaments/{tournamentId}/match-result \
+  -H "Content-Type: application/json" \
+  -d '{
+    "matchId": "...",
+    "winner": "0x1234...",
+    "gameId": "..."
+  }'
+
+# Expected: {success: true, nextRound: 2, bracketUpdated: true}
+
+# 6. View Final Results
+curl http://localhost:3000/api/tournaments/{tournamentId}/results
+
+# Expected: {success: true, leaderboard: [{rank: 1, ...}]}
+```
+
+**Tournament Features:**
+- Single elimination brackets (supports 8, 16, 32, 64, 128 players)
+- Automatic bracket advancement
+- Prize distribution (1st: 50%, 2nd: 30%, 3rd: 20%)
+- Player seeding system
+- Tournament history tracking
+- Real-time status updates
+
+**Bot Swarm for Demo:**
+```bash
+# Fund 20 bot wallets
+cd apps/web/scripts/bots
+npm run fund-bots
+
+# Deploy bot swarm (14 bots for testnet)
+npm run spawn-swarm
+
+# Bots will auto-play games with unique personalities:
+# - DegenBot3000 (berzerker, 20% wagers)
+# - PaperHands_Pete (merchant, 3% wagers)
+# - HODL_Monk (disciple, no gambling)
+# - And 17 more...
+```
+
+---
+
 ## 🔐 Security Notes
 
 - All API endpoints have rate limiting
@@ -850,6 +1014,10 @@ Happy testing! May the Pontiff judge your code mercifully. 🙏
 | 9: Debate Judging | ✅ Complete | AI scoring, winner determination, payouts, Twitter |
 | 10: NFTs & Cardinals | ✅ Complete | Conversion certificates, membership subscriptions |
 | 11: WebSocket Feed | ✅ Complete | Real-time broadcasts, live updates |
-| 12: Dashboard | 🚧 In Progress | Unified metrics (partial) |
+| 12: Confession System | ✅ Complete | Penance stakes, NFT minting, Twitter roasting |
+| 13: Smart Contracts | ✅ Complete | TreasuryVault, deployment scripts |
+| 14: Example Bots | ✅ Complete | Python RPS bot, JavaScript poker bot |
+| 15: Frontend Polish | ✅ Complete | Animations, holy light effects, sound system |
+| 16: Tournament System | ✅ Complete | Holy Tournaments, brackets, leaderboards |
 
-**Total: 11/12 Modules Complete** 🎯
+**Total: 16/16 Modules Complete** 🎯
