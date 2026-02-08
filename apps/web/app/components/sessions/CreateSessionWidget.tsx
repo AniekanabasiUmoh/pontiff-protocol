@@ -23,21 +23,27 @@ const STRATEGIES = {
         icon: '⚔️',
         description: 'High risk, high reward. Bets 15% of balance per game.',
         riskLevel: 'HIGH',
-        color: 'red'
+        color: 'red',
+        fee: 10, // 10 GUILT session fee
+        expectedROI: '-10% to +500%'
     },
     merchant: {
         name: 'Merchant',
         icon: '💰',
-        description: 'Medium risk. Bets 5% of balance with strategic moves.',
+        description: 'Medium risk. Strategic pattern-based play. Bets 5% with analysis.',
         riskLevel: 'MEDIUM',
-        color: 'yellow'
+        color: 'yellow',
+        fee: 15, // 15 GUILT session fee
+        expectedROI: '+5% to +30%'
     },
     disciple: {
         name: 'Disciple',
         icon: '🙏',
-        description: 'Low risk. Bets 2% of balance conservatively.',
+        description: 'Low risk, passive income. Stakes in Cathedral + 2% game bets.',
         riskLevel: 'LOW',
-        color: 'green'
+        color: 'green',
+        fee: 5, // 5 GUILT session fee
+        expectedROI: '+15% APY (stable)'
     }
 };
 
@@ -60,7 +66,7 @@ export default function CreateSessionWidget({
     const depositNum = parseFloat(depositAmount) || 0;
     const stopLossNum = parseFloat(stopLoss) || 0;
     const takeProfitNum = parseFloat(takeProfit) || 0;
-    const sessionFee = depositNum * 0.01; // 1% fee
+    const sessionFee = selectedStrategy.fee; // Strategy-based fee
     const totalCost = depositNum + sessionFee;
 
     const handleCreateSession = async () => {
@@ -195,8 +201,14 @@ export default function CreateSessionWidget({
                                         <div className="text-sm font-bold text-white mb-1">
                                             {s.name}
                                         </div>
-                                        <div className={`text-xs font-bold text-${s.color}-400`}>
+                                        <div className={`text-xs font-bold text-${s.color}-400 mb-1`}>
                                             {s.riskLevel} RISK
+                                        </div>
+                                        <div className="text-xs text-gray-400">
+                                            {s.fee} GUILT fee
+                                        </div>
+                                        <div className="text-xs text-green-400 mt-1">
+                                            {s.expectedROI}
                                         </div>
                                     </button>
                                 );
@@ -295,8 +307,8 @@ export default function CreateSessionWidget({
                             <span className="text-white font-bold">{depositNum.toFixed(2)} GUILT</span>
                         </div>
                         <div className="flex justify-between text-sm mb-2">
-                            <span className="text-gray-400">Session Fee (1%):</span>
-                            <span className="text-yellow-500 font-bold">{sessionFee.toFixed(2)} GUILT</span>
+                            <span className="text-gray-400">Session Fee ({selectedStrategy.name}):</span>
+                            <span className="text-yellow-500 font-bold">{sessionFee} GUILT</span>
                         </div>
                         <div className="border-t border-gray-700 my-2"></div>
                         <div className="flex justify-between text-sm">

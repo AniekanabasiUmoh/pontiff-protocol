@@ -1149,6 +1149,11 @@ For advanced users who want to code their own agents:
 ### Module 6: Token Transfer Integration
 **Current Status:** Not Implemented
 
+
+# Replace with YOUR email address
+
+
+
 - [⏳] **Pre-Game Checks**
   - [ ] Verify $GUILT balance >= wager
   - [ ] Check allowance for contract spending

@@ -141,13 +141,31 @@ export class AgentManagerService {
             return;
         }
 
-        // Context could rely on history, but for now simple
+        // Fetch game history for strategy analysis
+        const { data: historyData } = await supabase
+            .from('game_history')
+            .select('*')
+            .eq('player_address', sessionWalletAddress.toLowerCase())
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        const gameHistory = (historyData || []).map(game => ({
+            outcome: game.result === 'win' ? 'WIN' : game.result === 'loss' ? 'LOSS' : 'DRAW',
+            playerMove: game.player_move || 1,
+            pontiffMove: game.pontiff_move || 1,
+            wager: parseFloat(game.wager || '0'),
+            timestamp: new Date(game.created_at).getTime()
+        }));
+
         const context = {
-            gameHistory: [],
-            currentBalance: balance
+            gameHistory,
+            currentBalance: balance,
+            lastGameResult: gameHistory[0]?.outcome,
+            gamesPlayed: session.games_played || 0
         };
 
         const action = strategy(context);
+        console.log(`Strategy decision for ${sessionId}: ${action.reasoning || 'No reasoning provided'}`);
 
         // 5. Execute Action (Play Game)
         // 5. Execute Action
