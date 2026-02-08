@@ -163,6 +163,7 @@ cd apps/web && npm run dev
 - [Deployment Guide](DEPLOYMENT_GUIDE.md) - Full deployment walkthrough
 - [GitHub Setup](GITHUB_SETUP.md) - Pushing to repository
 - [Module 5 Guide](A%20Pontiff%20Roadmap/Module%205%20-%20Session%20Wallet%20System%20-%20Implementation%20Guide.md) - Session wallet deep dive
+- [Module 6 Guide](A%20Pontiff%20Roadmap/Module%206%20-%20Agent%20Strategies%20-%20Implementation%20Guide.md) - Agent strategies (The Champions) ⭐ **NEW!**
 - [Build Reference](A%20Pontiff%20Roadmap/THE%20PONTIFF%20-%20COMPLETE%20BUILD%20REFERENCE.md) - System overview
 - [Identified Errors](A%20Pontiff%20Roadmap/Identified%20errors.md) - Bug fixes log
 
@@ -170,6 +171,7 @@ cd apps/web && npm run dev
 
 ### Phase 1: Core Platform ✅ Complete
 - [x] Session Wallet System (Module 5)
+- [x] **Agent Strategies (Module 6)** - Berzerker, Merchant, Disciple ⭐ **NEW!**
 - [x] Rock-Paper-Scissors Game (Module 2)
 - [x] Judas Protocol (Module 3)
 - [x] Game History & Leaderboards (Module 4 - 80%)
@@ -200,4 +202,4 @@ MIT
 
 **Built with ⚔️ by Antigravity AI & Claude Code**
 
-**Status**: 🟢 Active Development | Module 5 Complete
+**Status**: 🟢 Active Development | Module 6 Complete (Agent Strategies)
