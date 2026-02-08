@@ -24,7 +24,7 @@ contract SessionWallet is Initializable, Ownable {
     event FundsWithdrawn(address indexed owner, uint256 amount);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
+    constructor() Ownable(msg.sender) {
         _disableInitializers();
     }
 

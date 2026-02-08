@@ -1278,8 +1278,66 @@ for (const item of items) {
 
 ---
 
+---
+
+## Phase 17: Module 5 Deployment
+
+### ❌ ERROR 17.1: SessionWallet OpenZeppelin Ownable Constructor Missing
+
+**Issue:** SessionWallet contract fails to compile with OpenZeppelin v5.x Ownable
+**Symptom:**
+```
+TypeError: No arguments passed to the base constructor. Specify the arguments or mark "SessionWallet" as abstract.
+  --> src/session/SessionWallet.sol:18:1:
+   |
+18 | contract SessionWallet is Initializable, Ownable {
+```
+
+**Root Cause:** OpenZeppelin Contracts v5.x changed Ownable to require constructor parameter for initial owner, but SessionWallet uses proxy pattern with initialize() function instead of constructor.
+
+**Code (WRONG):**
+```solidity
+// SessionWallet.sol
+contract SessionWallet is Initializable, Ownable {
+    constructor() {  // ❌ Ownable requires address parameter
+        _disableInitializers();
+    }
+}
+```
+
+**Solution: Pass temporary owner in constructor**
+```solidity
+contract SessionWallet is Initializable, Ownable {
+    constructor() Ownable(msg.sender) {  // ✅ Provide initial owner
+        _disableInitializers();
+    }
+
+    function initialize(address _owner, address _pontiff, address _guiltToken) external initializer {
+        _transferOwnership(_owner);  // Transfer to actual owner during initialization
+        pontiff = _pontiff;
+        guiltToken = IERC20(_guiltToken);
+    }
+}
+```
+
+**Why This Works:**
+- Constructor runs ONCE when implementation is deployed
+- `msg.sender` (deployer) becomes temporary owner
+- Each clone calls `initialize()` which transfers ownership to actual user
+- Prevents "abstract contract" error while maintaining proxy pattern
+
+**Status:** ✅ Fixed
+
+**Deployment Result:**
+- SessionWalletFactory: `0xfd5Ff66f9B916a91a92E6c4d1D3775D09f330CAA`
+- SessionWallet Implementation: `0x3a8611417fD841dF1925aF28167B7cD9DA6618D3`
+- Network: Monad Testnet (Chain ID: 10143)
+- Deployed: 2026-02-08
+
+---
+
 **Document Maintained By:** Claude Code & Antigravity AI
-**Last Verified:** 2026-02-08 08:00:00
+**Last Verified:** 2026-02-08 19:30:00
 
 ---
 
