@@ -1,0 +1,14 @@
+{
+  "network": "monadTestnet",
+  "chainId": "10143",
+  "timestamp": "2026-02-08T09:47:35.474Z",
+  "deployer": "0x9f994707E36848a82e672d34aDB3194877dB8cc3",
+  "contracts": {
+    "SessionWalletFactory": {
+      "address": "0xfd5Ff66f9B916a91a92E6c4d1D3775D09f330CAA",
+      "guiltToken": "0x3ba95dB0F41E81d71bCee84fAabb20F047b8d9fA",
+      "pontiff": "0x9f994707E36848a82e672d34aDB3194877dB8cc3",
+      "implementation": "0x3a8611417fD841dF1925aF28167B7cD9DA6618D3"
+    }
+  }
+}
