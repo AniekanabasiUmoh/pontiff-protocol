@@ -1,0 +1,17 @@
+{
+  "name": "pontiff-poker-bot",
+  "version": "1.0.0",
+  "description": "Autonomous poker bot for The Pontiff Protocol",
+  "main": "poker-bot.js",
+  "scripts": {
+    "start": "node poker-bot.js",
+    "test": "node poker-bot.js 5"
+  },
+  "keywords": ["poker", "bot", "pontiff", "web3"],
+  "author": "The Pontiff",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  }
+}
