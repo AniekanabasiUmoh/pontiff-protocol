@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import { LeaderboardService } from '@/lib/services/leaderboard-service';
 
-export async function GET(request: Request, { params }: { params: { type: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ type: string }> }) {
     try {
-        const type = params.type as 'shame' | 'saints' | 'heretics';
+        const { type } = await params;
 
         if (!['shame', 'saints', 'heretics'].includes(type)) {
             return NextResponse.json({ error: "Invalid leaderboard type" }, { status: 400 });
         }
 
-        const entries = await LeaderboardService.getLeaderboard(type);
+        const entries = await LeaderboardService.getLeaderboard(type as 'shame' | 'saints' | 'heretics');
 
         // Mock Data if Empty (For Demo Purpose)
         if (entries.length === 0) {

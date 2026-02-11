@@ -1,0 +1,149 @@
+'use client';
+
+import { useState } from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+
+interface NavItem {
+    label: string;
+    href: string;
+    icon: string;
+    section?: string;
+}
+
+const NAV_ITEMS: NavItem[] = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', section: 'core' },
+    { label: 'Confessional', href: '/confess', icon: 'psychology_alt', section: 'core' },
+    { label: 'RPS Arena', href: '/games/rps', icon: 'sports_mma', section: 'games' },
+    { label: 'Poker Table', href: '/games/poker', icon: 'style', section: 'games' },
+    { label: 'Judas Protocol', href: '/judas', icon: 'visibility', section: 'games' },
+    { label: 'Cathedral', href: '/cathedral', icon: 'account_balance', section: 'economy' },
+    { label: 'Indulgences', href: '/indulgences', icon: 'local_fire_department', section: 'economy' },
+    { label: 'Hire Agent', href: '/hire', icon: 'smart_toy', section: 'economy' },
+    { label: 'Tournaments', href: '/tournaments', icon: 'emoji_events', section: 'compete' },
+    { label: 'Leaderboard', href: '/leaderboard', icon: 'leaderboard', section: 'compete' },
+    { label: 'Competitors', href: '/competitors', icon: 'shield', section: 'compete' },
+    { label: 'Crusades', href: '/crusades', icon: 'gps_fixed', section: 'compete' },
+    { label: 'Debates', href: '/debates', icon: 'forum', section: 'social' },
+    { label: 'Live Wire', href: '/live', icon: 'electric_bolt', section: 'social' },
+    { label: 'Membership', href: '/membership', icon: 'card_membership', section: 'account' },
+];
+
+const SECTION_LABELS: Record<string, string> = {
+    core: 'COMMAND',
+    games: 'ARENA',
+    economy: 'TREASURY',
+    compete: 'INQUISITION',
+    social: 'COMMUNE',
+    account: 'ACCOUNT',
+};
+
+export function Sidebar() {
+    const pathname = usePathname();
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    // Group nav items by section
+    const sections = NAV_ITEMS.reduce((acc, item) => {
+        const section = item.section || 'other';
+        if (!acc[section]) acc[section] = [];
+        acc[section].push(item);
+        return acc;
+    }, {} as Record<string, NavItem[]>);
+
+    const isActive = (href: string) => {
+        if (href === '/dashboard' && pathname === '/dashboard') return true;
+        if (href !== '/dashboard' && pathname?.startsWith(href)) return true;
+        return false;
+    };
+
+    return (
+        <aside
+            onMouseEnter={() => setIsExpanded(true)}
+            onMouseLeave={() => setIsExpanded(false)}
+            className={`
+        fixed left-0 top-12 bottom-8 z-40
+        flex flex-col
+        bg-background-dark/95 backdrop-blur-md
+        border-r border-primary/20
+        overflow-hidden
+        transition-all duration-300 ease-in-out
+        ${isExpanded ? 'w-56' : 'w-16'}
+        hidden lg:flex
+      `}
+        >
+            {/* Nav Logo — top of sidebar */}
+            <Link
+                href="/"
+                className="flex items-center gap-3 px-4 h-14 border-b border-primary/10 flex-shrink-0 group"
+            >
+                <div className="w-8 h-8 border border-primary/50 rounded flex items-center justify-center bg-primary/5 group-hover:bg-primary/20 transition-all duration-300 flex-shrink-0">
+                    <span className="material-icons text-primary text-lg group-hover:animate-pulse">auto_awesome</span>
+                </div>
+                <span className={`text-sm font-bold tracking-widest uppercase text-white group-hover:text-primary transition-all duration-300 whitespace-nowrap ${isExpanded ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                    PONTIFF
+                </span>
+            </Link>
+
+            {/* Navigation Items */}
+            <nav className="flex-1 overflow-y-auto custom-scrollbar py-2">
+                {Object.entries(sections).map(([section, items]) => (
+                    <div key={section} className="mb-1">
+                        {/* Section Label — only visible when expanded */}
+                        <div className={`px-4 py-2 transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0 h-0 py-0 overflow-hidden'}`}>
+                            <span className="text-[9px] font-mono tracking-[0.2em] text-primary/40 uppercase">
+                                {SECTION_LABELS[section] || section}
+                            </span>
+                        </div>
+
+                        {items.map((item) => {
+                            const active = isActive(item.href);
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`
+                    flex items-center gap-3 px-4 py-2.5 mx-1 rounded
+                    transition-all duration-200 group relative
+                    ${active
+                                            ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                                            : 'text-gray-500 hover:text-primary hover:bg-white/5 border-l-2 border-transparent'
+                                        }
+                  `}
+                                >
+                                    <span className={`material-icons text-lg flex-shrink-0 transition-colors ${active ? 'text-primary' : 'text-gray-500 group-hover:text-primary'}`}>
+                                        {item.icon}
+                                    </span>
+                                    <span className={`text-xs font-medium tracking-wide whitespace-nowrap transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+                                        {item.label}
+                                    </span>
+
+                                    {/* Tooltip when collapsed */}
+                                    {!isExpanded && (
+                                        <div className="absolute left-full ml-2 px-2 py-1 bg-obsidian border border-primary/30 rounded text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                                            {item.label}
+                                        </div>
+                                    )}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                ))}
+            </nav>
+
+            {/* Bottom Collapse Button */}
+            <div className="flex-shrink-0 border-t border-primary/10 p-2">
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded text-gray-500 hover:text-primary hover:bg-white/5 transition-all"
+                >
+                    <span className={`material-icons text-lg transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'}`}>
+                        chevron_left
+                    </span>
+                    <span className={`text-[10px] font-mono tracking-wider whitespace-nowrap transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+                        COLLAPSE
+                    </span>
+                </button>
+            </div>
+        </aside>
+    );
+}

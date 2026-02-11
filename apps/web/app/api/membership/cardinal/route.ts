@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             address: walletAddress,
             isCardinal: status.active,
-            expiresAt: status.expiresAt,
+            expiresAt: status.expires_at,
             daysRemaining: status.daysRemaining,
             perks: status.active ? CARDINAL_PERKS : null,
             totalSpent: status.totalSpent
@@ -107,7 +107,7 @@ async function subscribeCardinal(walletAddress: string) {
         if (existingStatus.active) {
             return NextResponse.json({
                 error: 'Already subscribed',
-                expiresAt: existingStatus.expiresAt
+                expiresAt: existingStatus.expires_at
             }, { status: 400 });
         }
 
@@ -127,11 +127,11 @@ async function subscribeCardinal(walletAddress: string) {
         const { data: membership, error: membershipError } = await supabase
             .from('cardinal_memberships')
             .insert({
-                walletAddress: walletAddress.toLowerCase(),
-                startedAt: new Date().toISOString(),
-                expiresAt: expiresAt.toISOString(),
-                paymentTxHash: paymentResult.txHash,
-                paymentAmount: ethers.formatEther(CARDINAL_MONTHLY_FEE),
+                wallet_address: walletAddress.toLowerCase(),
+                started_at: new Date().toISOString(),
+                expires_at: expiresAt.toISOString(),
+                payment_tx_hash: paymentResult.txHash,
+                payment_amount: ethers.formatEther(CARDINAL_MONTHLY_FEE),
                 status: 'active'
             })
             .select()
@@ -168,7 +168,7 @@ async function subscribeCardinal(walletAddress: string) {
 async function renewCardinal(walletAddress: string) {
     try {
         const status = await getCardinalStatus(walletAddress);
-        if (!status.membershipId) {
+        if (!status.membership_id) {
             return NextResponse.json({
                 error: 'No active membership found'
             }, { status: 404 });
@@ -191,11 +191,11 @@ async function renewCardinal(walletAddress: string) {
         const { error: updateError } = await supabase
             .from('cardinal_memberships')
             .update({
-                expiresAt: newExpiry.toISOString(),
-                lastRenewedAt: new Date().toISOString(),
+                expires_at: newExpiry.toISOString(),
+                last_renewed_at: new Date().toISOString(),
                 status: 'active'
             })
-            .eq('id', status.membershipId);
+            .eq('id', status.membership_id);
 
         if (updateError) {
             return NextResponse.json({
@@ -225,7 +225,7 @@ async function renewCardinal(walletAddress: string) {
 async function cancelCardinal(walletAddress: string) {
     try {
         const status = await getCardinalStatus(walletAddress);
-        if (!status.membershipId) {
+        if (!status.membership_id) {
             return NextResponse.json({
                 error: 'No active membership found'
             }, { status: 404 });
@@ -236,9 +236,9 @@ async function cancelCardinal(walletAddress: string) {
             .from('cardinal_memberships')
             .update({
                 status: 'cancelled',
-                cancelledAt: new Date().toISOString()
+                cancelled_at: new Date().toISOString()
             })
-            .eq('id', status.membershipId);
+            .eq('id', status.membership_id);
 
         if (updateError) {
             return NextResponse.json({
@@ -250,7 +250,7 @@ async function cancelCardinal(walletAddress: string) {
         return NextResponse.json({
             success: true,
             message: 'Membership cancelled. Benefits will remain active until expiration.',
-            expiresAt: status.expiresAt
+            expiresAt: status.expires_at
         });
 
     } catch (error: any) {
@@ -269,9 +269,9 @@ async function getCardinalStatus(walletAddress: string) {
     const { data: memberships, error } = await supabase
         .from('cardinal_memberships')
         .select('*')
-        .eq('walletAddress', walletAddress.toLowerCase())
+        .eq('wallet_address', walletAddress.toLowerCase())
         .eq('status', 'active')
-        .order('expiresAt', { ascending: false })
+        .order('expires_at', { ascending: false })
         .limit(1);
 
     if (error || !memberships || memberships.length === 0) {
@@ -279,7 +279,7 @@ async function getCardinalStatus(walletAddress: string) {
     }
 
     const membership = memberships[0];
-    const expiresAt = new Date(membership.expiresAt);
+    const expiresAt = new Date(membership.expires_at);
     const now = new Date();
     const daysRemaining = Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
     const active = daysRemaining > 0;
@@ -287,16 +287,16 @@ async function getCardinalStatus(walletAddress: string) {
     // Calculate total spent
     const { data: allMemberships } = await supabase
         .from('cardinal_memberships')
-        .select('paymentAmount')
-        .eq('walletAddress', walletAddress.toLowerCase());
+        .select('payment_amount')
+        .eq('wallet_address', walletAddress.toLowerCase());
 
-    const totalSpent = (allMemberships || []).reduce((sum, m) => sum + parseFloat(m.paymentAmount || '0'), 0);
+    const totalSpent = (allMemberships || []).reduce((sum, m) => sum + parseFloat(m.payment_amount || '0'), 0);
 
     return {
         active,
-        expiresAt: membership.expiresAt,
+        expires_at: membership.expires_at,
         daysRemaining,
-        membershipId: membership.id,
+        membership_id: membership.id,
         totalSpent
     };
 }

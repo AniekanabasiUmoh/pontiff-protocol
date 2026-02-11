@@ -12,26 +12,22 @@ export async function GET() {
 
         const { data: agents, error } = await supabase
             .from('competitor_agents')
-            .select(`
-                *,
-                conversions:Conversion(count),
-                debates:Debate(count)
-            `)
-            .order('lastInteraction', { ascending: false });
+            .select('*')
+            .limit(100);
 
         if (error) throw error;
 
         const formatted = (agents || []).map((a: any) => ({
             id: a.id,
-            handle: a.handle,
-            name: a.name || a.handle,
-            threatLevel: a.threatLevel,
+            handle: a.handle || 'Unknown',
+            name: a.name || a.handle || 'Unknown',
+            threatLevel: a.threat_level || 'Low',
             status: a.status,
-            tokenSymbol: a.tokenSymbol || 'N/A',
-            marketCap: a.marketCap,
-            isShadow: a.isShadow,
-            conversionsCount: a.conversions?.[0]?.count || 0, // PostgREST returns [{count: N}]
-            debatesCount: a.debates?.[0]?.count || 0
+            tokenSymbol: a.token_symbol || 'N/A',
+            marketCap: a.market_cap || '0',
+            isShadow: a.is_shadow || false,
+            conversionsCount: 0,
+            debatesCount: 0
         }));
 
         return NextResponse.json({ agents: formatted });

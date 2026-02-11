@@ -31,6 +31,21 @@ interface NFTMetadata {
     }>;
 }
 
+interface Confession {
+    id: string;
+    wallet_address: string;
+    status: string;
+    sin_reduction: number;
+    stake_amount: string;
+    created_at: string;
+    previous_sin_score: number;
+    new_sin_score: number;
+    nft_token_id?: number | null;
+    nft_minted?: boolean;
+    nft_mint_tx?: string;
+    nft_metadata?: any;
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -53,12 +68,14 @@ export async function POST(request: NextRequest) {
         }
 
         // Fetch confession record
-        const { data: confession, error: confessionError } = await supabase
+        const { data: rawConfession, error: confessionError } = await supabase
             .from('confessions')
             .select('*')
             .eq('id', confessionId)
             .eq('wallet_address', walletAddress.toLowerCase())
             .single();
+
+        const confession = rawConfession as unknown as Confession;
 
         if (confessionError || !confession) {
             console.error('[Confession NFT] Confession not found:', confessionError);
@@ -129,7 +146,13 @@ export async function POST(request: NextRequest) {
 
         // Mint NFT on-chain
         const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-        const pontiffWallet = new ethers.Wallet(process.env.PONTIFF_PRIVATE_KEY!, provider);
+
+        let pontiffKey = process.env.PONTIFF_PRIVATE_KEY!;
+        if (pontiffKey && !pontiffKey.startsWith('0x')) {
+            pontiffKey = `0x${pontiffKey}`;
+        }
+
+        const pontiffWallet = new ethers.Wallet(pontiffKey, provider);
 
         const confessionNFTContract = new ethers.Contract(
             CONFESSION_NFT_ADDRESS,
@@ -168,12 +191,13 @@ export async function POST(request: NextRequest) {
             // Update confession record with NFT details
             const { error: updateError } = await supabase
                 .from('confessions')
+                // @ts-ignore
                 .update({
                     nft_minted: true,
                     nft_token_id: tokenId,
                     nft_mint_tx: receipt.hash,
                     nft_metadata: metadata
-                })
+                } as any)
                 .eq('id', confessionId);
 
             if (updateError) {
@@ -227,12 +251,14 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch confession record
-        const { data: confession, error } = await supabase
+        const { data: rawConfession, error } = await supabase
             .from('confessions')
             .select('nft_minted, nft_token_id, nft_mint_tx, nft_metadata')
             .eq('id', confessionId)
             .eq('wallet_address', walletAddress.toLowerCase())
             .single();
+
+        const confession = rawConfession as unknown as Confession;
 
         if (error || !confession) {
             return NextResponse.json(

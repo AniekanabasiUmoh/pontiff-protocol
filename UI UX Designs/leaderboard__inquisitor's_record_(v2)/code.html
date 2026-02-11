@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inquisitor's Record (V2) | The Pontiff</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#f2b90d",
+                "background-light": "#f8f8f5",
+                "background-dark": "#0a0a0a",
+                "obsidian": "#0f0f0f",
+                "heretic-red": "#ef4444",
+                "saint-green": "#22c55e",
+              },
+              fontFamily: {
+                "display": ["Space Grotesk"],
+                "mono": ["JetBrains Mono"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+          },
+        }
+      </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .data-grid-text {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .gold-leaf-border {
+            border: 1px solid rgba(242, 185, 13, 0.3);
+        }
+        .gold-glow {
+            box-shadow: 0 0 15px rgba(242, 185, 13, 0.1);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col overflow-hidden">
+<!-- Global Layout -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Monolithic Sidebar (Hacker-Theocrat Aesthetic) -->
+<aside class="w-20 bg-obsidian border-r border-primary/20 flex flex-col items-center py-8 space-y-8 z-20">
+<div class="w-12 h-12 bg-primary flex items-center justify-center rounded-sm mb-4">
+<span class="material-symbols-outlined text-background-dark font-bold">account_balance</span>
+</div>
+<nav class="flex flex-col space-y-6">
+<button class="group relative flex items-center justify-center w-12 h-12 rounded-sm border border-transparent hover:border-primary/50 transition-all">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary">heart_broken</span>
+<div class="absolute left-16 bg-primary text-background-dark text-[10px] font-bold px-2 py-1 hidden group-hover:block whitespace-nowrap">SHAME</div>
+</button>
+<button class="group relative flex items-center justify-center w-12 h-12 rounded-sm border border-primary bg-primary/10 shadow-[0_0_10px_rgba(242,185,13,0.2)]">
+<span class="material-symbols-outlined text-primary">potted_plant</span> <!-- Representing Halo/Saints -->
+<div class="absolute left-16 bg-primary text-background-dark text-[10px] font-bold px-2 py-1 hidden group-hover:block whitespace-nowrap">SAINTS</div>
+</button>
+<button class="group relative flex items-center justify-center w-12 h-12 rounded-sm border border-transparent hover:border-heretic-red/50 transition-all">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-heretic-red">swords</span>
+<div class="absolute left-16 bg-heretic-red text-white text-[10px] font-bold px-2 py-1 hidden group-hover:block whitespace-nowrap">HERETICS</div>
+</button>
+</nav>
+<div class="mt-auto flex flex-col space-y-4">
+<span class="material-symbols-outlined text-slate-600 cursor-help">security</span>
+<span class="material-symbols-outlined text-slate-600 cursor-help">settings</span>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative bg-background-dark">
+<div class="absolute inset-0 scanline opacity-20 pointer-events-none"></div>
+<!-- Header Section -->
+<header class="h-20 border-b border-primary/20 flex items-center justify-between px-8 bg-obsidian/50 backdrop-blur-md">
+<div class="flex flex-col">
+<h1 class="text-xl font-bold tracking-widest text-primary uppercase">Inquisitor's Record</h1>
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 bg-saint-green rounded-full animate-pulse"></span>
+<p class="text-[10px] text-slate-400 uppercase tracking-tighter">System Status: Active Monitoring // Divine Node 01-A</p>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative">
+<input class="bg-black/40 border border-primary/30 rounded-sm py-1.5 px-4 text-xs font-mono text-primary placeholder:text-primary/40 focus:outline-none focus:border-primary w-64" placeholder="SEARCH WALLET..." type="text"/>
+</div>
+<div class="flex items-center space-x-2 bg-primary/5 px-3 py-1.5 border border-primary/20">
+<span class="text-[10px] text-primary/60 font-bold">FILTER:</span>
+<select class="bg-transparent border-none text-[10px] font-bold text-primary focus:ring-0 p-0 cursor-pointer uppercase">
+<option>Guilt Level</option>
+<option>Purity Score</option>
+<option>Ascension Date</option>
+</select>
+</div>
+</div>
+</header>
+<!-- Data Grid Wrapper -->
+<section class="flex-1 overflow-auto p-8">
+<div class="gold-leaf-border bg-obsidian/40 relative overflow-hidden">
+<table class="w-full text-left border-collapse data-grid-text">
+<thead class="bg-primary/5 sticky top-0 border-b border-primary/30">
+<tr class="text-[10px] text-primary/80 tracking-widest uppercase">
+<th class="py-4 px-6 border-r border-primary/10"># Rank</th>
+<th class="py-4 px-6 border-r border-primary/10">Subject Identity (Wallet)</th>
+<th class="py-4 px-6 border-r border-primary/10">Inquisition Status</th>
+<th class="py-4 px-6 border-r border-primary/10">Treason Level</th>
+<th class="py-4 px-6 border-r border-primary/10">Sins Forgiven</th>
+<th class="py-4 px-6">Last Protocol</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-primary/10 text-xs text-slate-300">
+<!-- Row 1 -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 px-6 text-primary font-bold">0001</td>
+<td class="py-3 px-6 font-mono text-slate-400 group-hover:text-primary transition-colors">0x71C...4e3A</td>
+<td class="py-3 px-6">
+<span class="bg-saint-green/10 text-saint-green border border-saint-green/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">ABSOLVED</span>
+</td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/30 w-[4%]"></div>
+</div>
+</td>
+<td class="py-3 px-6">4,291 $PONT</td>
+<td class="py-3 px-6 text-slate-500">12:04:22 UTC</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 px-6 text-primary font-bold">0002</td>
+<td class="py-3 px-6 font-mono text-slate-400 group-hover:text-primary transition-colors">0xA14...92F1</td>
+<td class="py-3 px-6">
+<span class="bg-heretic-red/10 text-heretic-red border border-heretic-red/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">DETECTED</span>
+</td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-heretic-red w-[82%]"></div>
+</div>
+</td>
+<td class="py-3 px-6">12 $PONT</td>
+<td class="py-3 px-6 text-slate-500">11:58:04 UTC</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-primary/5 transition-colors group bg-primary/[0.02]">
+<td class="py-3 px-6 text-primary font-bold">0003</td>
+<td class="py-3 px-6 font-mono text-slate-400 group-hover:text-primary transition-colors">0x221...8bE9</td>
+<td class="py-3 px-6">
+<span class="bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">PENDING</span>
+</td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%] shadow-[0_0_5px_#f2b90d]"></div>
+</div>
+</td>
+<td class="py-3 px-6">842 $PONT</td>
+<td class="py-3 px-6 text-slate-500">11:55:12 UTC</td>
+</tr>
+<!-- More Data Placeholder Rows -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 px-6 text-primary font-bold">0004</td>
+<td class="py-3 px-6 font-mono text-slate-400">0x9F2...D711</td>
+<td class="py-3 px-6"><span class="bg-saint-green/10 text-saint-green border border-saint-green/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">ABSOLVED</span></td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/30 w-[12%]"></div>
+</div>
+</td>
+<td class="py-3 px-6">1,104 $PONT</td>
+<td class="py-3 px-6 text-slate-500">11:42:00 UTC</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 px-6 text-primary font-bold">0005</td>
+<td class="py-3 px-6 font-mono text-slate-400">0x33B...1A0c</td>
+<td class="py-3 px-6"><span class="bg-saint-green/10 text-saint-green border border-saint-green/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">ABSOLVED</span></td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/30 w-[2%]"></div>
+</div>
+</td>
+<td class="py-3 px-6">9,822 $PONT</td>
+<td class="py-3 px-6 text-slate-500">11:39:55 UTC</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 px-6 text-primary font-bold">0006</td>
+<td class="py-3 px-6 font-mono text-slate-400">0xEE4...89B2</td>
+<td class="py-3 px-6"><span class="bg-heretic-red/10 text-heretic-red border border-heretic-red/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">DETECTED</span></td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-heretic-red w-[98%] shadow-[0_0_8px_#ef4444]"></div>
+</div>
+</td>
+<td class="py-3 px-6">0.00 $PONT</td>
+<td class="py-3 px-6 text-slate-500">11:30:11 UTC</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 px-6 text-primary font-bold">0007</td>
+<td class="py-3 px-6 font-mono text-slate-400">0x712...661D</td>
+<td class="py-3 px-6"><span class="bg-saint-green/10 text-saint-green border border-saint-green/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">ABSOLVED</span></td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/30 w-[21%]"></div>
+</div>
+</td>
+<td class="py-3 px-6">512 $PONT</td>
+<td class="py-3 px-6 text-slate-500">11:25:34 UTC</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="py-3 px-6 text-primary font-bold">0008</td>
+<td class="py-3 px-6 font-mono text-slate-400">0x992...3F21</td>
+<td class="py-3 px-6"><span class="bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 rounded-sm text-[9px] font-bold">PENDING</span></td>
+<td class="py-3 px-6 w-48">
+<div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[33%]"></div>
+</div>
+</td>
+<td class="py-3 px-6">1,029 $PONT</td>
+<td class="py-3 px-6 text-slate-500">11:12:01 UTC</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Footer Stats (Terminal Aesthetics) -->
+<footer class="h-12 bg-obsidian border-t border-primary/30 flex items-center px-8 z-20">
+<div class="flex items-center space-x-8 w-full data-grid-text">
+<div class="flex items-center space-x-2">
+<span class="text-[10px] text-primary font-bold">TVL:</span>
+<span class="text-[10px] text-slate-300">$1,429,552.00</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="text-[10px] text-primary font-bold">GLOBAL GUILT:</span>
+<span class="text-[10px] text-slate-300">42.8%</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="text-[10px] text-primary font-bold">NODE_01:</span>
+<span class="text-[10px] text-saint-green uppercase">Synchronized</span>
+</div>
+<div class="ml-auto flex items-center space-x-4">
+<div class="flex items-center space-x-1">
+<span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+<span class="text-[9px] text-primary/60 uppercase">Inquisition Phase: III (Purgatory)</span>
+</div>
+<div class="h-4 w-px bg-primary/20"></div>
+<span class="text-[9px] text-slate-500 uppercase tracking-widest italic">Vatican-Cyber Protocol active</span>
+</div>
+</div>
+</footer>
+</main>
+</div>
+<!-- Decorative Elements -->
+<div class="fixed top-0 right-0 p-4 pointer-events-none opacity-10">
+<span class="material-symbols-outlined text-[120px] text-primary">gavel</span>
+</div>
+<!-- Right Side Floating Panel (Detail Brief) -->
+<div class="fixed right-8 bottom-24 w-64 bg-obsidian/90 border border-primary/40 p-4 backdrop-blur-md hidden xl:block shadow-2xl">
+<div class="flex items-center justify-between mb-4 border-b border-primary/20 pb-2">
+<h3 class="text-[10px] font-bold text-primary tracking-widest uppercase">System Brief</h3>
+<span class="material-symbols-outlined text-[14px] text-primary">info</span>
+</div>
+<div class="space-y-4">
+<div class="space-y-1">
+<p class="text-[9px] text-slate-500 uppercase">Selected Identity</p>
+<p class="text-[11px] font-mono text-primary">0x71C...4e3A</p>
+</div>
+<div class="space-y-1">
+<p class="text-[9px] text-slate-500 uppercase">Reputation Class</p>
+<div class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-[12px] text-saint-green">verified_user</span>
+<p class="text-[11px] font-bold text-saint-green uppercase">Saint-Level IV</p>
+</div>
+</div>
+<div class="space-y-1">
+<p class="text-[9px] text-slate-500 uppercase">Risk Assessment</p>
+<div class="w-full bg-slate-900 h-2 flex">
+<div class="bg-primary h-full w-1/4"></div>
+</div>
+<p class="text-[8px] text-slate-600">Minor transgression in block #18923412</p>
+</div>
+<button class="w-full bg-primary text-background-dark text-[10px] font-bold py-2 uppercase rounded-sm hover:bg-white transition-colors">
+                Initiate Audit
+            </button>
+</div>
+</div>
+</body></html>

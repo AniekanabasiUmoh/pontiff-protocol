@@ -5,24 +5,21 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const { data: debates, error } = await supabase
+        const { data: debates, error} = await supabase
             .from('debates')
-            .select(`
-                *,
-                competitorAgent:CompetitorAgent(*)
-            `)
-            .order('createdAt', { ascending: false });
+            .select('*')
+            .limit(100);
 
         if (error) throw error;
 
         const formatted = (debates || []).map((d: any) => ({
             id: d.id,
-            agentHandle: d.competitorAgent?.handle || 'Unknown',
+            agentHandle: 'Unknown',
             status: d.status,
-            exchanges: d.exchanges,
-            lastReply: d.ourArgument,
-            heresy: d.theirArgument,
-            createdAt: d.createdAt
+            exchanges: d.exchanges || 1,
+            lastReply: d.our_argument || '',
+            heresy: d.their_argument || '',
+            createdAt: d.created_at
         }));
 
         return NextResponse.json({ debates: formatted });

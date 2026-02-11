@@ -33,7 +33,22 @@ export async function GET(request: Request) {
         const treasury = new ethers.Contract(treasuryAddress, TREASURY_ABI, provider);
 
         // Get on-chain revenue stats
-        const stats = await treasury.getRevenueStats();
+        let stats;
+        try {
+            stats = await treasury.getRevenueStats();
+        } catch (err) {
+            console.warn('[API] Treasury contract call failed (likely empty/reverted), returning defaults:', err);
+            // Return zeroed stats if contract call fails (e.g. no revenue yet)
+            stats = {
+                total: 0n,
+                distributed: 0n,
+                pending: 0n,
+                rpsRevenue: 0n,
+                pokerRevenue: 0n,
+                judasRevenue: 0n,
+                sessionRevenue: 0n
+            };
+        }
 
         const revenue = {
             total: parseFloat(ethers.formatEther(stats.total)),

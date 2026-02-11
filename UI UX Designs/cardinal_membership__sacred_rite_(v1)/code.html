@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cardinal Membership: Sacred Rite</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f2b90d",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#050505", /* Overriding specifically for the "obsidian" feel requested, sticking close to dark theme but deeper */
+                        "obsidian": "#000000",
+                        "stone": "#1a1a1a",
+                        "terminal-green": "#00ff41",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "full": "9999px"
+                    },
+                    backgroundImage: {
+                        'gold-gradient': 'linear-gradient(135deg, #f2b90d 0%, #b3880a 100%)',
+                        'stone-texture': 'url("https://www.transparenttextures.com/patterns/dark-matter.png")',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Marquee Animation */
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            animation: marquee 25s linear infinite;
+        }
+        
+        /* Gold Glow Effects */
+        .gold-glow {
+            box-shadow: 0 0 15px rgba(242, 185, 13, 0.2);
+        }
+        .gold-border-glow {
+            box-shadow: 0 0 5px rgba(242, 185, 13, 0.5), inset 0 0 10px rgba(242, 185, 13, 0.1);
+        }
+        
+        /* Triptych Fold Effect */
+        .triptych-side {
+            background: linear-gradient(90deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-gray-900 dark:text-gray-100 font-display flex flex-col overflow-x-hidden selection:bg-primary selection:text-black">
+<!-- 1. Live Sins Marquee -->
+<div class="w-full bg-primary/10 border-b border-primary/20 overflow-hidden py-1 relative z-50">
+<div class="whitespace-nowrap animate-marquee font-mono text-xs text-primary font-bold uppercase tracking-widest">
+            LIVE SINS: USER_882 JUST COMMITTED GLUTTONY (+5,000 MON) +++ SISTER_MARY LOST 200 MON ON ROULETTE +++ BISHOP_ALGO LIQUIDATED ON ETH PERP +++ NEW SINNER JOINED: USER_666 +++ CONFESSION BOOTH BUSY +++ 
+        </div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-grow container mx-auto px-4 py-8 md:py-16 relative flex flex-col items-center justify-center max-w-5xl">
+<!-- Background Elements -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+<!-- 2. Hero Section -->
+<div class="text-center mb-12 relative z-10 w-full">
+<h2 class="text-primary font-mono text-sm tracking-[0.3em] mb-2 uppercase opacity-80">The Sacred Rite of Membership</h2>
+<h1 class="text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-none mb-6 drop-shadow-2xl">
+                CARDINAL<br/><span class="text-primary">MEMBERSHIP</span>
+</h1>
+<!-- 3. Status Bar -->
+<div class="inline-flex items-center gap-6 border border-primary/40 bg-black/60 backdrop-blur-md px-6 py-3 rounded-lg gold-border-glow mx-auto mt-4">
+<div class="flex items-center gap-2">
+<span class="text-gray-400 font-mono text-xs uppercase tracking-wider">Current Rank:</span>
+<span class="text-white font-bold font-mono uppercase">Saint</span>
+</div>
+<div class="w-px h-4 bg-primary/30"></div>
+<div class="flex items-center gap-2">
+<span class="text-gray-400 font-mono text-xs uppercase tracking-wider">Status:</span>
+<span class="text-terminal-green font-bold font-mono uppercase animate-pulse">● ACTIVE</span>
+</div>
+</div>
+</div>
+<div class="grid md:grid-cols-2 gap-8 w-full items-start relative z-10">
+<!-- 4. Pricing Card (Triptych Style) -->
+<div class="h-full">
+<div class="relative bg-stone border border-primary/30 rounded-t-xl overflow-hidden h-full flex flex-col shadow-2xl gold-glow group">
+<!-- Triptych Header -->
+<div class="bg-primary/10 p-6 border-b border-primary/20 text-center relative">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+<h3 class="font-bold text-2xl text-primary tracking-wide uppercase">The Path of the Cardinal</h3>
+<p class="text-gray-400 text-sm mt-1 font-mono">Tier: High Priest</p>
+</div>
+<!-- Price -->
+<div class="p-8 text-center bg-black/40 relative">
+<!-- Decorative Gothic arch hint -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-8 bg-primary/10 rounded-b-full blur-md"></div>
+<div class="inline-block">
+<span class="text-4xl md:text-5xl font-bold text-white font-mono">1,000</span>
+<span class="text-primary text-xl ml-1 font-mono">MON</span>
+</div>
+<div class="text-gray-500 text-xs font-mono uppercase mt-2 tracking-widest">/ Month Auto-Renew</div>
+</div>
+<!-- 5. Features -->
+<div class="p-8 flex-grow bg-gradient-to-b from-stone via-stone to-black/80">
+<ul class="space-y-6">
+<li class="flex items-start gap-4 group/item">
+<span class="material-icons-round text-primary mt-0.5 group-hover/item:scale-110 transition-transform">star</span>
+<div>
+<h4 class="text-white font-bold text-sm uppercase mb-1">Governance Voting Rights</h4>
+<p class="text-gray-400 text-xs leading-relaxed">Cast your divine will on protocol upgrades and treasury allocations.</p>
+</div>
+</li>
+<li class="flex items-start gap-4 group/item">
+<span class="material-icons-round text-primary mt-0.5 group-hover/item:scale-110 transition-transform">auto_graph</span>
+<div>
+<h4 class="text-white font-bold text-sm uppercase mb-1">20% Yield Boost</h4>
+<p class="text-gray-400 text-xs leading-relaxed">Enhance your staking rewards through the blessed multiplier.</p>
+</div>
+</li>
+<li class="flex items-start gap-4 group/item">
+<span class="material-icons-round text-primary mt-0.5 group-hover/item:scale-110 transition-transform">lock_open</span>
+<div>
+<h4 class="text-white font-bold text-sm uppercase mb-1">Exclusive Arena Entry</h4>
+<p class="text-gray-400 text-xs leading-relaxed">Access the 'High Council' betting tables with uncapped limits.</p>
+</div>
+</li>
+</ul>
+</div>
+<!-- Bottom Edge -->
+<div class="h-2 bg-primary w-full"></div>
+</div>
+</div>
+<!-- 6. Payment Form (Stone Tablet UI) -->
+<div class="h-full flex flex-col justify-center">
+<div class="bg-[#151515] border border-gray-800 rounded-xl p-8 shadow-2xl relative overflow-hidden">
+<!-- Texture overlay for stone look -->
+<div class="absolute inset-0 bg-stone-texture opacity-20 pointer-events-none"></div>
+<div class="relative z-10">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-white font-bold text-lg uppercase tracking-wide flex items-center gap-2">
+<span class="material-icons-round text-gray-500">payments</span>
+                                Offering Detail
+                            </h3>
+<span class="bg-primary/20 text-primary text-xs px-2 py-1 rounded font-mono border border-primary/20">SECURE_RITE_V1</span>
+</div>
+<form class="space-y-6" onsubmit="event.preventDefault();">
+<div>
+<label class="block text-gray-400 text-xs font-mono uppercase mb-2 ml-1">Sacred Name / Alias</label>
+<input class="w-full bg-black border border-gray-700 rounded p-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-mono placeholder-gray-600" placeholder="Pontiff_Maximus" type="text"/>
+</div>
+<div>
+<label class="block text-gray-400 text-xs font-mono uppercase mb-2 ml-1">Payment Method</label>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-3 border border-primary bg-primary/10 rounded text-primary font-bold text-sm hover:bg-primary/20 transition-colors">
+<span class="material-icons-round text-sm">currency_bitcoin</span>
+                                        CRYPTO
+                                    </button>
+<button class="flex items-center justify-center gap-2 py-3 border border-gray-700 bg-black rounded text-gray-400 font-bold text-sm hover:border-gray-500 transition-colors">
+<span class="material-icons-round text-sm">credit_card</span>
+                                        FIAT
+                                    </button>
+</div>
+</div>
+<div>
+<label class="block text-gray-400 text-xs font-mono uppercase mb-2 ml-1">Wallet Address</label>
+<div class="relative">
+<input class="w-full bg-black border border-gray-700 rounded p-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-mono text-sm placeholder-gray-600 pl-10" placeholder="0x..." type="text"/>
+<span class="material-icons-round text-gray-500 absolute left-3 top-3 text-sm">account_balance_wallet</span>
+</div>
+<p class="text-gray-600 text-[10px] mt-2 font-mono">* Smart contract interaction required for activation.</p>
+</div>
+<div class="pt-4">
+<button class="w-full bg-primary hover:bg-[#d9a50b] text-black font-bold text-lg py-4 rounded shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0 uppercase tracking-widest flex items-center justify-center gap-3 group">
+                                    Pledge MON
+                                    <span class="material-icons-round group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<p class="text-center text-gray-500 text-xs mt-4">By pledging, you accept the <a class="text-primary hover:underline" href="#">Canonical Laws</a>.</p>
+</div>
+</form>
+</div>
+</div>
+<!-- Security Badges -->
+<div class="flex justify-center gap-6 mt-6 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+<div class="flex items-center gap-1 text-xs text-gray-400 font-mono">
+<span class="material-icons-round text-sm">verified_user</span> AUDITED
+                     </div>
+<div class="flex items-center gap-1 text-xs text-gray-400 font-mono">
+<span class="material-icons-round text-sm">lock</span> ENCRYPTED
+                     </div>
+</div>
+</div>
+</div>
+</main>
+<!-- 7. Footer Data -->
+<footer class="w-full border-t border-gray-800 bg-black/80 backdrop-blur text-gray-500 text-xs font-mono py-4">
+<div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-terminal-green animate-pulse"></span>
+<span>SYSTEM ONLINE</span>
+</div>
+<div class="flex gap-8">
+<div class="text-center md:text-right">
+<span class="block text-gray-600 text-[10px] uppercase">Total Value Locked</span>
+<span class="text-white font-bold">4,023,991 MON</span>
+</div>
+<div class="text-center md:text-right">
+<span class="block text-gray-600 text-[10px] uppercase">Active Agents</span>
+<span class="text-white font-bold">12,402</span>
+</div>
+</div>
+</div>
+</footer>
+<!-- Image Description Attributes for Context -->
+<div class="hidden">
+<img data-alt="Abstract golden sacred geometry pattern background" src=""/>
+<img data-alt="Dark stone tablet texture overlay" src=""/>
+</div>
+</body></html>
