@@ -50,8 +50,8 @@ export async function POST(
             .from('tournament_brackets')
             .update({
                 winner_wallet: winner,
-                status: 'completed',
-                game_id: gameId
+                status: 'completed'
+                // game_id removed - column doesn't exist in schema
             })
             .eq('id', matchId);
 

@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
                 competitorAgent:competitor_agents(*)
             `)
             .eq('id', debateId)
-            .single();
+            .single() as any;
 
         if (debateError || !debate) {
             return NextResponse.json({ error: 'Debate not found' }, { status: 404 });
@@ -63,15 +63,25 @@ export async function POST(request: NextRequest) {
         );
 
         // 3. Update debate status
+        // 3. Update debate status
+        // Schema adaptation: Store scores/reasoning in metadata, map completedAt to ended_at
+        const updatedMetadata = {
+            ...(debate.metadata || {}), // Keep existing metadata
+            pontiffScore: judgeResult.pontiffScore,
+            competitorScore: judgeResult.competitorScore,
+            judgeReasoning: judgeResult.reasoning,
+            totalPontiffScore: judgeResult.pontiffScore.quality + judgeResult.pontiffScore.coherence + judgeResult.pontiffScore.persuasiveness,
+            totalCompetitorScore: judgeResult.competitorScore.quality + judgeResult.competitorScore.coherence + judgeResult.competitorScore.persuasiveness
+        };
+
         const { error: updateError } = await supabase
             .from('debates')
+            // @ts-ignore
             .update({
                 status: 'Completed',
-                winner: judgeResult.winner,
-                pontiffScore: judgeResult.pontiffScore.quality + judgeResult.pontiffScore.coherence + judgeResult.pontiffScore.persuasiveness,
-                competitorScore: judgeResult.competitorScore.quality + judgeResult.competitorScore.coherence + judgeResult.competitorScore.persuasiveness,
-                judgeReasoning: judgeResult.reasoning,
-                completedAt: new Date().toISOString()
+                winner_wallet: judgeResult.winner === 'pontiff' ? process.env.NEXT_PUBLIC_PONTIFF_WALLET : (debate.competitorAgent?.wallet_address || null),
+                metadata: updatedMetadata,
+                ended_at: new Date().toISOString()
             })
             .eq('id', debateId);
 
@@ -110,7 +120,12 @@ async function judgeDebate(
     competitorHandle: string
 ): Promise<JudgeResult> {
     try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+        // Fallback if key is missing or invalid
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error('Missing GEMINI_API_KEY');
+        }
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const prompt = `
@@ -212,6 +227,7 @@ async function processDebatePayout(winner: 'pontiff' | 'competitor', debate: any
         // Record payout in game_history for analytics
         const { error: historyError } = await supabase
             .from('game_history')
+            // @ts-ignore
             .insert({
                 player1: 'ThePontiff',
                 player2: debate.competitorAgent?.handle || 'Unknown',

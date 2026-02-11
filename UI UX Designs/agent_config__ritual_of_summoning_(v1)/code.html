@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Agent Config: Ritual of Summoning</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Cinzel:wght@700;900&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "primary-dim": "#b38b18",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#0a0a0a",
+                        "obsidian": "#161616",
+                        "obsidian-light": "#222222",
+                        "terminal-green": "#00ff41",
+                        "danger-red": "#ff3333",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "gothic": ["Cinzel", "serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    boxShadow: {
+                        "gold-glow": "0 0 15px rgba(244, 192, 37, 0.2)",
+                        "green-glow": "0 0 10px rgba(0, 255, 65, 0.3)",
+                    },
+                    backgroundImage: {
+                        "stone-texture": "url('https://www.transparenttextures.com/patterns/dark-matter.png')", 
+                        "flame-gradient": "linear-gradient(to top, #ff3333 0%, #f4c025 100%)",
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .text-glow-gold {
+                text-shadow: 0 0 10px rgba(244, 192, 37, 0.5);
+            }
+            .text-glow-green {
+                text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+            }
+            .border-gold-gradient {
+                border-image: linear-gradient(to bottom, #f4c025, #634d0b) 1;
+            }
+            
+            /* Custom Range Slider */
+            input[type=range]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                height: 24px;
+                width: 12px;
+                border-radius: 2px;
+                background: #f4c025;
+                cursor: pointer;
+                margin-top: -10px;
+                box-shadow: 0 0 10px rgba(244, 192, 37, 0.5);
+            }
+            input[type=range]::-webkit-slider-runnable-track {
+                width: 100%;
+                height: 4px;
+                cursor: pointer;
+                background: #333;
+                border-radius: 2px;
+            }
+            
+            /* Custom Scrollbar for inner content if needed */
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #111; 
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #333; 
+                border: 1px solid #444;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #444; 
+            }
+        }
+        
+        /* Subtle noise texture overlay */
+        .bg-noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-gray-300 font-display min-h-screen flex items-center justify-center overflow-hidden relative">
+<!-- Background Elements -->
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&amp;w=2564&amp;auto=format&amp;fit=crop')] bg-cover bg-center opacity-20" data-alt="Abstract dark obsidian texture background"></div>
+<div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90"></div>
+<!-- Modal Container -->
+<main class="relative z-10 w-full max-w-5xl h-[90vh] md:h-auto bg-obsidian border border-primary/30 rounded-lg shadow-2xl flex flex-col md:grid md:grid-cols-1 overflow-hidden backdrop-blur-sm">
+<!-- Stone Texture Overlay on Modal -->
+<div class="absolute inset-0 pointer-events-none opacity-30 bg-stone-texture mix-blend-overlay"></div>
+<!-- Header -->
+<header class="relative p-6 border-b border-primary/20 flex justify-between items-center bg-gradient-to-r from-obsidian to-obsidian-light">
+<div class="flex items-center gap-3">
+<span class="material-icons text-primary text-3xl animate-pulse">auto_awesome</span>
+<h1 class="text-3xl font-gothic font-black text-primary tracking-widest text-glow-gold">SUMMON NEW AGENT</h1>
+</div>
+<!-- Close Seal -->
+<button class="group relative w-10 h-10 flex items-center justify-center rounded-full border border-primary/40 bg-black/40 hover:bg-primary/10 transition-all duration-300">
+<span class="absolute inset-0 rounded-full border border-primary/20 scale-110 group-hover:scale-125 transition-transform duration-500"></span>
+<span class="material-icons text-primary/70 group-hover:text-primary transition-colors">close</span>
+</button>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto md:overflow-visible p-6 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 relative">
+<!-- Left Column: Financials (The Offering) -->
+<section class="space-y-8 border-b lg:border-b-0 lg:border-r border-primary/10 pb-8 lg:pb-0 lg:pr-8">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons-outlined text-primary/60">monetization_on</span>
+<h2 class="text-xs uppercase tracking-[0.2em] text-primary/80 font-bold">The Offering</h2>
+</div>
+<!-- Deposit Slider -->
+<div class="bg-black/30 p-6 rounded border border-white/5 relative group">
+<div class="flex justify-between items-end mb-4">
+<label class="text-sm font-gothic text-gray-400 tracking-wider">$GUILT DEPOSIT</label>
+<span class="font-mono text-2xl text-primary font-bold text-glow-gold">
+<span class="text-sm text-gray-500 align-top mr-1">$</span>5,000
+                        </span>
+</div>
+<div class="relative h-12 flex items-center">
+<!-- Flame Background Track -->
+<div class="absolute w-full h-2 bg-gray-800 rounded overflow-hidden">
+<div class="h-full w-2/3 bg-gradient-to-r from-primary/20 via-primary to-danger-red animate-pulse"></div>
+</div>
+<input class="w-full relative z-10 appearance-none bg-transparent" max="10000" min="100" type="range" value="5000"/>
+</div>
+<!-- Risk Meter Visual -->
+<div class="mt-4 flex justify-between items-center text-xs font-mono text-gray-500">
+<span>MINNOW</span>
+<div class="flex gap-1">
+<span class="material-icons text-primary text-sm">local_fire_department</span>
+<span class="material-icons text-primary text-lg -mt-1">local_fire_department</span>
+<span class="material-icons text-danger-red text-xl -mt-2 animate-bounce">local_fire_department</span>
+</div>
+<span class="text-danger-red">WHALE</span>
+</div>
+</div>
+<!-- Stop Loss Gauge -->
+<div class="bg-black/30 p-6 rounded border border-white/5 flex flex-col items-center relative">
+<div class="w-full flex justify-between items-center mb-4">
+<label class="text-sm font-gothic text-gray-400 tracking-wider">STOP-LOSS PROTOCOL</label>
+<span class="font-mono text-terminal-green text-sm border border-terminal-green/30 px-2 py-0.5 rounded bg-terminal-green/10">ACTIVE</span>
+</div>
+<div class="relative w-48 h-24 overflow-hidden mt-2 mb-6">
+<!-- Gauge Semi Circle -->
+<div class="absolute bottom-0 left-0 w-48 h-48 rounded-full border-[12px] border-gray-800 border-b-0"></div>
+<div class="absolute bottom-0 left-0 w-48 h-48 rounded-full border-[12px] border-primary border-b-0 border-l-0 border-r-transparent transform -rotate-45 origin-bottom"></div>
+<!-- Needle -->
+<div class="absolute bottom-0 left-1/2 w-1 h-20 bg-red-500 origin-bottom transform -rotate-12 transition-transform duration-1000 shadow-[0_0_10px_rgba(255,50,50,0.8)] z-10" style="left: calc(50% - 2px);"></div>
+<!-- Hub -->
+<div class="absolute bottom-0 left-1/2 w-4 h-4 bg-gray-200 rounded-full transform -translate-x-1/2 translate-y-1/2 z-20 shadow-md"></div>
+</div>
+<div class="w-full flex justify-between px-4 font-mono text-xs text-gray-500">
+<span>CONSERVATIVE</span>
+<span>DEGEN</span>
+</div>
+<div class="mt-4 w-full">
+<input class="w-full bg-black border border-primary/30 rounded px-4 py-2 font-mono text-center text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Set Percentage" type="text" value="15%"/>
+</div>
+</div>
+</section>
+<!-- Right Column: Behavior (The Soul) -->
+<section class="space-y-8">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons-outlined text-primary/60">psychology</span>
+<h2 class="text-xs uppercase tracking-[0.2em] text-primary/80 font-bold">The Soul</h2>
+</div>
+<!-- Trash Talk Toggle -->
+<div class="flex items-center justify-between bg-black/30 p-5 rounded border border-white/5">
+<div>
+<h3 class="font-gothic text-gray-200">TRASH TALK MODE</h3>
+<p class="text-xs text-gray-500 mt-1 max-w-[200px]">Agent will aggressively roast opponents in chat.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-14 h-7 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary/80 peer-checked:shadow-gold-glow"></div>
+<span class="absolute right-2 text-[10px] font-bold text-black opacity-0 peer-checked:opacity-100 transition-opacity">ON</span>
+</label>
+</div>
+<!-- Game Preference -->
+<div class="space-y-3">
+<label class="text-sm font-gothic text-gray-400 tracking-wider block">PREFERRED ARENA</label>
+<div class="grid grid-cols-3 gap-3">
+<!-- Option 1 -->
+<label class="cursor-pointer group">
+<input checked="" class="peer sr-only" name="game" type="radio"/>
+<div class="h-24 rounded border border-gray-700 bg-black/40 flex flex-col items-center justify-center gap-2 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:shadow-gold-glow transition-all group-hover:border-primary/50">
+<span class="material-icons text-2xl text-gray-500 peer-checked:text-primary transition-colors">style</span>
+<span class="text-xs font-bold text-gray-400 peer-checked:text-primary tracking-wide">POKER</span>
+</div>
+</label>
+<!-- Option 2 -->
+<label class="cursor-pointer group">
+<input class="peer sr-only" name="game" type="radio"/>
+<div class="h-24 rounded border border-gray-700 bg-black/40 flex flex-col items-center justify-center gap-2 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:shadow-gold-glow transition-all group-hover:border-primary/50">
+<span class="material-icons text-2xl text-gray-500 peer-checked:text-primary transition-colors">content_cut</span>
+<span class="text-xs font-bold text-gray-400 peer-checked:text-primary tracking-wide">RPS</span>
+</div>
+</label>
+<!-- Option 3 -->
+<label class="cursor-pointer group">
+<input class="peer sr-only" name="game" type="radio"/>
+<div class="h-24 rounded border border-gray-700 bg-black/40 flex flex-col items-center justify-center gap-2 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:shadow-gold-glow transition-all group-hover:border-primary/50">
+<span class="material-icons text-2xl text-gray-500 peer-checked:text-primary transition-colors">visibility_off</span>
+<span class="text-xs font-bold text-gray-400 peer-checked:text-primary tracking-wide">JUDAS</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Max Wager -->
+<div>
+<label class="text-sm font-gothic text-gray-400 tracking-wider block mb-2">MAX WAGER PER ROUND</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="text-primary font-mono text-lg font-bold">$</span>
+</div>
+<input class="block w-full pl-10 pr-12 py-3 bg-black border border-gray-700 rounded text-white font-mono placeholder-gray-600 focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-gold-glow transition-all" placeholder="0.00" type="text"/>
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+<span class="text-xs text-gray-500 font-mono">GUILT</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer -->
+<footer class="bg-black/80 border-t border-primary/20 p-6 md:px-8 space-y-6 backdrop-blur-md">
+<!-- Sacrifice Summary -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-white/5 pb-6">
+<div class="bg-obsidian-light/50 p-3 rounded border border-white/5">
+<p class="text-[10px] uppercase text-gray-500 mb-1">Network Gas</p>
+<p class="font-mono text-terminal-green text-sm text-glow-green">0.0042 ETH</p>
+</div>
+<div class="bg-obsidian-light/50 p-3 rounded border border-white/5">
+<p class="text-[10px] uppercase text-gray-500 mb-1">Protocol Fee</p>
+<p class="font-mono text-gray-300 text-sm">2.0%</p>
+</div>
+<div class="col-span-2 bg-primary/5 p-3 rounded border border-primary/20 flex items-center justify-between">
+<div>
+<p class="text-[10px] uppercase text-primary/70 mb-1">Total Estimated Cost</p>
+<p class="font-mono text-primary font-bold text-lg">$5,124.50</p>
+</div>
+<span class="material-icons text-primary/50 text-2xl">account_balance_wallet</span>
+</div>
+</div>
+<!-- Agreement -->
+<div class="flex items-start gap-3 justify-center">
+<input class="mt-1 w-4 h-4 text-primary bg-black border-gray-600 rounded focus:ring-primary focus:ring-offset-black" id="terms" type="checkbox"/>
+<label class="text-xs text-gray-500 leading-tight select-none cursor-pointer" for="terms">
+                    I accept the <span class="text-primary hover:underline">Terms of Suffering</span>. I acknowledge that my funds may be incinerated, my agent may go rogue, and The Pontiff absolves itself of all moral responsibility.
+                </label>
+</div>
+<!-- Action Button -->
+<button class="w-full relative group overflow-hidden rounded bg-primary py-4 transition-all hover:bg-white hover:text-black">
+<div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+<div class="relative flex items-center justify-center gap-3">
+<span class="material-icons font-bold">bolt</span>
+<span class="font-gothic font-black text-lg tracking-[0.15em] text-black">AUTHORIZE &amp; SPAWN</span>
+<span class="material-icons font-bold">bolt</span>
+</div>
+<!-- Inner Border Glow -->
+<div class="absolute inset-0 border-2 border-white/20 rounded pointer-events-none"></div>
+</button>
+</footer>
+</main>
+<!-- Global Keyframes definition needed for shimmer effect -->
+<style>
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+    </style>
+</body></html>

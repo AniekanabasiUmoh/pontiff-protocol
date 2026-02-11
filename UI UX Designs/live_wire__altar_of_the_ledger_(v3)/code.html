@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Live Wire: Altar of the Ledger (V3)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&amp;family=Space+Mono:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ffc800", // Increased brightness for better pop against black
+                        "primary-glow": "#ffd700",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#050505", // Obsidian Black
+                        "stone-dark": "#121212", // Deep charcoal matte
+                        "terminal-green": "#00ff41", // Vibrant terminal green
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "whisper": ["Space Mono", "monospace"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    backgroundImage: {
+                        'stone-texture': "url('https://www.transparenttextures.com/patterns/black-felt.png')", 
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+        }
+        .particle {
+            position: absolute;
+            background: #ffc800;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            box-shadow: 0 0 8px #ffc800;
+        }
+        .text-glow {
+            text-shadow: 0 0 15px rgba(255, 200, 0, 0.6), 0 0 30px rgba(255, 200, 0, 0.2);
+        }
+        .stone-card {
+            background-color: #121212; 
+            border: 1px solid #1f1f1f;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+        }
+        .whisper-card {
+            background-color: #0a0a0a;
+            border-left: 2px solid rgba(255, 200, 0, 0.6);
+            box-shadow: 0 0 20px rgba(0,0,0,0.9);
+        }
+        .icon-glow-container {
+             box-shadow: 0 0 25px rgba(255, 200, 0, 0.4);
+        }
+        .terminal-text {
+            color: #00ff41;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background-dark font-display text-gray-300 h-screen overflow-hidden relative">
+<div class="absolute inset-0 opacity-20 mix-blend-overlay z-0 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.15\'/%3E%3C/svg%3E');"></div>
+<div class="particle w-1 h-1 left-[10%] bottom-0 animate-[float_10s_linear_infinite]"></div>
+<div class="particle w-2 h-2 left-[20%] bottom-0 animate-[float_15s_linear_infinite_2s]"></div>
+<div class="particle w-1 h-1 left-[80%] bottom-0 animate-[float_12s_linear_infinite_1s]"></div>
+<div class="particle w-1 h-1 left-[60%] bottom-0 animate-[float_18s_linear_infinite_4s]"></div>
+<div class="particle w-2 h-2 left-[90%] bottom-0 animate-[float_20s_linear_infinite_0.5s]"></div>
+<main class="relative z-10 h-full flex flex-col items-center max-w-7xl mx-auto px-4">
+<header class="pt-8 pb-4 w-full text-center flex flex-col items-center space-y-6 shrink-0">
+<div class="space-y-1">
+<h2 class="text-primary/60 text-xs tracking-[0.4em] uppercase font-bold">Vatican Live Wire</h2>
+<h1 class="text-4xl md:text-5xl font-extrabold text-primary text-glow tracking-tight uppercase">Altar of the Ledger</h1>
+</div>
+<div class="flex items-center justify-center space-x-8 md:space-x-16 pt-4">
+<button class="group flex flex-col items-center space-y-2 focus:outline-none opacity-50 hover:opacity-100 transition-all duration-300">
+<div class="w-16 h-16 rounded-full border border-primary/30 group-hover:border-primary/80 group-hover:bg-primary/5 flex items-center justify-center transition-all bg-[#0a0a0a]">
+<span class="material-icons text-3xl text-primary drop-shadow-[0_0_5px_rgba(255,200,0,0.5)]">sports_mma</span>
+</div>
+<span class="text-[10px] uppercase tracking-widest text-primary/60 group-hover:text-primary">Conflict</span>
+</button>
+<button class="group flex flex-col items-center space-y-2 focus:outline-none opacity-100 scale-110 transition-all duration-300 relative">
+<div class="absolute -inset-2 bg-primary/10 blur-xl rounded-full"></div>
+<div class="w-20 h-20 rounded-full border-2 border-primary bg-stone-dark flex items-center justify-center relative z-10 icon-glow-container">
+<span class="material-icons text-4xl text-primary text-glow">style</span>
+</div>
+<span class="text-[10px] uppercase tracking-widest text-primary font-bold text-glow">Wager</span>
+</button>
+<button class="group flex flex-col items-center space-y-2 focus:outline-none opacity-50 hover:opacity-100 transition-all duration-300">
+<div class="w-16 h-16 rounded-full border border-primary/30 group-hover:border-primary/80 group-hover:bg-primary/5 flex items-center justify-center transition-all bg-[#0a0a0a]">
+<span class="material-icons text-3xl text-primary drop-shadow-[0_0_5px_rgba(255,200,0,0.5)]">psychology_alt</span>
+</div>
+<span class="text-[10px] uppercase tracking-widest text-primary/60 group-hover:text-primary">Confess</span>
+</button>
+</div>
+<div class="w-24 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_10px_#ffc800]"></div>
+</header>
+<div class="flex-1 w-full max-w-2xl overflow-y-auto no-scrollbar py-8 relative mask-linear-fade">
+<div class="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-background-dark to-transparent z-20 pointer-events-none"></div>
+<div class="space-y-4 px-2 pb-24">
+<div class="stone-card rounded-lg p-5 flex items-center gap-5 group relative border border-white/5 hover:border-primary/50 transition-all duration-300 hover:translate-y-[-2px]">
+<div class="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+<button class="text-gray-500 hover:text-primary transition-colors" title="View on Scan"><span class="material-icons text-lg">open_in_new</span></button>
+<button class="text-gray-500 hover:text-primary transition-colors" title="Share"><span class="material-icons text-lg">share</span></button>
+</div>
+<div class="w-12 h-12 rounded bg-black border border-primary/40 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(255,200,0,0.1)]">
+<span class="material-icons text-primary text-2xl text-glow">style</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-white font-bold font-display text-lg truncate tracking-wide">ROYAL FLUSH</h3>
+<span class="text-primary font-bold font-display text-xl text-glow">+ 4500 USDC</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-500 font-mono">
+<span class="w-2 h-2 rounded-full bg-terminal-green/80 inline-block shadow-[0_0_5px_#00ff41]"></span>
+<span class="truncate">0x71C...9e21</span>
+<span class="text-gray-700 mx-1">|</span>
+<span>2m ago</span>
+</div>
+</div>
+</div>
+<div class="stone-card rounded-lg p-5 flex items-center gap-5 group relative border border-white/5 hover:border-primary/30 transition-all duration-300">
+<div class="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+<button class="text-gray-500 hover:text-red-500 transition-colors" title="Roast"><span class="material-icons text-lg">whatshot</span></button>
+</div>
+<div class="w-12 h-12 rounded bg-black border border-primary/20 flex items-center justify-center shrink-0 opacity-60">
+<span class="material-icons text-gray-400 text-2xl">back_hand</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-gray-400 font-semibold font-display text-lg truncate">DEFEATED BY SCISSORS</h3>
+<span class="text-red-500/80 font-mono text-sm tracking-wide">- 0.5 ETH</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-600 font-mono">
+<span class="w-2 h-2 rounded-full bg-red-500/30 inline-block"></span>
+<span class="truncate">0xBa2...11f8</span>
+<span class="text-gray-700 mx-1">|</span>
+<span>4m ago</span>
+</div>
+</div>
+</div>
+<div class="whisper-card rounded-lg p-6 relative my-8 mx-2">
+<span class="material-icons text-primary/10 text-6xl absolute -right-2 -top-4 -rotate-12 pointer-events-none">format_quote</span>
+<div class="flex gap-4">
+<div class="mt-1 shrink-0">
+<span class="material-icons text-primary/80 text-xl text-glow">psychology_alt</span>
+</div>
+<div class="flex-1">
+<p class="font-whisper italic text-primary text-sm md:text-base leading-relaxed text-glow tracking-tight">
+                            "Forgive me Pontiff, for I leveraged the rent money on a memecoin named after a fruit. The fruit rotted. I am now liquid."
+                        </p>
+<div class="mt-4 flex justify-between items-center border-t border-primary/20 pt-3">
+<span class="text-[10px] uppercase tracking-widest text-gray-500">Anonymous Sinner #992</span>
+<div class="flex gap-3">
+<button class="flex items-center gap-1 text-[10px] uppercase text-gray-500 hover:text-primary transition-colors">
+<span class="material-icons text-sm">thumb_up</span> Absolve
+                                </button>
+<button class="flex items-center gap-1 text-[10px] uppercase text-gray-500 hover:text-red-500 transition-colors">
+<span class="material-icons text-sm">local_fire_department</span> Condemn
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="stone-card rounded-lg p-5 flex items-center gap-5 group relative border border-white/5 opacity-70 hover:opacity-100 hover:border-primary/30 transition-all duration-300">
+<div class="w-12 h-12 rounded bg-black border border-white/10 flex items-center justify-center shrink-0">
+<span class="material-icons text-gray-500 text-2xl">filter_none</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-gray-500 font-semibold font-display text-base truncate">FOLDED HAND</h3>
+<span class="text-gray-600 font-mono text-xs">NO ACTION</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-600 font-mono">
+<span class="w-2 h-2 rounded-full bg-gray-800 inline-block"></span>
+<span class="truncate">0x99A...bB21</span>
+<span class="text-gray-700 mx-1">|</span>
+<span>8m ago</span>
+</div>
+</div>
+</div>
+<div class="stone-card rounded-lg p-5 flex items-center gap-5 group relative border border-white/5 hover:border-primary/50 transition-all duration-300 hover:translate-y-[-2px]">
+<div class="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+<button class="text-gray-500 hover:text-blue-400 transition-colors" title="Tweet"><span class="material-icons text-lg">flutter_dash</span></button>
+</div>
+<div class="w-12 h-12 rounded bg-black border border-primary/40 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(255,200,0,0.1)]">
+<span class="material-icons text-primary text-2xl text-glow">back_hand</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-white font-bold font-display text-lg truncate tracking-wide">PAPER COVERS ROCK</h3>
+<span class="text-primary font-bold font-display text-lg text-glow">+ 1200 USDT</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-gray-500 font-mono">
+<span class="w-2 h-2 rounded-full bg-terminal-green/80 inline-block shadow-[0_0_5px_#00ff41]"></span>
+<span class="truncate">0xDr4...g00n</span>
+<span class="text-gray-700 mx-1">|</span>
+<span>12m ago</span>
+</div>
+</div>
+</div>
+<div class="whisper-card rounded-lg p-6 relative my-8 mx-2 opacity-80">
+<div class="flex gap-4">
+<div class="mt-1 shrink-0">
+<span class="material-icons text-primary/80 text-xl text-glow">psychology_alt</span>
+</div>
+<div class="flex-1">
+<p class="font-whisper italic text-primary/90 text-sm leading-relaxed text-glow tracking-tight">
+                            "I told my wife I lost the keys to the ledger. In truth, I staked it all on a pixelated toad."
+                        </p>
+<div class="mt-4 flex justify-between items-center border-t border-primary/20 pt-3">
+<span class="text-[10px] uppercase tracking-widest text-gray-500">Anonymous Sinner #401</span>
+<div class="flex gap-3">
+<button class="flex items-center gap-1 text-[10px] uppercase text-gray-500 hover:text-primary transition-colors">
+<span class="material-icons text-sm">thumb_up</span> Absolve
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="stone-card rounded-lg p-5 flex items-center gap-5 group relative border border-primary/60 bg-[#0f0f0f] hover:border-primary transition-all duration-300 shadow-[0_0_20px_rgba(255,200,0,0.15)]">
+<div class="absolute -left-1 top-0 bottom-0 w-1 bg-primary rounded-l-lg shadow-[0_0_10px_#ffc800]"></div>
+<div class="w-12 h-12 rounded bg-primary text-black border border-primary flex items-center justify-center shrink-0 shadow-[0_0_15px_#ffc800]">
+<span class="material-icons text-2xl">emoji_events</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-primary font-extrabold font-display text-xl truncate tracking-wide text-glow">TOURNAMENT WIN</h3>
+<span class="text-white font-bold font-display text-2xl text-glow drop-shadow-md">10.5 ETH</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-primary/80 font-mono uppercase tracking-wider">
+<span class="material-icons text-[10px]">star</span>
+<span class="truncate font-bold text-glow">The_Pontiff_Himself</span>
+<span class="text-primary/40 mx-1">|</span>
+<span>15m ago</span>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-background-dark via-background-dark/90 to-transparent z-20 pointer-events-none"></div>
+</div>
+<footer class="w-full max-w-2xl py-4 flex justify-between items-center text-[10px] uppercase tracking-widest text-gray-500 border-t border-white/10 bg-background-dark relative z-30">
+<div class="flex items-center gap-2 terminal-text font-bold">
+<span class="w-2 h-2 rounded-full bg-terminal-green animate-pulse shadow-[0_0_8px_#00ff41]"></span>
+<span class="drop-shadow-[0_0_3px_rgba(0,255,65,0.8)]">Live Feed Active</span>
+</div>
+<div class="flex gap-4">
+<span class="text-gray-600">Block: 18,239,401</span>
+<span class="text-gray-600">Gas: 24 Gwei</span>
+</div>
+</footer>
+</main>
+<img alt="" class="hidden" data-alt="Abstract golden gradient texture for background effects" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRapPtoxBW1UP3hDGLzY916MJ7UB1tBEfMa_WR5yl4IdwHRPPwmB4E0h6UlP70qictB-yMWObJj5hchQnLqri4lpiw3Qgp6dY53WGpGcVAMoJuUpj9wJR4jBDpZs7A6Zj0LpAPw7AbqS81TVuYOd8TFC0rta2GvUqAR4QK6KRne6aFCj5zGBAo6Jmskd68LpCx97lYnU9LtQHTH9yVK0u5_UiSLRkyL2VyxlmqJma0qzlV9Mt9PicVj3uXh2pJ_daI0mzVtezS7ocJ"/>
+
+</body></html>

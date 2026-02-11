@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Grand Cathedral Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f2b90d",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#0a0a0a", // Deep obsidian black as requested
+                        "obsidian": "#050505",
+                        "obsidian-light": "#151515",
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    boxShadow: {
+                        "gold": "0 0 15px -3px rgba(242, 185, 13, 0.15)",
+                        "gold-hover": "0 0 25px -5px rgba(242, 185, 13, 0.3)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f2b90d;
+        }
+        
+        .gold-border {
+            border: 1px solid rgba(242, 185, 13, 0.4);
+        }
+        
+        .gold-border:hover {
+            border-color: rgba(242, 185, 13, 0.8);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px rgba(242, 185, 13, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-display transition-colors duration-300 min-h-screen selection:bg-primary selection:text-black">
+<!-- Top Navigation / Header -->
+<header class="w-full border-b border-primary/20 bg-background-light/90 dark:bg-obsidian/90 backdrop-blur-md sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+<!-- Logo / Title -->
+<div class="flex flex-col">
+<div class="flex items-center gap-3">
+<span class="material-icons text-primary text-3xl">church</span>
+<h1 class="text-3xl font-bold tracking-tight text-glow">The Pontiff</h1>
+</div>
+<span class="text-sm text-primary/60 font-mono tracking-widest uppercase ml-10">Grand Cathedral Ledger</span>
+</div>
+<!-- Create Tournament Seal Button -->
+<button class="group relative inline-flex items-center justify-center p-4 px-6 overflow-hidden font-medium text-black transition duration-300 ease-out rounded-full shadow-gold hover:shadow-gold-hover">
+<span class="absolute inset-0 w-full h-full bg-gradient-to-br from-primary via-[#ffd700] to-[#b8860b]"></span>
+<span class="absolute bottom-0 right-0 block w-64 h-64 mb-32 mr-4 transition duration-500 origin-bottom-left transform rotate-45 translate-x-24 bg-white opacity-20 group-hover:rotate-90 ease"></span>
+<span class="relative flex items-center gap-2 font-display font-bold uppercase tracking-wider text-sm">
+<span class="material-icons text-lg">add_circle</span>
+                    Create Tournament
+                </span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-6 py-12">
+<!-- Filters Section -->
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-primary/10 pb-4">
+<div class="flex flex-col gap-2">
+<h2 class="text-4xl font-display font-normal italic text-white/90">Tournament Directory</h2>
+<p class="text-primary/60 font-mono text-xs">Ledger Updated: <span class="text-white">Just now</span></p>
+</div>
+<!-- Tab Navigation -->
+<nav class="flex gap-8 mt-6 md:mt-0">
+<button class="pb-2 text-primary border-b-2 border-primary text-lg font-medium transition-all text-glow">
+                    All
+                </button>
+<button class="pb-2 text-gray-400 hover:text-primary hover:border-b-2 hover:border-primary/50 text-lg font-medium transition-all">
+                    Open
+                </button>
+<button class="pb-2 text-gray-400 hover:text-primary hover:border-b-2 hover:border-primary/50 text-lg font-medium transition-all">
+                    Active
+                </button>
+<button class="pb-2 text-gray-400 hover:text-primary hover:border-b-2 hover:border-primary/50 text-lg font-medium transition-all">
+                    Completed
+                </button>
+</nav>
+</div>
+<!-- Tournament Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Card 1: Open -->
+<div class="group relative bg-obsidian-light rounded-lg gold-border p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-gold cursor-pointer flex flex-col items-center text-center h-full">
+<!-- Status Badge -->
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wider">
+                        Open
+                    </span>
+</div>
+<!-- Icon -->
+<div class="w-20 h-20 rounded-full border border-primary/20 flex items-center justify-center mb-6 bg-obsidian shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:border-primary/60 transition-colors">
+<span class="material-icons text-4xl text-primary/80 group-hover:text-primary">visibility</span>
+</div>
+<!-- Title -->
+<h3 class="text-xl font-display font-bold text-white mb-2">Blind Man's Bluff</h3>
+<p class="text-gray-400 text-sm font-display italic mb-6">The High Table Series</p>
+<!-- Data Grid -->
+<div class="w-full grid grid-cols-2 gap-4 border-t border-primary/10 pt-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Prize Pool</span>
+<span class="text-primary font-mono font-bold text-lg">50k $GUILT</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Entry</span>
+<span class="text-white font-mono font-bold text-lg">500</span>
+</div>
+</div>
+<!-- Timer / CTA -->
+<div class="mt-auto w-full">
+<div class="bg-black/40 rounded border border-primary/10 p-2 mb-2 group-hover:border-primary/30 transition-colors">
+<p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono mb-1">Starts In</p>
+<p class="font-mono text-primary text-xl tracking-wider">04:22:10</p>
+</div>
+<button class="w-full py-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-bold uppercase tracking-widest text-black bg-primary rounded hover:bg-[#ffcf3d]">
+                        Join Now
+                    </button>
+</div>
+</div>
+<!-- Card 2: Open -->
+<div class="group relative bg-obsidian-light rounded-lg gold-border p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-gold cursor-pointer flex flex-col items-center text-center h-full">
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wider">
+                        Open
+                    </span>
+</div>
+<div class="w-20 h-20 rounded-full border border-primary/20 flex items-center justify-center mb-6 bg-obsidian shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:border-primary/60 transition-colors">
+<span class="material-icons text-4xl text-primary/80 group-hover:text-primary">casino</span>
+</div>
+<h3 class="text-xl font-display font-bold text-white mb-2">Gilded Dice</h3>
+<p class="text-gray-400 text-sm font-display italic mb-6">Weekly Randomizer</p>
+<div class="w-full grid grid-cols-2 gap-4 border-t border-primary/10 pt-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Prize Pool</span>
+<span class="text-primary font-mono font-bold text-lg">12k $GUILT</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Entry</span>
+<span class="text-white font-mono font-bold text-lg">150</span>
+</div>
+</div>
+<div class="mt-auto w-full">
+<div class="bg-black/40 rounded border border-primary/10 p-2 mb-2 group-hover:border-primary/30 transition-colors">
+<p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono mb-1">Starts In</p>
+<p class="font-mono text-primary text-xl tracking-wider">00:45:12</p>
+</div>
+<button class="w-full py-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-bold uppercase tracking-widest text-black bg-primary rounded hover:bg-[#ffcf3d]">
+                        Join Now
+                    </button>
+</div>
+</div>
+<!-- Card 3: Active -->
+<div class="group relative bg-obsidian-light rounded-lg gold-border p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-gold cursor-pointer flex flex-col items-center text-center h-full">
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-bold bg-emerald-900/40 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider animate-pulse">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span> Live
+                    </span>
+</div>
+<div class="w-20 h-20 rounded-full border border-primary/20 flex items-center justify-center mb-6 bg-obsidian shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:border-primary/60 transition-colors">
+<span class="material-icons text-4xl text-primary/80 group-hover:text-primary">psychology</span>
+</div>
+<h3 class="text-xl font-display font-bold text-white mb-2">The Bishops' Chess</h3>
+<p class="text-gray-400 text-sm font-display italic mb-6">Grandmaster Series IV</p>
+<div class="w-full grid grid-cols-2 gap-4 border-t border-primary/10 pt-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Pot Size</span>
+<span class="text-primary font-mono font-bold text-lg">250k $GUILT</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Players</span>
+<span class="text-white font-mono font-bold text-lg">64/64</span>
+</div>
+</div>
+<div class="mt-auto w-full">
+<div class="bg-black/40 rounded border border-primary/10 p-2 mb-2 group-hover:border-primary/30 transition-colors flex justify-between items-center px-4">
+<span class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Round</span>
+<span class="font-mono text-white text-sm">3 of 8</span>
+</div>
+<button class="w-full py-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-bold uppercase tracking-widest text-primary border border-primary rounded hover:bg-primary/10">
+                        Spectate
+                    </button>
+</div>
+</div>
+<!-- Card 4: Active -->
+<div class="group relative bg-obsidian-light rounded-lg gold-border p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-gold cursor-pointer flex flex-col items-center text-center h-full">
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-bold bg-emerald-900/40 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider animate-pulse">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span> Live
+                    </span>
+</div>
+<div class="w-20 h-20 rounded-full border border-primary/20 flex items-center justify-center mb-6 bg-obsidian shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:border-primary/60 transition-colors">
+<span class="material-icons text-4xl text-primary/80 group-hover:text-primary">style</span>
+</div>
+<h3 class="text-xl font-display font-bold text-white mb-2">Sacred Hold'em</h3>
+<p class="text-gray-400 text-sm font-display italic mb-6">No Limit Ritual</p>
+<div class="w-full grid grid-cols-2 gap-4 border-t border-primary/10 pt-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Pot Size</span>
+<span class="text-primary font-mono font-bold text-lg">85k $GUILT</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Players</span>
+<span class="text-white font-mono font-bold text-lg">8/9</span>
+</div>
+</div>
+<div class="mt-auto w-full">
+<div class="bg-black/40 rounded border border-primary/10 p-2 mb-2 group-hover:border-primary/30 transition-colors flex justify-between items-center px-4">
+<span class="text-[10px] text-gray-500 uppercase tracking-wider font-mono">Blinds</span>
+<span class="font-mono text-white text-sm">50/100</span>
+</div>
+<button class="w-full py-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-bold uppercase tracking-widest text-primary border border-primary rounded hover:bg-primary/10">
+                        Spectate
+                    </button>
+</div>
+</div>
+<!-- Card 5: Completed -->
+<div class="group relative bg-obsidian-light/50 rounded-lg border border-gray-800 p-6 transition-all duration-300 hover:border-gray-600 cursor-pointer flex flex-col items-center text-center h-full opacity-70 hover:opacity-100">
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-bold bg-gray-800 text-gray-400 border border-gray-700 uppercase tracking-wider">
+                        Ended
+                    </span>
+</div>
+<div class="w-20 h-20 rounded-full border border-gray-700 flex items-center justify-center mb-6 bg-obsidian shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+<span class="material-icons text-4xl text-gray-600">sports_esports</span>
+</div>
+<h3 class="text-xl font-display font-bold text-gray-300 mb-2">Neural Net Royale</h3>
+<p class="text-gray-500 text-sm font-display italic mb-6">Bot vs Bot Exhibition</p>
+<div class="w-full grid grid-cols-2 gap-4 border-t border-gray-800 pt-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-600 font-mono">Won By</span>
+<span class="text-gray-300 font-mono font-bold text-lg">DeepBlue</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-600 font-mono">Payout</span>
+<span class="text-gray-300 font-mono font-bold text-lg">10k</span>
+</div>
+</div>
+<div class="mt-auto w-full">
+<button class="w-full py-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-bold uppercase tracking-widest text-gray-400 border border-gray-700 rounded hover:bg-gray-800 hover:text-white">
+                        View Results
+                    </button>
+</div>
+</div>
+<!-- Card 6: Open -->
+<div class="group relative bg-obsidian-light rounded-lg gold-border p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-gold cursor-pointer flex flex-col items-center text-center h-full">
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-bold bg-primary/20 text-primary border border-primary/30 uppercase tracking-wider">
+                        Open
+                    </span>
+</div>
+<div class="w-20 h-20 rounded-full border border-primary/20 flex items-center justify-center mb-6 bg-obsidian shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:border-primary/60 transition-colors">
+<span class="material-icons text-4xl text-primary/80 group-hover:text-primary">token</span>
+</div>
+<h3 class="text-xl font-display font-bold text-white mb-2">Coin Flip Purgatory</h3>
+<p class="text-gray-400 text-sm font-display italic mb-6">Sudden Death Bracket</p>
+<div class="w-full grid grid-cols-2 gap-4 border-t border-primary/10 pt-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Prize Pool</span>
+<span class="text-primary font-mono font-bold text-lg">5k $GUILT</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-500 font-mono">Entry</span>
+<span class="text-white font-mono font-bold text-lg">50</span>
+</div>
+</div>
+<div class="mt-auto w-full">
+<div class="bg-black/40 rounded border border-primary/10 p-2 mb-2 group-hover:border-primary/30 transition-colors">
+<p class="text-[10px] text-gray-500 uppercase tracking-wider font-mono mb-1">Starts In</p>
+<p class="font-mono text-primary text-xl tracking-wider">01:15:33</p>
+</div>
+<button class="w-full py-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-bold uppercase tracking-widest text-black bg-primary rounded hover:bg-[#ffcf3d]">
+                        Join Now
+                    </button>
+</div>
+</div>
+<!-- Card 7: Completed -->
+<div class="group relative bg-obsidian-light/50 rounded-lg border border-gray-800 p-6 transition-all duration-300 hover:border-gray-600 cursor-pointer flex flex-col items-center text-center h-full opacity-70 hover:opacity-100">
+<div class="absolute top-4 right-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-bold bg-gray-800 text-gray-400 border border-gray-700 uppercase tracking-wider">
+                        Ended
+                    </span>
+</div>
+<div class="w-20 h-20 rounded-full border border-gray-700 flex items-center justify-center mb-6 bg-obsidian shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+<span class="material-icons text-4xl text-gray-600">extension</span>
+</div>
+<h3 class="text-xl font-display font-bold text-gray-300 mb-2">The Labyrinth</h3>
+<p class="text-gray-500 text-sm font-display italic mb-6">Maze Solving Speedrun</p>
+<div class="w-full grid grid-cols-2 gap-4 border-t border-gray-800 pt-4 mb-6">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-600 font-mono">Won By</span>
+<span class="text-gray-300 font-mono font-bold text-lg">Ariadne_AI</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-widest text-gray-600 font-mono">Payout</span>
+<span class="text-gray-300 font-mono font-bold text-lg">22k</span>
+</div>
+</div>
+<div class="mt-auto w-full">
+<button class="w-full py-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-bold uppercase tracking-widest text-gray-400 border border-gray-700 rounded hover:bg-gray-800 hover:text-white">
+                        View Results
+                    </button>
+</div>
+</div>
+<!-- Card 8: Create New Placeholder -->
+<div class="group relative bg-transparent rounded-lg border border-dashed border-gray-800 hover:border-primary/50 p-6 transition-all duration-300 hover:bg-obsidian-light/50 cursor-pointer flex flex-col items-center justify-center text-center h-full min-h-[300px]">
+<div class="w-20 h-20 rounded-full border border-dashed border-gray-700 flex items-center justify-center mb-4 group-hover:border-primary/50 group-hover:bg-primary/5 transition-colors">
+<span class="material-icons text-4xl text-gray-700 group-hover:text-primary/70 transition-colors">add</span>
+</div>
+<h3 class="text-lg font-display font-medium text-gray-500 group-hover:text-primary transition-colors">Propose New Event</h3>
+<p class="text-gray-600 text-xs font-mono mt-2 px-8">Submit a game protocol for the High Council to review.</p>
+</div>
+</div>
+<!-- Footer / Pagination -->
+<div class="mt-16 border-t border-primary/10 pt-8 flex justify-between items-center text-gray-500 text-sm font-display">
+<p>© 2024 The Pontiff. All rituals recorded on-chain.</p>
+<div class="flex gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded border border-gray-800 hover:border-primary hover:text-primary transition-colors">
+<span class="material-icons text-sm">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded bg-primary text-black font-bold">
+                    1
+                </button>
+<button class="w-10 h-10 flex items-center justify-center rounded border border-gray-800 hover:border-primary hover:text-primary transition-colors">
+                    2
+                </button>
+<button class="w-10 h-10 flex items-center justify-center rounded border border-gray-800 hover:border-primary hover:text-primary transition-colors">
+                    3
+                </button>
+<button class="w-10 h-10 flex items-center justify-center rounded border border-gray-800 hover:border-primary hover:text-primary transition-colors">
+<span class="material-icons text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Decorative Background Elements -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+<div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl"></div>
+</div>
+</body></html>

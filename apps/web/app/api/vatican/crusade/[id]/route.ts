@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { CrusadeService } from '@/lib/services/crusade-service';
 import { supabase } from '@/lib/db/supabase';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const { data: crusade, error } = await supabase
         .from('Crusade')
         .select('*')
@@ -16,7 +17,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ crusade });
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         const { outcome } = await request.json(); // "Victory" | "Defeat"
         await CrusadeService.resolveCrusade(params.id, outcome);

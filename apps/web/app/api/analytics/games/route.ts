@@ -5,7 +5,7 @@
  * Provides game statistics and metrics
  */
 
-import { NextResponse } from 'next/request';
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(

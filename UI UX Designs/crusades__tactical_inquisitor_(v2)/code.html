@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Crusades: Tactical Inquisitor (V2)</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f2b90d",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                        // Custom derived colors for the terminal feel
+                        "obsidian": "#050505", 
+                        "terminal-grid": "#f2b90d1a", // 10% opacity primary
+                        "danger": "#cf3030",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #f2b90d1a 1px, transparent 1px), linear-gradient(to bottom, #f2b90d1a 1px, transparent 1px)",
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scanline': 'scanline 8s linear infinite',
+                    },
+                    keyframes: {
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for Terminal Feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #221e10; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f2b90d; 
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4a00b; 
+        }
+
+        /* CRT Scanline Effect */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(242, 185, 13, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(242, 185, 13, 0.05) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-obsidian font-display text-gray-800 dark:text-gray-300 min-h-screen flex flex-col overflow-hidden relative selection:bg-primary selection:text-black">
+<!-- Background Grid Overlay -->
+<div class="absolute inset-0 z-0 grid-bg pointer-events-none"></div>
+<!-- CRT Overlay -->
+<div class="fixed inset-0 crt z-50 pointer-events-none opacity-20"></div>
+<!-- Header Section -->
+<header class="relative z-10 w-full border-b border-primary/20 bg-background-light/90 dark:bg-obsidian/90 backdrop-blur-md">
+<div class="max-w-[1920px] mx-auto px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-3 h-12 bg-primary animate-pulse"></div>
+<div>
+<h1 class="text-2xl font-bold tracking-widest uppercase text-black dark:text-white">
+                        Tactical Inquisitor <span class="text-primary text-sm align-top">V2.0</span>
+</h1>
+<div class="flex items-center gap-2 text-xs font-mono tracking-widest text-primary/80">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        SYSTEM ONLINE // ENCRYPTION: AES-256
+                    </div>
+</div>
+</div>
+<div class="flex gap-8 font-mono text-sm">
+<div class="flex flex-col items-end">
+<span class="text-xs text-gray-500 uppercase tracking-wider">Operator</span>
+<span class="text-primary font-bold">INQ_CMDR_001</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-xs text-gray-500 uppercase tracking-wider">Session Time</span>
+<span class="text-white">04:22:19</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-xs text-gray-500 uppercase tracking-wider">Latency</span>
+<span class="text-green-500">12ms</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 relative z-10 overflow-hidden flex max-w-[1920px] mx-auto w-full">
+<!-- Left: Mission Grid -->
+<div class="flex-1 overflow-y-auto p-6 scroll-smooth">
+<!-- Quick Stats Bar -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+<div class="border border-primary/20 bg-background-dark/50 p-4 rounded relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/10"></div>
+<div class="text-xs text-primary/60 uppercase tracking-widest mb-1">Active Targets</div>
+<div class="text-3xl font-bold text-white font-mono">24</div>
+</div>
+<div class="border border-primary/20 bg-background-dark/50 p-4 rounded relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/10"></div>
+<div class="text-xs text-primary/60 uppercase tracking-widest mb-1">Success Rate</div>
+<div class="text-3xl font-bold text-white font-mono">89.4%</div>
+</div>
+<div class="border border-primary/20 bg-background-dark/50 p-4 rounded relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/10"></div>
+<div class="text-xs text-primary/60 uppercase tracking-widest mb-1">Total Bounty</div>
+<div class="text-3xl font-bold text-primary font-mono">1.2M</div>
+</div>
+<div class="border border-primary/20 bg-background-dark/50 p-4 rounded relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-16 h-16 bg-danger/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-danger/20"></div>
+<div class="text-xs text-red-400/80 uppercase tracking-widest mb-1">Critical Alerts</div>
+<div class="text-3xl font-bold text-red-500 font-mono animate-pulse">03</div>
+</div>
+</div>
+<div class="mb-4 flex justify-between items-center">
+<h2 class="text-lg text-white font-light tracking-wider flex items-center gap-2">
+<span class="material-icons text-primary text-sm">grid_view</span>
+                    MISSION LOGS
+                </h2>
+<div class="flex gap-2">
+<button class="px-3 py-1 border border-primary/30 text-xs text-primary bg-primary/10 hover:bg-primary/20 uppercase tracking-widest transition-colors">
+                        Sort: Threat
+                    </button>
+<button class="px-3 py-1 border border-primary/30 text-xs text-gray-400 hover:text-primary hover:border-primary/50 uppercase tracking-widest transition-colors">
+                        Filter: Active
+                    </button>
+</div>
+</div>
+<!-- The Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
+<!-- Card 1: High Threat -->
+<div class="bg-background-dark border border-primary/30 rounded-lg p-0 overflow-hidden relative hover:border-primary transition-colors group">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-80"></div>
+<div class="p-5 relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="text-xs text-gray-500 font-mono mb-1">TARGET_ID: <span class="text-white">8829-AX</span></div>
+<h3 class="text-xl font-bold text-white tracking-wide">PNTF_WHALE_01</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] uppercase text-gray-500 tracking-widest mb-1">Threat Lvl</span>
+<div class="flex items-center gap-2">
+<span class="block w-2 h-2 rounded-full bg-red-600 animate-pulse-fast shadow-[0_0_10px_rgba(220,38,38,0.8)]"></span>
+<span class="text-red-500 font-bold font-mono">CRITICAL</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-black/40 p-3 rounded border border-white/5">
+<div class="text-[10px] uppercase text-gray-500 mb-1">Bounty Pool</div>
+<div class="text-primary font-mono text-lg">45,000 <span class="text-xs text-primary/60">PNTF</span></div>
+</div>
+<div class="bg-black/40 p-3 rounded border border-white/5 flex items-center justify-between">
+<div>
+<div class="text-[10px] uppercase text-gray-500 mb-1">Win Prob.</div>
+<div class="text-white font-mono text-lg">34.2%</div>
+</div>
+<!-- Mini Circular Chart SVG -->
+<div class="relative w-10 h-10">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-800" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-primary" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-dasharray="100" stroke-dashoffset="66" stroke-width="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="h-8 w-8 rounded bg-background-light dark:bg-gray-800 flex items-center justify-center border border-white/10">
+<span class="material-icons text-gray-400 text-sm">lock</span>
+</div>
+<button class="flex-1 bg-transparent border border-primary text-primary hover:bg-primary hover:text-black font-mono font-bold py-2 px-4 rounded text-sm uppercase tracking-widest transition-all shadow-[0_0_10px_rgba(242,185,13,0.1)] hover:shadow-[0_0_20px_rgba(242,185,13,0.4)]">
+                                Deploy Tactic
+                            </button>
+</div>
+</div>
+<!-- Background aesthetic data -->
+<div class="absolute bottom-2 right-2 text-[10px] font-mono text-white/5 pointer-events-none">
+                        0x442A...99F
+                    </div>
+</div>
+<!-- Card 2: Medium Threat -->
+<div class="bg-background-dark border border-white/10 rounded-lg p-0 overflow-hidden relative hover:border-primary/50 transition-colors group">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
+<div class="p-5 relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="text-xs text-gray-500 font-mono mb-1">TARGET_ID: <span class="text-white">1029-BZ</span></div>
+<h3 class="text-xl font-bold text-white tracking-wide">DAO_TREASURY</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] uppercase text-gray-500 tracking-widest mb-1">Threat Lvl</span>
+<div class="flex items-center gap-2">
+<span class="block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-primary font-bold font-mono">ELEVATED</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-black/40 p-3 rounded border border-white/5">
+<div class="text-[10px] uppercase text-gray-500 mb-1">Bounty Pool</div>
+<div class="text-primary font-mono text-lg">12,500 <span class="text-xs text-primary/60">PNTF</span></div>
+</div>
+<div class="bg-black/40 p-3 rounded border border-white/5 flex items-center justify-between">
+<div>
+<div class="text-[10px] uppercase text-gray-500 mb-1">Win Prob.</div>
+<div class="text-white font-mono text-lg">62.1%</div>
+</div>
+<div class="relative w-10 h-10">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-800" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-primary" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-dasharray="100" stroke-dashoffset="38" stroke-width="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="h-8 w-8 rounded bg-background-light dark:bg-gray-800 flex items-center justify-center border border-white/10">
+<span class="material-icons text-gray-400 text-sm">wifi_tethering</span>
+</div>
+<button class="flex-1 bg-transparent border border-primary text-primary hover:bg-primary hover:text-black font-mono font-bold py-2 px-4 rounded text-sm uppercase tracking-widest transition-all shadow-[0_0_10px_rgba(242,185,13,0.1)] hover:shadow-[0_0_20px_rgba(242,185,13,0.4)]">
+                                Deploy Tactic
+                            </button>
+</div>
+</div>
+</div>
+<!-- Card 3: Low Threat -->
+<div class="bg-background-dark border border-white/10 rounded-lg p-0 overflow-hidden relative hover:border-primary/50 transition-colors group">
+<div class="p-5 relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="text-xs text-gray-500 font-mono mb-1">TARGET_ID: <span class="text-white">4411-CV</span></div>
+<h3 class="text-xl font-bold text-white tracking-wide">RETAIL_BOT_NET</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] uppercase text-gray-500 tracking-widest mb-1">Threat Lvl</span>
+<div class="flex items-center gap-2">
+<span class="block w-2 h-2 rounded-full bg-gray-500"></span>
+<span class="text-gray-400 font-bold font-mono">LOW</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-black/40 p-3 rounded border border-white/5">
+<div class="text-[10px] uppercase text-gray-500 mb-1">Bounty Pool</div>
+<div class="text-primary font-mono text-lg">2,100 <span class="text-xs text-primary/60">PNTF</span></div>
+</div>
+<div class="bg-black/40 p-3 rounded border border-white/5 flex items-center justify-between">
+<div>
+<div class="text-[10px] uppercase text-gray-500 mb-1">Win Prob.</div>
+<div class="text-white font-mono text-lg">91.5%</div>
+</div>
+<div class="relative w-10 h-10">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-800" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-primary" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-dasharray="100" stroke-dashoffset="8" stroke-width="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="h-8 w-8 rounded bg-background-light dark:bg-gray-800 flex items-center justify-center border border-white/10">
+<span class="material-icons text-gray-400 text-sm">public</span>
+</div>
+<button class="flex-1 bg-transparent border border-gray-600 text-gray-400 hover:border-primary hover:text-primary font-mono font-bold py-2 px-4 rounded text-sm uppercase tracking-widest transition-all">
+                                Deploy Tactic
+                            </button>
+</div>
+</div>
+</div>
+<!-- Card 4: Locked/Scanning -->
+<div class="bg-background-dark/40 border border-white/5 rounded-lg p-0 overflow-hidden relative flex flex-col justify-center items-center h-full min-h-[260px]">
+<div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20" data-alt="Subtle noise pattern texture"></div>
+<div class="text-center relative z-10">
+<span class="material-icons text-primary/40 text-4xl animate-spin mb-4" style="animation-duration: 3s;">radar</span>
+<h3 class="text-lg text-white/60 font-mono tracking-widest">SCANNING SECTOR 7...</h3>
+<p class="text-xs text-primary/40 mt-2">Identifying new threats</p>
+</div>
+</div>
+<!-- Card 5: High Threat -->
+<div class="bg-background-dark border border-primary/30 rounded-lg p-0 overflow-hidden relative hover:border-primary transition-colors group">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-80"></div>
+<div class="p-5 relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="text-xs text-gray-500 font-mono mb-1">TARGET_ID: <span class="text-white">9901-XQ</span></div>
+<h3 class="text-xl font-bold text-white tracking-wide">PONTIFF_SHADOW</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] uppercase text-gray-500 tracking-widest mb-1">Threat Lvl</span>
+<div class="flex items-center gap-2">
+<span class="block w-2 h-2 rounded-full bg-red-600 animate-pulse-fast shadow-[0_0_10px_rgba(220,38,38,0.8)]"></span>
+<span class="text-red-500 font-bold font-mono">CRITICAL</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-black/40 p-3 rounded border border-white/5">
+<div class="text-[10px] uppercase text-gray-500 mb-1">Bounty Pool</div>
+<div class="text-primary font-mono text-lg">88,000 <span class="text-xs text-primary/60">PNTF</span></div>
+</div>
+<div class="bg-black/40 p-3 rounded border border-white/5 flex items-center justify-between">
+<div>
+<div class="text-[10px] uppercase text-gray-500 mb-1">Win Prob.</div>
+<div class="text-white font-mono text-lg">12.8%</div>
+</div>
+<div class="relative w-10 h-10">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-800" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-red-500" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-dasharray="100" stroke-dashoffset="87" stroke-width="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="h-8 w-8 rounded bg-background-light dark:bg-gray-800 flex items-center justify-center border border-white/10">
+<span class="material-icons text-gray-400 text-sm">security</span>
+</div>
+<button class="flex-1 bg-transparent border border-primary text-primary hover:bg-primary hover:text-black font-mono font-bold py-2 px-4 rounded text-sm uppercase tracking-widest transition-all shadow-[0_0_10px_rgba(242,185,13,0.1)] hover:shadow-[0_0_20px_rgba(242,185,13,0.4)]">
+                                Deploy Tactic
+                            </button>
+</div>
+</div>
+</div>
+<!-- Card 6: Completed/Cooldown -->
+<div class="bg-background-dark border border-white/5 rounded-lg p-0 overflow-hidden relative opacity-70 hover:opacity-100 transition-opacity">
+<div class="p-5 relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="text-xs text-gray-500 font-mono mb-1">TARGET_ID: <span class="text-white">0032-FF</span></div>
+<h3 class="text-xl font-bold text-gray-400 line-through tracking-wide">SOLANA_BRIDGE</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] uppercase text-gray-500 tracking-widest mb-1">Status</span>
+<div class="flex items-center gap-2">
+<span class="block w-2 h-2 rounded-full bg-gray-500"></span>
+<span class="text-gray-400 font-bold font-mono">NEUTRALIZED</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-primary/5 border border-primary/10 rounded flex items-center justify-center gap-3">
+<span class="material-icons text-primary">verified</span>
+<span class="text-primary text-sm font-bold tracking-widest">MISSION SUCCESS</span>
+</div>
+<div class="mt-4 text-center">
+<p class="text-[10px] text-gray-500 font-mono">Cooldown active: 44m 12s</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Terminal Sidebar -->
+<aside class="w-80 lg:w-96 border-l border-primary/20 bg-black/60 backdrop-blur-sm hidden lg:flex flex-col">
+<div class="p-4 border-b border-white/10">
+<h3 class="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+<span class="material-icons text-xs text-primary">terminal</span>
+                    System Log
+                </h3>
+</div>
+<div class="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-3">
+<div class="text-gray-500 border-l-2 border-transparent pl-2 hover:border-gray-500 transition-colors">
+<span class="text-gray-600">[14:00:22]</span> System initialized.
+                </div>
+<div class="text-primary border-l-2 border-primary/50 pl-2 bg-primary/5 p-1 rounded-r">
+<span class="text-primary/70">[14:02:10]</span> New target acquired: PNTF_WHALE_01. Threat level assessment completed.
+                </div>
+<div class="text-gray-400 border-l-2 border-transparent pl-2">
+<span class="text-gray-600">[14:05:44]</span> User_X deployed 'Excommunicate' on Target_Y.
+                </div>
+<div class="text-red-400 border-l-2 border-red-500/50 pl-2 bg-red-500/5 p-1 rounded-r">
+<span class="text-red-500/70">[14:12:01]</span> ALERT: Counter-offensive detected from sector 4.
+                </div>
+<div class="text-gray-400 border-l-2 border-transparent pl-2">
+<span class="text-gray-600">[14:15:30]</span> Calculating win probabilities...
+                </div>
+<div class="text-gray-400 border-l-2 border-transparent pl-2">
+<span class="text-gray-600">[14:15:32]</span> Probability matrix updated.
+                </div>
+<div class="text-primary border-l-2 border-transparent pl-2">
+<span class="text-primary/70">[14:18:05]</span> Bounty pool injection: +500 PNTF.
+                </div>
+<div class="text-gray-400 border-l-2 border-transparent pl-2">
+<span class="text-gray-600">[14:22:10]</span> Handshake confirmed with Node_7.
+                </div>
+<!-- Simulating a cursor -->
+<div class="text-primary animate-pulse">
+                    _
+                </div>
+</div>
+<div class="p-4 border-t border-white/10 bg-black/80">
+<div class="relative">
+<input class="w-full bg-background-dark border border-white/20 text-white font-mono text-xs p-2 pl-3 rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-gray-600 uppercase" placeholder="ENTER COMMAND..." type="text"/>
+<span class="absolute right-2 top-2 text-primary material-icons text-sm cursor-pointer hover:text-white">send</span>
+</div>
+</div>
+<!-- Map Visualization Placeholder -->
+<div class="h-48 border-t border-primary/20 relative overflow-hidden">
+<img alt="Abstract dark map of world connections with data points" class="w-full h-full object-cover opacity-40 mix-blend-luminosity filter grayscale contrast-125" data-alt="Abstract dark map of world connections with data points" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChfBabsBV2Ti7CVLlx81p7e14D7jGiIOU7sGeLqb7dEgaEsWUEFASa15y2r1bC5I1ERdF_ClucwgvE6gjOaKNeadX5a9XOUULyv7b1Tud1bjX831J1YpfFkCAi2myip8-r-52FzTf9gXDduKTy2hu9b-e03RG6Wmd-XboFGZu_WuSykUBZPpnWm4qaSiYbdiO-eCXmyiqDZsPLlplKF-EsdP8f6wuSrOafCci1QpRK-JPoCdsw_wZU33h3In9LWzxK3-uPiJkgY8a2"/>
+<div class="absolute inset-0 bg-primary/10 mix-blend-overlay"></div>
+<!-- Map overlays -->
+<div class="absolute top-1/4 left-1/4 w-2 h-2 bg-primary rounded-full animate-ping"></div>
+<div class="absolute top-1/2 right-1/3 w-2 h-2 bg-red-500 rounded-full animate-ping delay-75"></div>
+<div class="absolute bottom-2 left-2 text-[10px] font-mono text-primary bg-black/80 px-1 border border-primary/30">
+                    LIVE_GEOMAP // TRACKING
+                </div>
+</div>
+</aside>
+</main>
+<!-- Footer: War Chest -->
+<footer class="relative z-10 border-t border-primary/20 bg-background-dark text-white p-0 h-12 flex items-center overflow-hidden">
+<div class="flex items-center h-full px-6 bg-primary text-black font-bold uppercase tracking-wider text-sm border-r border-black z-20 shadow-xl">
+            War Chest
+        </div>
+<!-- Scrolling Ticker -->
+<div class="flex-1 overflow-hidden relative flex items-center">
+<div class="animate-[marquee_20s_linear_infinite] whitespace-nowrap flex items-center gap-12 text-sm font-mono text-gray-300">
+<div class="flex items-center gap-2">
+<span class="text-gray-500 uppercase text-xs">TVL:</span>
+<span class="text-primary font-bold text-lg">$4,203,110</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-gray-500 uppercase text-xs">Active Crusaders:</span>
+<span class="text-white font-bold">402</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-gray-500 uppercase text-xs">System Load:</span>
+<div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[12%]"></div>
+</div>
+<span class="text-primary text-xs">12%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-gray-500 uppercase text-xs">PNTF Price:</span>
+<span class="text-green-500 font-bold">▲ $1.24 (+4.2%)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-gray-500 uppercase text-xs">Global Hashrate:</span>
+<span class="text-white font-bold">445 TH/s</span>
+</div>
+<!-- Duplicate for seamless loop -->
+<div class="flex items-center gap-2">
+<span class="text-gray-500 uppercase text-xs">TVL:</span>
+<span class="text-primary font-bold text-lg">$4,203,110</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-gray-500 uppercase text-xs">Active Crusaders:</span>
+<span class="text-white font-bold">402</span>
+</div>
+</div>
+</div>
+<div class="hidden md:flex items-center h-full px-4 border-l border-white/10 bg-black/50 text-xs font-mono text-gray-500">
+            SECURE_CONNECTION_v2
+        </div>
+</footer>
+<!-- CSS for Marquee Animation -->
+<style>
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+</body></html>

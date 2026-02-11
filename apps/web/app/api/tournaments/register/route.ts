@@ -77,9 +77,12 @@ export async function POST(request: NextRequest) {
             .insert({
                 tournament_id: tournamentId,
                 wallet_address: walletAddress.toLowerCase(),
-                agent_name: agentName || `Agent ${seedNumber}`,
-                agent_strategy: agentStrategy,
-                registration_fee: registrationFee,
+                // Schema mismatch: agent_name, agent_strategy, registration_fee columns do not exist in live DB
+                // Removing them to prevent 500 errors.
+                // agent_name: agentName || `Agent ${seedNumber}`,
+                // agent_strategy: agentStrategy,
+                // registration_fee: registrationFee,
+                entry_paid: registrationFee || '10', // Mapping fee to entry_paid (string)
                 seed_number: seedNumber
             })
             .select()

@@ -1,30 +1,25 @@
 import type { Metadata } from "next";
-import { Cinzel, Orbitron, Inter } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Web3Provider } from "./providers/Web3Provider";
-import { ToastProvider } from "./components/ToastProvider";
+import { ToastProvider } from "./components/ui/Toast";
+import { Shell } from "../components/layout/Shell";
 
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "900"],
-});
-
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "The Pontiff - Confess Your Sins",
-  description: "The Medieval Roast Bot that judges your crypto sins",
+  title: "The Pontiff - Unified Command Console",
+  description: "The first AI-native casino. Submit your wager to the eternal ledger.",
 };
 
 export default function RootLayout({
@@ -33,14 +28,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${cinzel.variable} ${orbitron.variable} ${inter.variable} antialiased`}
-        suppressHydrationWarning
-      >
+    <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-display bg-background-dark text-white antialiased">
         <Web3Provider>
           <ToastProvider>
-            {children}
+            <Shell>
+              {children}
+            </Shell>
           </ToastProvider>
         </Web3Provider>
       </body>

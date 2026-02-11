@@ -1,353 +1,381 @@
 'use client';
 
-import Link from 'next/link';
-import { WalletConnect } from '../components/WalletConnect';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useState, useEffect } from 'react';
 import { formatEther, parseEther } from 'viem';
 import { StakingCathedralABI, GuiltTokenABI } from '../abis';
 
-// Contract Addresses from environment variables
 const STAKING_ADDRESS = process.env.NEXT_PUBLIC_STAKING_ADDRESS as `0x${string}`;
 const GUILT_ADDRESS = process.env.NEXT_PUBLIC_GUILT_ADDRESS as `0x${string}`;
+
+const DURATIONS = [
+    { label: '7 Days', value: 7, multiplier: '1x' },
+    { label: '30 Days', value: 30, multiplier: '2.5x' },
+    { label: '90 Days', value: 90, multiplier: '5x' },
+    { label: '365 Days', value: 365, multiplier: '12x' },
+];
+
+const SAINTS_FEED = [
+    { address: '0x71C...9A2', amount: '50,000', duration: '365d', time: '2m ago', whale: false },
+    { address: '0xB2...CC4', amount: '250,000', duration: '90d', time: '5m ago', whale: true },
+    { address: '0xK1...GOD', amount: '10,000', duration: '30d', time: '12m ago', whale: false },
+    { address: '0x88...1FA', amount: '100,000', duration: '365d', time: '18m ago', whale: true },
+    { address: '0xDr4...g0n', amount: '5,000', duration: '7d', time: '25m ago', whale: false },
+    { address: '0xA1...F44', amount: '75,000', duration: '90d', time: '33m ago', whale: false },
+];
 
 export default function CathedralPage() {
     const { address, isConnected } = useAccount();
     const [isMounted, setIsMounted] = useState(false);
     const [stakeAmount, setStakeAmount] = useState('');
     const [unstakeAmount, setUnstakeAmount] = useState('');
+    const [sliderValue, setSliderValue] = useState(50);
+    const [selectedDuration, setSelectedDuration] = useState(30);
+    const [activeTab, setActiveTab] = useState<'stake' | 'unstake'>('stake');
 
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+    useEffect(() => { setIsMounted(true); }, []);
 
-    // --- Reads ---
-
-    // 1. Get User's Shares (Balance of Staking Contract)
+    // ── Contract Reads ──
     const { data: shareBalance, refetch: refetchShares } = useReadContract({
-        address: STAKING_ADDRESS,
-        abi: StakingCathedralABI,
-        functionName: 'balanceOf',
-        args: address ? [address] : undefined,
-        query: { enabled: !!address },
+        address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'balanceOf',
+        args: address ? [address] : undefined, query: { enabled: !!address },
     });
-
-    // 2. Convert Shares to Assets (Real Staked GUILT Value)
     const { data: stakedBalance, refetch: refetchStakedBalance } = useReadContract({
-        address: STAKING_ADDRESS,
-        abi: StakingCathedralABI,
-        functionName: 'convertToAssets',
-        args: shareBalance ? [shareBalance] : undefined,
-        query: { enabled: !!shareBalance },
+        address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'convertToAssets',
+        args: shareBalance ? [shareBalance] : undefined, query: { enabled: !!shareBalance },
     });
-
-    // 3. User's GUILT Balance
     const { data: guiltBalance, refetch: refetchGuilt } = useReadContract({
-        address: GUILT_ADDRESS,
-        abi: GuiltTokenABI,
-        functionName: 'balanceOf',
-        args: address ? [address] : undefined,
-        query: { enabled: !!address },
+        address: GUILT_ADDRESS, abi: GuiltTokenABI, functionName: 'balanceOf',
+        args: address ? [address] : undefined, query: { enabled: !!address },
     });
-
-    // 4. Allowance Check
     const { data: allowance, refetch: refetchAllowance } = useReadContract({
-        address: GUILT_ADDRESS,
-        abi: GuiltTokenABI,
-        functionName: 'allowance',
-        args: address ? [address, STAKING_ADDRESS] : undefined,
-        query: { enabled: !!address, refetchInterval: 2000 },
+        address: GUILT_ADDRESS, abi: GuiltTokenABI, functionName: 'allowance',
+        args: address ? [address, STAKING_ADDRESS] : undefined, query: { enabled: !!address, refetchInterval: 2000 },
     });
-
-    // 5. User Info (Tier, Deposit Time, Rewards)
     const { data: userInfo, refetch: refetchUserInfo } = useReadContract({
-        address: STAKING_ADDRESS,
-        abi: StakingCathedralABI,
-        functionName: 'userInfo',
-        args: address ? [address] : undefined,
-        query: { enabled: !!address },
+        address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'userInfo',
+        args: address ? [address] : undefined, query: { enabled: !!address },
     });
-
-    // 6. Preview Shares for Withdraw (To ensure accuracy)
     const { data: previewShares } = useReadContract({
-        address: STAKING_ADDRESS,
-        abi: StakingCathedralABI,
-        functionName: 'convertToShares',
+        address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'convertToShares',
         args: unstakeAmount ? [parseEther(unstakeAmount)] : undefined,
         query: { enabled: !!unstakeAmount && parseFloat(unstakeAmount) > 0 },
     });
 
-    // 7. DIAGNOSTIC READS - Check Contract Configuration
-    const { data: contractAsset } = useReadContract({
-        address: STAKING_ADDRESS,
-        abi: StakingCathedralABI,
-        functionName: 'asset',
-        query: { enabled: true },
-    });
-
-    const { data: isExempt } = useReadContract({
-        address: GUILT_ADDRESS,
-        abi: GuiltTokenABI,
-        functionName: 'isTaxExempt',
-        args: [STAKING_ADDRESS],
-        query: { enabled: true },
-    });
-
-    const { data: stakingWalletAddress } = useReadContract({
-        address: GUILT_ADDRESS,
-        abi: GuiltTokenABI,
-        functionName: 'stakingWallet',
-        query: { enabled: true },
-    });
-
-    // --- Writes ---
-
+    // ── Contract Writes ──
     const { writeContract, data: txHash, isPending: isTxPending, error: writeError } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
 
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-        hash: txHash,
-    });
-
-    // Refresh data after transaction
     useEffect(() => {
         if (isConfirmed) {
-            refetchShares();
-            refetchGuilt();
-            refetchAllowance();
-            refetchStakedBalance();
-            refetchUserInfo();
-            setStakeAmount('');
-            setUnstakeAmount('');
+            refetchShares(); refetchGuilt(); refetchAllowance(); refetchStakedBalance(); refetchUserInfo();
+            setStakeAmount(''); setUnstakeAmount('');
         }
     }, [isConfirmed, refetchShares, refetchGuilt, refetchAllowance, refetchStakedBalance, refetchUserInfo]);
 
-    // Derived State
+    // Derived
     const needsApproval = stakeAmount && allowance ? parseEther(stakeAmount) > allowance : true;
     const isPending = isTxPending || isConfirming;
-
-    // Tier Logic (0: None, 1: Sinner, 2: Believer, 3: Saint - purely illustrative mapping based on contract logic)
     const userTier = userInfo ? Number(userInfo[2]) : 0;
-    const tierNames = ["None", "Sinner", "Believer", "Saint", "Cardinal", "Pope"];
-    const tierName = tierNames[userTier] || "Unknown";
-
-    // Earned Calculation (Current Value - Deposited Principal)
-    // Note: userInfo[0] is 'assets' which traditionally tracks principal or verified balance
+    const tierNames = ['None', 'Sinner', 'Believer', 'Saint', 'Cardinal', 'Pope'];
+    const tierName = tierNames[userTier] || 'Unknown';
     const principal = userInfo ? userInfo[0] : BigInt(0);
     const currentValue = stakedBalance || BigInt(0);
     const earned = currentValue > principal ? currentValue - principal : BigInt(0);
 
-    // Handlers
     const handleApprove = () => {
         if (!stakeAmount) return;
-        writeContract({
-            address: GUILT_ADDRESS,
-            abi: GuiltTokenABI,
-            functionName: 'approve',
-            args: [STAKING_ADDRESS, parseEther(stakeAmount)],
-        });
+        writeContract({ address: GUILT_ADDRESS, abi: GuiltTokenABI, functionName: 'approve', args: [STAKING_ADDRESS, parseEther(stakeAmount)] });
     };
-
     const handleStake = () => {
         if (!stakeAmount) return;
-        writeContract({
-            address: STAKING_ADDRESS,
-            abi: StakingCathedralABI,
-            functionName: 'stake',
-            args: [parseEther(stakeAmount)],
-            gas: BigInt(10000000), // Safety override for Testnet
-        });
+        writeContract({ address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'stake', args: [parseEther(stakeAmount)], gas: BigInt(10000000) });
     };
-
     const handleWithdraw = () => {
         if (!unstakeAmount) return;
-        // If we have a preview, use it. Otherwise fallback to 1:1 assumption or raw amount using force
-        // We use parseEther(unstakeAmount) as asset input to convertToShares, getting correct share amount to burn
         const sharesToBurn = previewShares || parseEther(unstakeAmount);
+        writeContract({ address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'withdraw', args: [sharesToBurn], gas: BigInt(10000000) });
+    };
 
-        writeContract({
-            address: STAKING_ADDRESS,
-            abi: StakingCathedralABI,
-            functionName: 'withdraw',
-            args: [sharesToBurn],
-            gas: BigInt(10000000), // Safety override for Testnet
-        });
+    const handleSlider = (val: number) => {
+        setSliderValue(val);
+        if (guiltBalance) {
+            const amount = (BigInt(val) * guiltBalance) / BigInt(100);
+            setStakeAmount(formatEther(amount));
+        }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-black via-neutral-950 to-black text-white font-sans">
-            <div className="container mx-auto px-4 py-8">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-12">
-                    <Link href="/" className="text-red-500 hover:text-red-400 transition-colors">
-                        ← Back to Home
-                    </Link>
-                    <WalletConnect />
+        <div className="min-h-[calc(100vh-5rem)] p-6 lg:p-8">
+            <div className="max-w-[1600px] mx-auto space-y-6">
+                {/* ─── Header ─── */}
+                <div>
+                    <p className="text-[10px] font-mono text-primary/50 tracking-[0.3em] uppercase mb-1">Treasury // Organ_Ledger_V2</p>
+                    <h1 className="text-3xl font-bold text-white tracking-wide uppercase">
+                        The <span className="text-primary text-gold-glow">Cathedral</span>
+                    </h1>
+                    <p className="text-sm text-gray-500 font-mono mt-1">Altar of Consecration — Stake $GUILT to earn divine yield</p>
                 </div>
 
-                {/* Cathedral Content */}
-                <div className="max-w-4xl mx-auto">
-                    <h1 className="text-6xl font-cinzel font-bold text-red-500 mb-4 text-center">
-                        The Cathedral
-                    </h1>
-                    <p className="text-xl text-zinc-400 text-center mb-12 font-light">
-                        Stake $GUILT to earn rewards. Pay the tax. Absolve your sins.
-                    </p>
+                {/* ─── 3-Column Layout ─── */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                    {/* Staking Interface */}
-                    <div className="bg-neutral-900/50 border border-red-900/30 rounded-lg p-8 relative overflow-hidden">
-                        {/* Background Ornament */}
-                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                            <span className="text-9xl text-red-900 font-cinzel">†</span>
-                        </div>
+                    {/* ── Left Column: User Metrics ── */}
+                    <div className="lg:col-span-3 space-y-4">
+                        {/* Stats Cards */}
+                        <div className="bg-obsidian rounded-lg border border-primary/10 p-5 space-y-5">
+                            <h3 className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">
+                                <span className="material-icons text-primary text-sm">person</span>
+                                Your Metrics
+                            </h3>
 
-                        <div className="flex justify-between items-end mb-6">
-                            <h2 className="text-2xl font-cinzel text-red-400">Staking Dashboard</h2>
-                            {isMounted && address && (
-                                <div className="text-right">
-                                    <p className="text-xs text-zinc-500 uppercase tracking-widest">Current Rank</p>
-                                    <p className="text-xl font-bold text-amber-500 font-cinzel">{tierName}</p>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Available Balance</div>
+                                    <div className="text-2xl font-bold font-mono text-white">
+                                        {isMounted && guiltBalance ? parseFloat(formatEther(guiltBalance)).toFixed(2) : '0.00'}
+                                    </div>
+                                    <div className="text-[10px] text-gray-600 font-mono">$GUILT</div>
                                 </div>
-                            )}
-                        </div>
 
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                            <div className="bg-black/50 p-4 rounded border border-red-900/20">
-                                <p className="text-xs text-zinc-500 mb-1">Staked ($GUILT)</p>
-                                <p className="text-2xl font-bold text-red-500">
-                                    {isMounted && stakedBalance ? parseFloat(formatEther(stakedBalance)).toFixed(2) : '0.00'}
-                                </p>
-                            </div>
-                            <div className="bg-black/50 p-4 rounded border border-red-900/20">
-                                <p className="text-xs text-zinc-500 mb-1">Earned</p>
-                                <p className="text-2xl font-bold text-green-500">
-                                    {isMounted ? parseFloat(formatEther(earned)).toFixed(4) : '0.00'}
-                                </p>
-                            </div>
-                            <div className="bg-black/50 p-4 rounded border border-red-900/20">
-                                <p className="text-xs text-zinc-500 mb-1">Wallet Balance</p>
-                                <p className="text-2xl font-bold text-zinc-300">
-                                    {isMounted && guiltBalance ? parseFloat(formatEther(guiltBalance)).toFixed(2) : '0.00'}
-                                </p>
-                            </div>
-                            <div className="bg-black/50 p-4 rounded border border-red-900/20">
-                                <p className="text-xs text-zinc-500 mb-1">APY</p>
-                                <p className="text-2xl font-bold text-amber-500">66.6%</p>
+                                <div className="h-px bg-primary/10" />
+
+                                <div>
+                                    <div className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Staked Assets</div>
+                                    <div className="text-2xl font-bold font-mono text-primary">
+                                        {isMounted && stakedBalance ? parseFloat(formatEther(stakedBalance)).toFixed(2) : '0.00'}
+                                    </div>
+                                    <div className="text-[10px] text-gray-600 font-mono">$GUILT locked</div>
+                                </div>
+
+                                <div className="h-px bg-primary/10" />
+
+                                <div>
+                                    <div className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Accrued Yield</div>
+                                    <div className="text-2xl font-bold font-mono text-green-400">
+                                        +{isMounted ? parseFloat(formatEther(earned)).toFixed(4) : '0.00'}
+                                    </div>
+                                    <div className="text-[10px] text-gray-600 font-mono">$GUILT earned</div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        {isMounted && isConnected ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Stake / Approve Flow */}
-                                <div className="border border-red-900/30 p-6 rounded bg-red-950/10 flex flex-col justify-between">
-                                    <div>
-                                        <div className="flex justify-between mb-2">
-                                            <label className="block text-sm text-red-400 font-bold">STAKE</label>
-                                            <span className="text-xs text-red-400/60 cursor-pointer hover:text-red-300" onClick={() => setStakeAmount(guiltBalance ? formatEther(guiltBalance) : '0')}>
-                                                Max: {guiltBalance ? parseFloat(formatEther(guiltBalance)).toFixed(2) : '0'}
-                                            </span>
+                        {/* APY + Tier */}
+                        <div className="bg-obsidian rounded-lg border border-primary/20 p-5 text-center relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+                            <div className="relative z-10">
+                                <div className="text-[10px] text-primary/60 font-mono uppercase tracking-widest mb-1">Current APY</div>
+                                <div className="text-5xl font-bold font-mono text-primary text-gold-glow">66.6%</div>
+                                <div className="mt-4 flex justify-center">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
+                                        <span className="text-[10px] text-primary/60 font-mono">RANK:</span>
+                                        <span className="text-xs text-primary font-bold">{isMounted ? tierName : '—'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Center Column: Sacrifice Portal ── */}
+                    <div className="lg:col-span-5">
+                        <div className="bg-obsidian rounded-lg border border-primary/20 overflow-hidden shadow-[0_0_40px_-10px_rgba(242,185,13,0.1)]">
+                            {/* Tabs */}
+                            <div className="flex border-b border-primary/10">
+                                {(['stake', 'unstake'] as const).map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`flex-1 py-4 text-xs font-mono uppercase tracking-widest font-bold transition-colors ${activeTab === tab ? 'text-primary bg-primary/5 border-b-2 border-primary' : 'text-gray-500 hover:text-white'
+                                            }`}
+                                    >
+                                        {tab === 'stake' ? '⬆ CONSECRATE' : '⬇ WITHDRAW'}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="p-6 space-y-6">
+                                {activeTab === 'stake' ? (
+                                    <>
+                                        {/* Amount Input */}
+                                        <div>
+                                            <div className="flex justify-between text-xs font-mono mb-2">
+                                                <span className="text-gray-500 uppercase tracking-widest">Sacrifice Amount</span>
+                                                <span className="text-primary/60 cursor-pointer hover:text-primary"
+                                                    onClick={() => guiltBalance && setStakeAmount(formatEther(guiltBalance))}>
+                                                    MAX
+                                                </span>
+                                            </div>
+                                            <div className="bg-background-dark border border-primary/20 rounded-lg p-4 flex items-center gap-3">
+                                                <span className="text-primary font-bold text-xl font-mono">$G</span>
+                                                <input
+                                                    type="number"
+                                                    value={stakeAmount}
+                                                    onChange={(e) => setStakeAmount(e.target.value)}
+                                                    className="flex-1 bg-transparent text-right text-2xl font-bold text-white font-mono focus:ring-0 outline-none border-none"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="flex gap-2">
+
+                                        {/* Slider */}
+                                        <div>
                                             <input
-                                                type="number"
-                                                placeholder="Amount"
-                                                className="bg-black border border-red-900/30 text-white px-4 py-3 rounded w-full focus:outline-none focus:border-red-500 text-lg"
-                                                value={stakeAmount}
-                                                onChange={(e) => setStakeAmount(e.target.value)}
+                                                type="range" min={0} max={100} value={sliderValue}
+                                                onChange={(e) => handleSlider(Number(e.target.value))}
+                                                className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-primary"
                                             />
+                                            <div className="flex justify-between text-[10px] font-mono text-gray-600 mt-1">
+                                                <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Penance Duration */}
+                                        <div>
+                                            <div className="text-xs font-mono text-gray-500 uppercase tracking-widest mb-3">Penance Duration</div>
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {DURATIONS.map((d) => (
+                                                    <button
+                                                        key={d.value}
+                                                        onClick={() => setSelectedDuration(d.value)}
+                                                        className={`py-3 rounded-lg border text-center transition-all ${selectedDuration === d.value
+                                                                ? 'border-primary bg-primary/10 text-primary'
+                                                                : 'border-gray-800 text-gray-500 hover:border-primary/30'
+                                                            }`}
+                                                    >
+                                                        <div className="text-xs font-bold">{d.label}</div>
+                                                        <div className="text-[10px] font-mono text-primary/60">{d.multiplier}</div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Estimated Yield */}
+                                        <div className="bg-green-900/10 border border-green-900/20 rounded-lg p-4">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs text-gray-500 font-mono">Estimated Yield</span>
+                                                <span className="text-green-400 font-bold font-mono text-lg">
+                                                    +{stakeAmount ? (parseFloat(stakeAmount) * 0.666 * (selectedDuration / 365)).toFixed(2) : '0.00'} $GUILT
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* CTA */}
+                                        <button
+                                            onClick={needsApproval ? handleApprove : handleStake}
+                                            disabled={isPending || !stakeAmount || parseFloat(stakeAmount) <= 0}
+                                            className={`w-full py-4 rounded-lg font-bold uppercase tracking-[0.2em] text-sm transition-all flex items-center justify-center gap-3 group ${needsApproval
+                                                    ? 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'
+                                                    : 'gold-embossed text-background-dark hover:scale-[1.01]'
+                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        >
+                                            <span className="material-icons text-lg">{needsApproval ? 'lock_open' : 'local_fire_department'}</span>
+                                            {isPending ? 'Processing...' : needsApproval ? 'APPROVE $GUILT' : 'CONSECRATE SACRIFICE'}
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        {/* Unstake */}
+                                        <div>
+                                            <div className="flex justify-between text-xs font-mono mb-2">
+                                                <span className="text-gray-500 uppercase tracking-widest">Withdraw Amount</span>
+                                                <span className="text-primary/60 cursor-pointer hover:text-primary"
+                                                    onClick={() => stakedBalance && setUnstakeAmount(formatEther(stakedBalance))}>
+                                                    MAX
+                                                </span>
+                                            </div>
+                                            <div className="bg-background-dark border border-gray-800 rounded-lg p-4 flex items-center gap-3">
+                                                <span className="text-gray-500 font-bold text-xl font-mono">$G</span>
+                                                <input
+                                                    type="number"
+                                                    value={unstakeAmount}
+                                                    onChange={(e) => setUnstakeAmount(e.target.value)}
+                                                    className="flex-1 bg-transparent text-right text-2xl font-bold text-white font-mono focus:ring-0 outline-none border-none"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            {previewShares && (
+                                                <p className="text-[10px] text-gray-600 mt-2 font-mono">
+                                                    Burning {parseFloat(formatEther(previewShares)).toFixed(2)} shares
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            onClick={handleWithdraw}
+                                            disabled={isPending || !unstakeAmount || parseFloat(unstakeAmount) <= 0}
+                                            className="w-full py-4 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 font-bold uppercase tracking-[0.2em] text-sm hover:bg-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                                        >
+                                            <span className="material-icons text-lg">arrow_downward</span>
+                                            {isPending ? 'Withdrawing...' : 'WITHDRAW'}
+                                        </button>
+                                    </>
+                                )}
+
+                                {/* Status Messages */}
+                                {isConfirmed && (
+                                    <div className="p-3 bg-green-900/20 border border-green-900/30 rounded-lg text-green-400 text-center text-xs font-mono">
+                                        ✓ Transaction confirmed. Your soul is one step closer to absolution.
+                                    </div>
+                                )}
+                                {writeError && (
+                                    <div className="p-3 bg-red-900/20 border border-red-900/30 rounded-lg text-red-400 text-center text-xs font-mono">
+                                        ✗ {writeError.message}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Right Column: Hall of Saints ── */}
+                    <div className="lg:col-span-4">
+                        <div className="bg-obsidian rounded-lg border border-primary/10 overflow-hidden h-full flex flex-col">
+                            <div className="p-4 border-b border-primary/10 flex justify-between items-center">
+                                <h3 className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">
+                                    <span className="material-icons text-primary text-sm">history_edu</span>
+                                    Hall of Saints
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                    <span className="text-[10px] text-gray-500 font-mono">LIVE</span>
+                                </div>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+                                {SAINTS_FEED.map((entry, i) => (
+                                    <div
+                                        key={i}
+                                        className={`p-3 rounded border transition-colors ${entry.whale
+                                                ? 'bg-primary/5 border-primary/20 shadow-[0_0_10px_rgba(242,185,13,0.05)]'
+                                                : 'border-gray-800 hover:border-primary/20'
+                                            }`}
+                                    >
+                                        <div className="flex justify-between items-center mb-1">
+                                            <div className="flex items-center gap-2">
+                                                {entry.whale && <span className="text-[10px] bg-primary/20 text-primary px-1 rounded font-bold">🐋</span>}
+                                                <span className="text-xs font-mono text-gray-400">{entry.address}</span>
+                                            </div>
+                                            <span className="text-[10px] text-gray-600 font-mono">{entry.time}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-mono font-bold text-white">{entry.amount} $GUILT</span>
+                                            <span className="text-[10px] text-primary/60 font-mono">{entry.duration}</span>
                                         </div>
                                     </div>
+                                ))}
+                            </div>
 
-                                    <button
-                                        onClick={needsApproval ? handleApprove : handleStake}
-                                        disabled={isPending || !stakeAmount || parseFloat(stakeAmount) <= 0}
-                                        className={`w-full mt-4 font-bold py-4 px-6 rounded border transition-all uppercase tracking-widest ${needsApproval
-                                            ? "bg-yellow-900/20 text-yellow-500 border-yellow-800 hover:bg-yellow-900/40"
-                                            : "bg-red-600 hover:bg-red-700 text-black border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.4)]"
-                                            } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                    >
-                                        {isPending ? (
-                                            <span className="flex items-center justify-center gap-2 animate-pulse">
-                                                Processing...
-                                            </span>
-                                        ) : needsApproval ? (
-                                            `Approve`
-                                        ) : (
-                                            `Stake`
-                                        )}
-                                    </button>
-                                </div>
-
-                                {/* Unstake Flow */}
-                                <div className="border border-zinc-800 p-6 rounded bg-zinc-950/30 flex flex-col justify-between">
+                            {/* Total Stats */}
+                            <div className="p-4 border-t border-primary/10 bg-obsidian">
+                                <div className="grid grid-cols-2 gap-4 text-center">
                                     <div>
-                                        <div className="flex justify-between mb-2">
-                                            <label className="block text-sm text-zinc-500 font-bold">UNSTAKE</label>
-                                            <span className="text-xs text-zinc-600 cursor-pointer hover:text-zinc-400" onClick={() => setUnstakeAmount(stakedBalance ? formatEther(stakedBalance) : '0')}>
-                                                Max: {stakedBalance ? parseFloat(formatEther(stakedBalance)).toFixed(2) : '0'}
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="number"
-                                                placeholder="Amount ($GUILT)"
-                                                className="bg-black border border-zinc-800 text-white px-4 py-3 rounded w-full focus:outline-none focus:border-zinc-600 text-lg"
-                                                value={unstakeAmount}
-                                                onChange={(e) => setUnstakeAmount(e.target.value)}
-                                            />
-                                        </div>
-                                        {previewShares && (
-                                            <p className="text-xs text-zinc-600 mt-1 font-mono">
-                                                Burning {parseFloat(formatEther(previewShares)).toFixed(2)} Shares
-                                            </p>
-                                        )}
+                                        <div className="text-lg font-bold text-primary font-mono">42.1M</div>
+                                        <div className="text-[9px] text-gray-600 font-mono uppercase">Total Staked</div>
                                     </div>
-                                    <button
-                                        onClick={handleWithdraw}
-                                        disabled={isPending || !unstakeAmount || parseFloat(unstakeAmount) <= 0}
-                                        className="w-full mt-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 font-semibold py-4 px-6 rounded border border-zinc-800 transition-all disabled:opacity-50 uppercase tracking-widest"
-                                    >
-                                        {isPending ? "Withdrawing..." : "Withdraw"}
-                                    </button>
+                                    <div>
+                                        <div className="text-lg font-bold text-white font-mono">3,412</div>
+                                        <div className="text-[9px] text-gray-600 font-mono uppercase">Active Stakers</div>
+                                    </div>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="text-center py-12 bg-black/40 rounded border border-red-900/10">
-                                <p className="text-red-500 animate-pulse font-mono text-lg mb-2">
-                                    [ CONNECTION REQUIRED ]
-                                </p>
-                                <p className="text-zinc-600 text-sm">Connect your wallet to enter the Cathedral</p>
-                                <div className="mt-8 pt-4 border-t border-zinc-800 text-xs text-zinc-600 font-mono text-center">
-                                    DEBUG: Staking Contract {STAKING_ADDRESS}<br />
-                                    DEBUG: Guilt Contract {GUILT_ADDRESS}<br />
-                                    DEBUG: On-Chain Asset: {contractAsset ? contractAsset.toString() : 'Loading...'}<br />
-                                    DEBUG: Staking Tax Exempt: {isExempt ? 'TRUE' : 'FALSE'}<br />
-                                    DEBUG: Guilt Staking Wallet: {stakingWalletAddress}<br />
-                                    DEBUG: Gas Limit Overridden to 10,000,000
-                                </div>
-                            </div>
-                        )}
-
-                        {isConfirmed && (
-                            <div className="mt-4 p-4 bg-green-900/20 border border-green-900/50 text-green-400 text-center rounded animate-fade-in-up">
-                                Transaction Confirmed! Your soul is one step closer to absolution.
-                            </div>
-                        )}
-                        {writeError && (
-                            <div className="mt-4 p-4 bg-red-900/20 border border-red-900/50 text-red-400 text-center rounded animate-fade-in-up text-xs font-mono">
-                                Error: {writeError.message}
-                            </div>
-                        )}
-
-                        <div className="mt-8 pt-4 border-t border-zinc-800 text-xs text-zinc-600 font-mono text-center">
-                            DEBUG: Staking Contract {STAKING_ADDRESS}<br />
-                            DEBUG: Guilt Contract {GUILT_ADDRESS}<br />
-                            DEBUG: On-Chain Asset: {contractAsset ? contractAsset.toString() : 'Loading...'}<br />
-                            DEBUG: Staking Tax Exempt (Bool): {isExempt ? 'TRUE' : 'FALSE'}<br />
-                            DEBUG: Staking Tax Exempt (Raw): {String(isExempt)}<br />
-                            DEBUG: Guilt Staking Wallet: {stakingWalletAddress ? stakingWalletAddress : 'UNDEFINED'}<br />
-                            DEBUG: Gas Limit Overridden to 10,000,000
                         </div>
                     </div>
                 </div>

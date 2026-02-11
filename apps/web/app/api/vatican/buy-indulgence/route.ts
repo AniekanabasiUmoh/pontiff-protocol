@@ -17,9 +17,9 @@ export async function POST(request: Request) {
         const { data: recentConfession, error } = await supabase
             .from('confessions')
             .select('*')
-            .eq('walletAddress', body.agentWallet)
+            .eq('wallet_address', body.agentWallet)
             .eq('status', 'Sinner')
-            .order('timestamp', { ascending: false })
+            .order('created_at', { ascending: false })
             .limit(1)
             .single();
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
         await ConversionService.trackConversionSign(
             body.agentWallet,
             'BuyIndulgence',
-            recentConfession?.indulgencePrice || "0",
+            recentConfession?.stake_amount || "0",
             { txHash: body.txHash }
         );
 

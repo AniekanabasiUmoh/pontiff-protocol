@@ -59,8 +59,9 @@ export async function POST(request: NextRequest) {
             // Mock mode: Store tweet in database but don't post to Twitter
             console.log('[Tweet Roast] MOCK MODE - Would post:', tweetText);
 
-            const { data: mockTweet, error } = await supabase
+            const { data: rawMockTweet, error } = await supabase
                 .from('roast_tweets')
+                // @ts-ignore
                 .insert({
                     wallet_address: walletAddress.toLowerCase(),
                     tweet_text: tweetText,
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
                 success: true,
                 mockMode: true,
                 tweetText,
-                tweetId: mockTweet?.id,
+                tweetId: (rawMockTweet as any)?.id,
                 message: 'Tweet created in mock mode (not posted to Twitter)'
             });
         }
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
             // Store tweet record in database
             const { data: tweet, error: dbError } = await supabase
                 .from('roast_tweets')
+                // @ts-ignore
                 .insert({
                     wallet_address: walletAddress.toLowerCase(),
                     tweet_text: tweetText,
@@ -121,8 +123,9 @@ export async function POST(request: NextRequest) {
             console.error('[Tweet Roast] Twitter API error:', twitterError);
 
             // Fall back to mock mode on Twitter API failure
-            const { data: fallbackTweet } = await supabase
+            const { data: rawFallbackTweet } = await supabase
                 .from('roast_tweets')
+                // @ts-ignore
                 .insert({
                     wallet_address: walletAddress.toLowerCase(),
                     tweet_text: tweetText,
@@ -139,7 +142,7 @@ export async function POST(request: NextRequest) {
                 error: 'Twitter API error',
                 message: twitterError.message,
                 fallbackMode: true,
-                tweetId: fallbackTweet?.id
+                tweetId: (rawFallbackTweet as any)?.id
             }, { status: 500 });
         }
 

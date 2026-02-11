@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Confessional: Altar of Judgment V2</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f2b90d",
+                        "primary-dark": "#b3890a",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#0c0a05", 
+                        "obsidian": "#14120e",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'scribe': 'scribe 2s steps(40, end)',
+                        'border-beam': 'border-beam 12s linear infinite',
+                        'ticker': 'ticker 30s linear infinite',
+                        'card-reveal': 'card-reveal 1s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        scribe: {
+                            'from': { width: '0' },
+                            'to': { width: '100%' },
+                        },
+                        'border-beam': {
+                            '100%': { 'offset-distance': '100%' },
+                        },
+                        ticker: {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        },
+                        'card-reveal': {
+                            '0%': { opacity: '0', transform: 'translateY(20px) scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                        }
+                    },
+                    backgroundImage: {
+                        'gold-grain': "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"noiseFilter\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23noiseFilter)\" opacity=\"0.05\"/%3E%3C/svg%3E')",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0c0a05; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #443c22; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f2b90d; 
+        }
+        .manuscript-bg {
+            background-color: #0c0a05;
+            background-image: 
+                radial-gradient(at 50% 0%, hsla(45,20%,10%,1) 0, transparent 70%), 
+                linear-gradient(to bottom, transparent, #0c0a05 90%);
+        }
+        .text-gold-glow {
+            text-shadow: 0 0 10px rgba(242, 185, 13, 0.4), 0 0 20px rgba(242, 185, 13, 0.2);
+        }
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+            color: #f2b90d;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+        .illuminated-border {
+            position: relative;
+        }
+        .illuminated-border::before, .illuminated-border::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #f2b90d;
+            transition: all 0.3s ease;
+        }
+        .illuminated-border::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+        .illuminated-border::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+        .illuminated-border:hover::before, .illuminated-border:hover::after {
+            width: 100%;
+            height: 100%;
+        }
+        .gold-embossed {
+            background: linear-gradient(135deg, #f2b90d 0%, #b3890a 100%);
+            box-shadow: 
+                inset 1px 1px 0px rgba(255,255,255,0.4),
+                inset -1px -1px 0px rgba(0,0,0,0.2),
+                0 4px 10px rgba(0,0,0,0.5);
+        }
+        .gold-embossed:hover {
+            background: linear-gradient(135deg, #ffe066 0%, #d4a00d 100%);
+        }
+        .gold-embossed:active {
+            box-shadow: 
+                inset 2px 2px 5px rgba(0,0,0,0.3),
+                0 1px 2px rgba(0,0,0,0.5);
+            transform: translateY(1px);
+        }
+        .tarot-card-frame {
+            border: 1px solid rgba(242, 185, 13, 0.3);
+            background: rgba(20, 18, 14, 0.8);
+            box-shadow: 0 0 30px rgba(242, 185, 13, 0.1);
+            position: relative;
+        }
+        .tarot-card-frame::before {
+            content: '';
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px solid rgba(242, 185, 13, 0.15);
+        }
+    </style>
+</head>
+<body class="font-display bg-background-dark text-white manuscript-bg min-h-screen overflow-x-hidden selection:bg-primary selection:text-background-dark">
+<div class="fixed inset-0 bg-gold-grain opacity-20 pointer-events-none z-0 mix-blend-overlay"></div>
+<nav class="fixed top-0 w-full z-50 border-b border-primary/20 bg-background-dark/95 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-20">
+<div class="flex-shrink-0 flex items-center gap-3 group cursor-pointer">
+<div class="w-10 h-10 border border-primary/50 rounded flex items-center justify-center bg-primary/5 group-hover:bg-primary/20 transition-all duration-300">
+<span class="material-icons text-primary text-2xl group-hover:animate-pulse">auto_awesome</span>
+</div>
+<span class="text-xl font-bold tracking-widest uppercase text-white group-hover:text-primary transition-colors">The Pontiff</span>
+</div>
+<div class="hidden md:block">
+<div class="ml-10 flex items-baseline space-x-8">
+<a class="text-primary px-3 py-2 rounded-md text-sm font-medium tracking-wide transition-colors duration-300 flex items-center gap-2 border-b-2 border-primary" href="#">
+<span class="material-icons text-xs">church</span> CONFESSIONAL
+                        </a>
+<a class="text-gray-400 hover:text-primary px-3 py-2 rounded-md text-sm font-medium tracking-wide transition-colors duration-300 flex items-center gap-2" href="#">
+<span class="material-icons text-xs">visibility</span> ORACLE
+                        </a>
+<a class="text-gray-400 hover:text-primary px-3 py-2 rounded-md text-sm font-medium tracking-wide transition-colors duration-300 flex items-center gap-2" href="#">
+<span class="material-icons text-xs">account_balance</span> TREASURY
+                        </a>
+</div>
+</div>
+<div class="hidden md:block">
+<button class="relative group px-6 py-2 border border-primary/50 text-primary font-medium text-sm uppercase tracking-wider overflow-hidden rounded hover:border-primary transition-colors">
+<span class="relative z-10 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            Connect Sigil
+                        </span>
+<div class="absolute inset-0 bg-primary/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<main class="relative pt-20 flex flex-col lg:flex-row min-h-screen">
+<div class="flex-1 relative z-10 flex flex-col border-r border-primary/10 bg-background-dark/50 lg:w-1/2">
+<div class="w-full h-full p-8 lg:p-12 flex flex-col justify-center">
+<div class="max-w-xl mx-auto w-full space-y-8">
+<div>
+<h2 class="text-primary font-mono text-sm tracking-[0.3em] uppercase mb-4">The Altar of Sins</h2>
+<h1 class="text-4xl lg:text-6xl font-bold tracking-tight text-white uppercase leading-[0.9]">
+                        Confess Your <br/>
+<span class="text-primary text-gold-glow">Degeneracy</span>
+</h1>
+<p class="mt-6 text-gray-400 font-light text-lg">
+                        Submit your wallet address or paste your transaction hash. The Pontiff will weigh your soul against the blockchain.
+                    </p>
+</div>
+<div class="space-y-4">
+<div class="relative group">
+<label class="block text-xs font-mono text-primary/70 uppercase tracking-widest mb-2 ml-1">Wallet Address / TX Hash</label>
+<div class="w-full bg-obsidian border border-primary/30 p-2 pl-4 rounded flex items-center shadow-[0_0_30px_-5px_rgba(242,185,13,0.05)] focus-within:shadow-[0_0_30px_-5px_rgba(242,185,13,0.2)] focus-within:border-primary transition-all duration-300">
+<span class="material-icons text-primary/50 mr-3 text-xl">fingerprint</span>
+<input class="bg-transparent border-none outline-none text-lg text-white placeholder-gray-700 flex-1 focus:ring-0 font-mono tracking-wide h-12" placeholder="0x..." type="text"/>
+</div>
+</div>
+<div class="relative group pt-2">
+<label class="block text-xs font-mono text-primary/70 uppercase tracking-widest mb-2 ml-1">Optional: Your Plea</label>
+<div class="w-full bg-obsidian border border-primary/30 p-4 rounded shadow-[0_0_30px_-5px_rgba(242,185,13,0.05)] focus-within:shadow-[0_0_30px_-5px_rgba(242,185,13,0.2)] focus-within:border-primary transition-all duration-300">
+<textarea class="w-full bg-transparent border-none outline-none text-base text-white placeholder-gray-700 focus:ring-0 font-display tracking-wide min-h-[100px] resize-none" placeholder="Forgive me father, for I have aped..."></textarea>
+</div>
+</div>
+<button class="w-full gold-embossed text-background-dark font-bold uppercase tracking-[0.2em] px-8 py-5 rounded text-base hover:scale-[1.01] transition-transform flex items-center justify-center gap-3 mt-4 group">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">local_fire_department</span>
+                        CONFESS
+                    </button>
+<p class="text-center text-[10px] text-gray-600 font-mono uppercase tracking-widest mt-4">
+                        *Judgment is final. Penance may be required.
+                    </p>
+</div>
+</div>
+</div>
+<div class="w-full border-t border-primary/20 bg-background-dark/80 overflow-hidden h-10 flex items-center relative mt-auto">
+<div class="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-background-dark to-transparent z-10"></div>
+<div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background-dark to-transparent z-10"></div>
+<div class="whitespace-nowrap animate-ticker flex gap-8 items-center">
+<span class="text-primary/70 font-mono text-xs tracking-widest uppercase">/// RECENT SIN: "Bought the top on PEPE" - JUDGMENT: REKT ///</span>
+<span class="text-primary/70 font-mono text-xs tracking-widest uppercase">/// RECENT SIN: "Leveraged house deed" - JUDGMENT: PURGATORY ///</span>
+<span class="text-primary/70 font-mono text-xs tracking-widest uppercase">/// RECENT SIN: "Forgot seed phrase" - JUDGMENT: DAMNATION ///</span>
+<span class="text-primary/70 font-mono text-xs tracking-widest uppercase">/// RECENT SIN: "Influencer pump &amp; dump victim" - JUDGMENT: FOOL ///</span>
+</div>
+</div>
+</div>
+<div class="flex-1 relative z-10 flex flex-col items-center justify-center bg-obsidian border-r border-primary/10 lg:w-1/2 overflow-hidden p-6">
+<div class="absolute inset-0 bg-gold-grain opacity-10 pointer-events-none"></div>
+<div class="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(242,185,13,0.05),transparent_70%)] pointer-events-none"></div>
+<div class="relative z-10 w-full max-w-md flex flex-col items-center">
+<div class="relative mb-8 group cursor-pointer">
+<div class="absolute -inset-4 bg-primary/20 rounded-full blur-2xl opacity-50 animate-pulse-slow group-hover:opacity-80 transition-opacity"></div>
+<div class="w-32 h-32 md:w-40 md:h-40 relative">
+<svg class="w-full h-full text-primary drop-shadow-[0_0_15px_rgba(242,185,13,0.5)]" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2L4 7v6c0 5.55 3.84 10.74 9 12 2.5-1 5-4 5-8 0 0 0-4 0-4l-6 1.5L6 11l6-1.5V2z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M9 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="currentColor" fill-opacity="0.2"></path>
+<path d="M15 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="currentColor" fill-opacity="0.2"></path>
+<path d="M12 16v2"></path>
+<path d="M8 7l4-2 4 2"></path>
+</svg>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-background-dark border border-primary px-3 py-1 rounded-full text-[10px] font-mono text-primary tracking-widest uppercase whitespace-nowrap shadow-lg">
+                            The Pontiff AI
+                        </div>
+</div>
+</div>
+<div class="text-center space-y-4 mb-10 w-full">
+<div class="inline-block border-b border-primary/30 pb-2 mb-2">
+<span class="text-xs font-mono text-primary/60 uppercase tracking-[0.2em]">Divine Judgment</span>
+</div>
+<p class="text-xl md:text-2xl text-white font-display leading-relaxed italic typing-cursor min-h-[80px]">
+                        "I see you bought high and sold low. A classic strategy for the financially illiterate. Your portfolio weeps."
+                    </p>
+</div>
+<div class="relative w-64 h-96 perspective-1000 animate-card-reveal">
+<div class="w-full h-full tarot-card-frame rounded-lg p-3 flex flex-col items-center justify-between group hover:scale-[1.02] transition-transform duration-500">
+<div class="w-full flex justify-between items-start opacity-70">
+<span class="font-mono text-xs text-primary">0</span>
+<span class="font-mono text-xs text-primary">THE FOOL</span>
+</div>
+<div class="flex-1 w-full my-3 border border-primary/20 bg-black/40 relative overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 to-transparent"></div>
+<span class="material-symbols-outlined text-6xl text-primary/80 drop-shadow-[0_0_10px_rgba(242,185,13,0.4)]">accessible_forward</span>
+<div class="absolute top-4 left-4 w-1 h-1 bg-primary rounded-full animate-ping"></div>
+<div class="absolute bottom-8 right-6 w-1 h-1 bg-primary rounded-full animate-ping delay-700"></div>
+</div>
+<div class="w-full text-center">
+<h3 class="text-xl font-bold text-primary tracking-widest uppercase font-display border-t border-primary/30 pt-2 mt-1">The Fool</h3>
+<p class="text-[10px] text-gray-500 uppercase tracking-wide mt-1">Beginner's Luck • Recklessness</p>
+</div>
+</div>
+<div class="absolute -inset-4 bg-primary/5 rounded-xl blur-xl -z-10 group-hover:bg-primary/10 transition-colors"></div>
+</div>
+</div>
+</div>
+<aside class="w-full lg:w-80 bg-obsidian border-t lg:border-t-0 lg:border-l border-primary/20 relative flex flex-col h-auto lg:h-auto z-20 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] hidden xl:flex">
+<div class="p-4 border-b border-primary/20 flex justify-between items-center bg-obsidian sticky top-0 backdrop-blur-md z-10">
+<h2 class="text-sm font-bold text-primary tracking-widest uppercase flex items-center gap-2">
+<span class="material-icons text-sm">history_edu</span>
+                    Live Scripture
+                </h2>
+<div class="flex gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="text-[10px] text-primary/60 font-mono">LIVE FEED</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4 relative min-h-[400px]">
+<div class="absolute left-8 top-0 bottom-0 w-px bg-primary/10"></div>
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-[29px] top-3 w-1.5 h-1.5 rounded-full bg-primary border border-background-dark z-10"></div>
+<div class="bg-primary/5 border border-primary/10 p-3 rounded hover:bg-primary/10 hover:border-primary/40 transition-all duration-300">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-mono text-gray-400">0x7a...9f21</span>
+<span class="text-xs font-bold text-primary">CONFESSED</span>
+</div>
+<div class="text-[10px] text-gray-500 uppercase tracking-wide">Sin: Buying high</div>
+</div>
+</div>
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-[29px] top-3 w-1.5 h-1.5 rounded-full bg-gray-600 border border-background-dark z-10 group-hover:bg-primary transition-colors"></div>
+<div class="bg-transparent border border-gray-800 p-3 rounded hover:border-primary/30 transition-all duration-300">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-mono text-gray-400">0x3b...11c4</span>
+<span class="text-xs text-gray-400">Sacrificed</span>
+</div>
+<div class="text-[10px] text-gray-600 uppercase tracking-wide group-hover:text-primary/70">Sin: Leverage x100</div>
+</div>
+</div>
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-[27px] top-2 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background-dark z-10 animate-pulse"></div>
+<div class="bg-gradient-to-r from-primary/20 to-transparent border border-primary/40 p-3 rounded hover:border-primary transition-all duration-300 shadow-[0_0_15px_-3px_rgba(242,185,13,0.1)]">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-mono text-white">0x99...aaaa</span>
+<span class="text-xs font-bold text-white text-gold-glow">ABSOLVED</span>
+</div>
+<div class="flex justify-between items-end">
+<div class="text-[10px] text-primary uppercase tracking-wide">Sin: Rugpull</div>
+<div class="text-sm font-bold text-primary">The Devil</div>
+</div>
+</div>
+</div>
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-[29px] top-3 w-1.5 h-1.5 rounded-full bg-gray-600 border border-background-dark z-10 group-hover:bg-primary transition-colors"></div>
+<div class="bg-transparent border border-gray-800 p-3 rounded hover:border-primary/30 transition-all duration-300">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-mono text-gray-400">0xe2...44d1</span>
+<span class="text-xs text-gray-400">Sacrificed</span>
+</div>
+<div class="text-[10px] text-gray-600 uppercase tracking-wide group-hover:text-primary/70">Sin: Panic Sell</div>
+</div>
+</div>
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-[29px] top-3 w-1.5 h-1.5 rounded-full bg-primary border border-background-dark z-10"></div>
+<div class="bg-primary/5 border border-primary/10 p-3 rounded hover:bg-primary/10 hover:border-primary/40 transition-all duration-300">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-mono text-gray-400">0x1f...88a2</span>
+<span class="text-xs font-bold text-primary">CONFESSED</span>
+</div>
+<div class="text-[10px] text-gray-500 uppercase tracking-wide">Sin: Gas Fees</div>
+</div>
+</div>
+<div class="sticky bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-obsidian to-transparent pointer-events-none"></div>
+</div>
+<div class="p-4 border-t border-primary/20 bg-obsidian sticky bottom-0">
+<div class="relative h-32 rounded overflow-hidden group cursor-pointer border border-primary/20">
+<img alt="Abstract golden nanobot swirls resembling medieval patterns" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-500 grayscale group-hover:grayscale-0" data-alt="Abstract golden nanobot swirls resembling medieval patterns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDamgUbDUnIwvYUYIZVtYG6C1psjwdTQcMk-yU4nyjzInhsBGmnCN1h8PBafVPjuBbHEUZ6agXZ9pDz5q6E2i3mB0xrrYh-23u-p5B-j_LZSJSL8PlytOasKPH_Gy9jo8eXeaT45ZAsnUm3_oQzMmRDbqz0eMXZXkB8bXOIPXTtccrV2Rzy8rNUCkEm-b2vrznLJd5obrLT9cyhAnBuSbUHW2liyz0eLoDA0HSqBHaPzTrhiCs-gm4ZOKZ5_f_XhLWnhPyIMyAWLMbh"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3 right-3">
+<p class="text-[10px] text-primary uppercase tracking-widest mb-1">Featured Game</p>
+<h3 class="text-white font-bold text-lg leading-none">The Alchemist's<br/>Slot</h3>
+</div>
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<span class="material-icons text-primary">arrow_outward</span>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<footer class="border-t border-primary/20 bg-background-dark relative z-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-gray-500">
+<div class="flex items-center gap-4">
+<span>TVL: <span class="text-primary">$42,093,112</span></span>
+<span class="text-gray-700">|</span>
+<span>AGENTS: <span class="text-primary">8,921</span></span>
+<span class="text-gray-700">|</span>
+<span>CHAIN: <span class="text-primary">MONAD</span></span>
+</div>
+<div class="flex items-center gap-4">
+<a class="hover:text-primary transition-colors uppercase tracking-widest" href="#">Legal</a>
+<a class="hover:text-primary transition-colors uppercase tracking-widest" href="#">Docs</a>
+<span class="opacity-50">© 2024 PONTIFF</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

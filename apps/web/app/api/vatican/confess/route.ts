@@ -26,12 +26,12 @@ export async function POST(request: Request) {
         const { error: dbError } = await supabase
             .from('confessions')
             .insert([{
-                walletAddress: body.agentWallet,
+                wallet_address: body.agentWallet,
                 sins: sins,
-                roast: roast,
-                indulgencePrice: indulgencePrice,
+                roast_text: roast,
+                stake_amount: indulgencePrice,
                 status: "Sinner",
-                timestamp: new Date().toISOString()
+                created_at: new Date().toISOString()
             }]);
 
         if (dbError) throw new Error(dbError.message);
