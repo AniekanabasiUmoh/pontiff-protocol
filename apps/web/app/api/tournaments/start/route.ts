@@ -76,9 +76,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Insert brackets into database
-        const { error: bracketError } = await supabase
+        const { data: insertedBrackets, error: bracketError } = await supabase
             .from('tournament_brackets')
-            .insert(brackets);
+            .insert(brackets)
+            .select();
 
         if (bracketError) {
             console.error('Bracket Generation Error:', bracketError);
@@ -94,9 +95,9 @@ export async function POST(request: NextRequest) {
             .update({ status: 'active' })
             .eq('id', tournamentId);
 
-        // Format bracket response
-        const formattedBracket = brackets.map(b => ({
-            matchId: b.id,
+        // Format bracket response using returned rows (have IDs)
+        const formattedBracket = (insertedBrackets || brackets).map(b => ({
+            matchId: b.id || null,
             bracketNumber: b.bracket_number,
             round: totalRounds,
             player1: b.player1_wallet,

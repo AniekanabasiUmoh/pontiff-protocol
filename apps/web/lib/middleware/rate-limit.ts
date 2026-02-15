@@ -1,43 +1,59 @@
-import { redis } from '../redis';
-import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+function getDb() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+    );
+}
 
 interface RateLimitConfig {
     limit: number;
-    windowMs: number;
+    windowSeconds: number;
 }
 
 const RATELIMIT_CONFIGS: Record<string, RateLimitConfig> = {
-    'confess': { limit: 10, windowMs: 60 * 1000 }, // 10 per min
-    'challenge': { limit: 5, windowMs: 60 * 1000 }, // 5 per min
-    'default': { limit: 20, windowMs: 60 * 1000 }
+    'confess': { limit: 5, windowSeconds: 60 },
+    'challenge': { limit: 5, windowSeconds: 60 },
+    'casino_rps': { limit: 30, windowSeconds: 60 },
+    'deploy_agent': { limit: 3, windowSeconds: 3600 },
+    'default': { limit: 20, windowSeconds: 60 }
 };
 
-export async function checkRateLimit(identifier: string, actionType: string = 'default'): Promise<{ success: boolean; remaining: number }> {
-    if (!redis) {
-        console.warn("Redis not available, skipping rate limit check.");
-        return { success: true, remaining: 999 };
-    }
-
+export async function checkRateLimit(identifier: string, actionType: string = 'default'): Promise<{ success: boolean; remaining: number; resetTime?: number }> {
     const config = RATELIMIT_CONFIGS[actionType] || RATELIMIT_CONFIGS['default'];
+    // Sanitize identifier to avoid key issues (e.g., ":" in IPv6)
     const key = `ratelimit:${actionType}:${identifier}`;
 
     try {
-        // Increment and get current count
-        const currentUsage = await redis.incr(key);
+        const { data, error } = await getDb().rpc('check_rate_limit', {
+            identify_key: key,
+            window_limit: config.limit,
+            window_seconds: config.windowSeconds
+        });
 
-        // If it's the first request, set expiry
-        if (currentUsage === 1) {
-            await redis.expire(key, config.windowMs / 1000);
+        if (error) {
+            console.error("Rate limit RPC error:", error);
+            // Fail open
+            return { success: true, remaining: 1 };
         }
 
-        if (currentUsage > config.limit) {
-            return { success: false, remaining: 0 };
-        }
+        // data is explicit array or object depending on RPC return?
+        // function returns table(allowed boolean, remaining int, reset_time timestamptz)
+        // RPC returns array of objects for table return
+        const result = Array.isArray(data) ? data[0] : data;
 
-        return { success: true, remaining: config.limit - currentUsage };
+        if (!result) return { success: true, remaining: 1 };
+
+        return {
+            success: result.allowed,
+            remaining: result.remaining,
+            resetTime: new Date(result.reset_time).getTime()
+        };
+
     } catch (error) {
-        console.error("Rate limit error:", error);
-        // Fail open to avoid blocking legitimate users on Redis error
+        console.error("Rate limit exception:", error);
         return { success: true, remaining: 1 };
     }
 }

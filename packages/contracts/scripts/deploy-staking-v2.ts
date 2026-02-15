@@ -4,7 +4,7 @@ async function main() {
     console.log("=== DEPLOYING STAKING V2 ===");
 
     // Configuration
-    const GUILT_ADDRESS = "0x5438DC9b8B5A314b85257c3C39746A0B4faE9611";
+    const GUILT_ADDRESS = "0x71a0016b50E3d846ce17A15DdfA957e4b0885369";
     const TREASURY_ADDRESS = "0x9f994707E36848a82e672d34aDB3194877dB8cc3";
 
     // 1. Get Signer

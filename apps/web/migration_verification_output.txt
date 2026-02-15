@@ -1,0 +1,9 @@
+Schema Verification Report
+==========================
+Checking table: agent_sessions
+✅ Table agent_sessions exists and is accessible.
+ℹ️ Column check result: column agent_sessions.active_game_state does not exist
+✅ Column active_game_state does NOT exist. Migration is safe to apply.
+
+Current Columns in agent_sessions (from sample row):
+id, user_wallet, session_wallet, strategy, starting_balance, current_balance, stop_loss, take_profit, status, games_played, created_at, expires_at, tx_hash, strategy_index, trash_talk, max_wager, game_type, profit_loss, stopped_at, total_wins, total_losses, agent_mode, pvp_wins, pvp_losses, pvp_draws, elo_rating, pvp_earnings, target_archetype, target_rival, pvp_aggression, deposit_amount, total_games, updated_at, wallet_address, session_wallet_backup

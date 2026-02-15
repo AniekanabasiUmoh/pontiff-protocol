@@ -27,7 +27,7 @@ contract JudasProtocol is Ownable, ReentrancyGuard {
     address public immutable treasury; // Treasury for tax collection
 
     // Config
-    uint256 public constant EPOCH_DURATION = 1 days;
+    uint256 public constant EPOCH_DURATION = 5 minutes; // DEMO DAY CONFIG
     uint256 public constant SIN_TAX_BPS = 2000; // 20%
     uint256 public constant MAX_BPS = 10000;
 
@@ -121,7 +121,7 @@ contract JudasProtocol is Ownable, ReentrancyGuard {
         sGuilt.transferFrom(msg.sender, address(this), amount);
 
         UserInfo storage user = userInfo[msg.sender];
-        _claimPendingRewards(msg.sender); // Settle previous epoch results if any
+        _claimPendingRewards(msg.sender, currentEpochId); // Settle previous epoch results if any
 
         user.stakedAmount += amount;
         user.isBetrayer = false; // Reset stance on new deposit? Or keep? Let's say default is Loyal.
@@ -133,6 +133,7 @@ contract JudasProtocol is Ownable, ReentrancyGuard {
      * @dev Switch sides to Betrayer. LOCKS funds until resolution.
      */
     function signalBetrayal() external nonReentrant {
+        _claimPendingRewards(msg.sender, currentEpochId);
         UserInfo storage user = userInfo[msg.sender];
         require(user.stakedAmount > 0, "No stake");
         require(!user.isBetrayer, "Already betrayed");
@@ -181,22 +182,26 @@ contract JudasProtocol is Ownable, ReentrancyGuard {
         } else if (betrayalPct < 40) {
             // PARTIAL COUP: Betrayers steal 20% of Loyalist stack
             outcome = "PARTIAL_COUP";
-            // Loyalists lose 20% -> 0.8x
-            // Betrayers gain the lost amount
-            uint256 loot = (epoch.totalLoyal * 20) / 100;
-            uint256 loyalistRemaining = epoch.totalLoyal - loot;
-            
-            epoch.loyalistMultiplier = (loyalistRemaining * 1e18) / epoch.totalLoyal; // ~0.8e18
-            epoch.betrayerMultiplier = ((epoch.totalBetrayed + loot) * 1e18) / epoch.totalBetrayed;
-            
+            if (epoch.totalLoyal > 0) {
+                uint256 loot = (epoch.totalLoyal * 20) / 100;
+                uint256 loyalistRemaining = epoch.totalLoyal - loot;
+                epoch.loyalistMultiplier = (loyalistRemaining * 1e18) / epoch.totalLoyal;
+                epoch.betrayerMultiplier = ((epoch.totalBetrayed + loot) * 1e18) / epoch.totalBetrayed;
+            } else {
+                epoch.betrayerMultiplier = 1e18;
+            }
+
         } else {
             // FULL COUP: Betrayers steal 50% of Loyalist stack
             outcome = "FULL_COUP";
-            uint256 loot = (epoch.totalLoyal * 50) / 100;
-            uint256 loyalistRemaining = epoch.totalLoyal - loot;
-            
-            epoch.loyalistMultiplier = (loyalistRemaining * 1e18) / epoch.totalLoyal; // ~0.5e18
-            epoch.betrayerMultiplier = ((epoch.totalBetrayed + loot) * 1e18) / epoch.totalBetrayed;
+            if (epoch.totalLoyal > 0) {
+                uint256 loot = (epoch.totalLoyal * 50) / 100;
+                uint256 loyalistRemaining = epoch.totalLoyal - loot;
+                epoch.loyalistMultiplier = (loyalistRemaining * 1e18) / epoch.totalLoyal;
+                epoch.betrayerMultiplier = ((epoch.totalBetrayed + loot) * 1e18) / epoch.totalBetrayed;
+            } else {
+                epoch.betrayerMultiplier = 1e18;
+            }
         }
 
         epoch.resolved = true;
@@ -208,32 +213,62 @@ contract JudasProtocol is Ownable, ReentrancyGuard {
     /**
      * @dev Internal helper to process a user's result from their last epoch
      */
-    function _claimPendingRewards(address userAddr) internal {
+    /**
+     * @dev Public function to claim rewards up to a specific epoch.
+     * Useful if gas limit prevents claiming all pending epochs at once.
+     */
+    function claimRewards(uint256 upToEpoch) external nonReentrant {
+        require(upToEpoch <= currentEpochId, "Cannot claim future");
+        require(upToEpoch > userInfo[msg.sender].lastEpochInteraction, "Already claimed");
+        _claimPendingRewards(msg.sender, upToEpoch);
+    }
+
+    /**
+     * @dev Internal helper to process a user's result from their last epoch
+     * Now supports multi-epoch catchup (Passive Loyalty).
+     * @param limitEpoch The epoch ID up to which we process rewards (exclusive if loop is < limitEpoch?).
+     * Actually, logic: process from lastEpoch to limitEpoch.
+     * If limitEpoch == currentEpochId, we process up to currentEpochId - 1 (finished epochs).
+     * Wait, currentEpochId is the *active* epoch.
+     * So we process up to currentEpochId.
+     * We should loop `i < limitEpoch`.
+     */
+    function _claimPendingRewards(address userAddr, uint256 limitEpoch) internal {
         UserInfo storage user = userInfo[userAddr];
         
-        if (user.lastEpochInteraction < currentEpochId && user.stakedAmount > 0) {
-            Epoch storage prevEpoch = epochs[currentEpochId - 1]; // Use previous resolved epoch
-            // This logic assumes continuous participation. 
-            // If skipped multiple epochs, this simple logic breaks.
-            // MVP Fix: Check the SPECIFIC epoch they were last in.
+        if (user.stakedAmount == 0) {
+            user.lastEpochInteraction = limitEpoch;
+            return;
+        }
+
+        uint256 lastEpoch = user.lastEpochInteraction;
+        // Optimization: If already current, do nothing
+        if (lastEpoch >= limitEpoch) return;
+
+        // Iterate from lastEpoch up to limitEpoch
+        for (uint256 i = lastEpoch; i < limitEpoch; i++) {
+            Epoch storage targetEpoch = epochs[i];
             
-            if (prevEpoch.resolved) {
-                 uint256 mult = user.isBetrayer ? prevEpoch.betrayerMultiplier : prevEpoch.loyalistMultiplier;
+            if (targetEpoch.resolved) {
+                 uint256 mult = user.isBetrayer ? targetEpoch.betrayerMultiplier : targetEpoch.loyalistMultiplier;
                  user.stakedAmount = (user.stakedAmount * mult) / 1e18;
 
-                 // Update Reputation
                  if (user.isBetrayer) {
                      reputation[userAddr].betrayalCount++;
                  } else {
                      reputation[userAddr].loyalCount++;
                  }
                  
-                 // Reset betrayal stance for next round (Default to Loyal)
                  user.isBetrayer = false; 
+            } else {
+                // Stop at first unresolved epoch
+                // Update lastEpochInteraction to i so we resume from here
+                user.lastEpochInteraction = i;
+                return;
             }
         }
         
-        user.lastEpochInteraction = currentEpochId;
+        user.lastEpochInteraction = limitEpoch;
     }
 
     /**
@@ -241,7 +276,7 @@ contract JudasProtocol is Ownable, ReentrancyGuard {
      */
     function withdraw(uint256 amount) external nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
-        _claimPendingRewards(msg.sender); // Realize PnL first
+        _claimPendingRewards(msg.sender, currentEpochId); // Realize PnL first
         
         require(amount <= user.stakedAmount, "Insufficient balance");
         require(!user.isBetrayer, "Betrayers locked until resolution"); // Can't withdraw mid-coup

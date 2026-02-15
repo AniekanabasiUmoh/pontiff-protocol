@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { CrusadeService } from '@/lib/services/crusade-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+    const supabase = createServerSupabase();
     const params = await props.params;
     const { data: crusade, error } = await supabase
         .from('Crusade')

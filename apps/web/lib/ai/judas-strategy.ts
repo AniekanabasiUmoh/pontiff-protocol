@@ -1,5 +1,13 @@
 import { getTwitterClient } from '@/lib/clients/twitter';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
+import { createWalletClient, http, parseEther, publicActions } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { monadTestnet } from 'viem/chains';
+import { JudasProtocolABI } from '../../app/abis';
+
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://monad-testnet.g.alchemy.com/v2/demo';
+const JUDAS_ADDRESS = process.env.NEXT_PUBLIC_JUDAS_ADDRESS as `0x${string}`;
+const PRIVATE_KEY = process.env.JUDAS_AGENT_PRIVATE_KEY as `0x${string}`;
 
 export class JudasStrategy {
 
@@ -55,10 +63,8 @@ export class JudasStrategy {
      * Announces the result of the Epoch on Twitter and Database.
      */
     static async processEpochResult(epochId: number, outcome: string, betrayalPct: number) {
+        const supabase = createServerSupabase();
         // 1. Log to DB
-        // Find or create 'JudasGame' generic wrapper? 
-        // We log a 'Game' entry for the Epoch.
-
         const { error } = await supabase.from('games').insert({
             player1: "ThePontiff", // Mock
             player2: "ThePeople",
@@ -72,14 +78,11 @@ export class JudasStrategy {
             },
             wager: "0", // Tracks global session
             winner: outcome === "FAILED_COUP" ? "LOYALISTS" : "BETRAYERS",
-            // txHash: "0xEPOCH...RESULT" // Not in schema?
         });
 
         if (error) console.error("Failed to log Judas Epoch:", error);
 
         // 2. Tweet Result
-        // "⚔️ EPOCH 5 RESULTS: FAILED COUP (12% Betrayal). Loyalists purged the heretics. The Pontiff remains supreme. #JudasProtocol"
-
         let message = `⚔️ EPOCH ${epochId} RESULTS: ${outcome.replace('_', ' ')} (${betrayalPct.toFixed(1)}% Betrayal).\n\n`;
 
         if (outcome === 'FAILED_COUP') {
@@ -104,40 +107,163 @@ export class JudasStrategy {
     }
 
     /**
+     * Resolves an expired epoch using the agent wallet.
+     * Called by cron when epoch endTime has passed but resolved=false.
+     */
+    static async resolveExpiredEpoch(epochId: number): Promise<{ success: boolean; txHash?: string }> {
+        try {
+            if (!PRIVATE_KEY || !JUDAS_ADDRESS) {
+                console.error("[JUDAS RESOLVE] Missing env vars");
+                return { success: false };
+            }
+
+            const account = privateKeyToAccount(PRIVATE_KEY);
+            const client = createWalletClient({
+                account,
+                chain: monadTestnet,
+                transport: http(RPC_URL)
+            }).extend(publicActions);
+
+            console.log(`[JUDAS RESOLVE] Resolving expired epoch ${epochId}...`);
+            const hash = await client.writeContract({
+                address: JUDAS_ADDRESS,
+                abi: JudasProtocolABI,
+                functionName: 'resolveEpoch',
+            });
+            await client.waitForTransactionReceipt({ hash });
+            console.log(`[JUDAS RESOLVE] Epoch ${epochId} resolved. Tx: ${hash}`);
+            return { success: true, txHash: hash };
+        } catch (error: any) {
+            const cleanError = error.message?.replace(PRIVATE_KEY, '[REDACTED_KEY]') || "Unknown Error";
+            console.error("[JUDAS RESOLVE] Failed:", cleanError);
+            return { success: false };
+        }
+    }
+
+    /**
      * Auto-stakes the Pontiff in the current epoch.
      * Called when a new epoch begins or when the Pontiff wants to participate.
      */
-    static async autoStakePontiff(epochId: number): Promise<{ success: boolean; action: string }> {
+    static async autoStakePontiff(epochId: number): Promise<{ success: boolean; action: string; txHash?: string }> {
         try {
-            // 1. Determine Pontiff's Action for this Epoch
-            // We need current epoch stats to decide, but for a new epoch, we use historical data
-            // For simplicity, we'll use a strategic default or look at past pattern
+            if (!PRIVATE_KEY || !JUDAS_ADDRESS) {
+                console.error("Missing Env Vars for Judas Agent");
+                return { success: false, action: 'ABORT' };
+            }
 
-            const action = await this.determinePontiffAction(epochId, BigInt(0), BigInt(0));
+            const account = privateKeyToAccount(PRIVATE_KEY);
+            const client = createWalletClient({
+                account,
+                chain: monadTestnet,
+                transport: http(RPC_URL)
+            }).extend(publicActions);
 
-            // 2. Mock stake amount (In production, this would trigger a backend wallet transaction)
-            const stakeAmount = "1000000000000000000000"; // 1000 sGUILT
+            const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_STAKING_ADDRESS as `0x${string}`;
+            // Import Staking ABI locally or assumes it's standard ERC20 mostly
+            const ERC20_ABI = [{
+                name: 'allowance',
+                type: 'function',
+                stateMutability: 'view',
+                inputs: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }],
+                outputs: [{ name: '', type: 'uint256' }]
+            }, {
+                name: 'approve',
+                type: 'function',
+                stateMutability: 'nonpayable',
+                inputs: [{ name: 'spender', type: 'address' }, { name: 'amount', type: 'uint256' }],
+                outputs: [{ name: '', type: 'bool' }]
+            }] as const;
 
-            // 3. Log the Pontiff's intent
-            console.log(`[JUDAS AUTO-STAKE] Epoch ${epochId}: Pontiff will ${action.action} with ${stakeAmount} sGUILT`);
-            console.log(`[JUDAS AUTO-STAKE] Reason: ${action.reason}`);
+            // 0. Check Allowance
+            const allowance = await client.readContract({
+                address: TOKEN_ADDRESS,
+                abi: ERC20_ABI,
+                functionName: 'allowance',
+                args: [account.address, JUDAS_ADDRESS]
+            });
 
-            // 4. In production, execute contract call:
-            // await judasContract.write.deposit([parseEther("1000")])
-            // if (action.action === 'BETRAY') {
-            //     await judasContract.write.signalBetrayal()
-            // }
+            if (allowance < parseEther("1000")) {
+                console.log("[JUDAS] Approving infinite...");
+                const hash = await client.writeContract({
+                    address: TOKEN_ADDRESS,
+                    abi: ERC20_ABI,
+                    functionName: 'approve',
+                    args: [JUDAS_ADDRESS, BigInt("115792089237316195423570985008687907853269984665640564039457584007913129639935")] // Max Uint256
+                });
+                await client.waitForTransactionReceipt({ hash });
+            }
+
+            // 1. Check Game State
+            const gameState = await client.readContract({
+                address: JUDAS_ADDRESS,
+                abi: JudasProtocolABI,
+                functionName: 'getGameState'
+            }) as any;
+
+            // Double check epoch match?
+            if (Number(gameState.epochId) !== epochId) {
+                console.warn(`[JUDAS] Epoch mismatch. Cron said ${epochId}, Contract said ${gameState.epochId}. Using contract.`);
+            }
+
+            const totalLoyal = BigInt(gameState.totalLoyal);
+            const totalBetrayed = BigInt(gameState.totalBetrayed);
+
+            // Check if already deposited?
+            const userPos = await client.readContract({
+                address: JUDAS_ADDRESS,
+                abi: JudasProtocolABI,
+                functionName: 'getUserPosition',
+                args: [account.address]
+            }) as any;
+
+            if (userPos.staked > BigInt(0)) {
+                return { success: true, action: 'ALREADY_STAKED', txHash: '0x' };
+            }
+
+            // 2. Decide
+            const actionResult = await this.determinePontiffAction(Number(gameState.epochId), totalLoyal, totalBetrayed);
+            const stakeAmount = parseEther("10"); // 10 sGUILT
+
+            console.log(`[JUDAS AUTO-STAKE] Pontiff deciding... Action: ${actionResult.action}`);
+
+            // 3. Execute
+            const txDeposit = await client.writeContract({
+                address: JUDAS_ADDRESS,
+                abi: JudasProtocolABI,
+                functionName: 'deposit',
+                args: [stakeAmount]
+            });
+            console.log(`[JUDAS] Deposit Tx: ${txDeposit}`);
+
+            let finalTx = txDeposit;
+
+            // Wait for deposit?
+            // Usually nonce management handles it, but let's wait to be safe and ensure ordering.
+            await client.waitForTransactionReceipt({ hash: txDeposit });
+
+            if (actionResult.action === 'BETRAY') {
+                const txBetray = await client.writeContract({
+                    address: JUDAS_ADDRESS,
+                    abi: JudasProtocolABI,
+                    functionName: 'signalBetrayal'
+                });
+                console.log(`[JUDAS] Betray Tx: ${txBetray}`);
+                finalTx = txBetray;
+            }
 
             return {
                 success: true,
-                action: action.action
+                action: actionResult.action,
+                txHash: finalTx
             };
 
-        } catch (error) {
-            console.error("[JUDAS AUTO-STAKE] Failed:", error);
+        } catch (error: any) {
+            // Mask private key
+            const cleanError = error.message?.replace(PRIVATE_KEY, '[REDACTED_KEY]') || "Unknown Error";
+            console.error("[JUDAS AUTO-STAKE] Failed:", cleanError);
             return {
                 success: false,
-                action: 'COOPERATE' // Default to safe option
+                action: 'ERROR'
             };
         }
     }

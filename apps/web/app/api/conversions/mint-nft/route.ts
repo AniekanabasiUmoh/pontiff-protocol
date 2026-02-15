@@ -1,6 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
-import { ethers } from 'ethers';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
+import {
+    createPublicClient,
+    createWalletClient,
+    http,
+    parseAbi,
+    keccak256,
+    toBytes,
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { monadTestnet } from 'viem/chains';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +37,7 @@ enum SinSeverity {
  */
 export async function POST(request: NextRequest) {
     try {
+        const supabase = createServerSupabase();
         const { conversionId, recipientAddress, severity } = await request.json();
 
         if (!conversionId || !recipientAddress) {
@@ -160,49 +170,48 @@ async function mintIndulgenceNFT(
     severity: SinSeverity
 ): Promise<{ success: boolean; tokenId?: number; txHash?: string; error?: string }> {
     try {
-        // Setup provider and signer
-        const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-
-        // Use regex to robustly extract key, ignoring potential env var concatenation
-        const keyMatch = (process.env.PONTIFF_PRIVATE_KEY || '0xREDACTED_ROTATE_THIS_KEY').match(/(0x)?[a-fA-F0-9]{64}/);
+        const keyMatch = (process.env.PONTIFF_PRIVATE_KEY || '').match(/(0x)?[a-fA-F0-9]{64}/);
         let pontiffKey = keyMatch ? keyMatch[0] : '';
-
-        if (pontiffKey && !pontiffKey.startsWith('0x')) {
-            pontiffKey = `0x${pontiffKey}`;
-        }
-
-        const pontiffWallet = new ethers.Wallet(pontiffKey, provider);
+        if (pontiffKey && !pontiffKey.startsWith('0x')) pontiffKey = `0x${pontiffKey}`;
 
         const indulgenceAddress = process.env.NEXT_PUBLIC_INDULGENCE_ADDRESS || process.env.NEXT_PUBLIC_NFT_ADDRESS;
         if (!indulgenceAddress) {
             throw new Error('NEXT_PUBLIC_INDULGENCE_ADDRESS or NEXT_PUBLIC_NFT_ADDRESS not configured');
         }
 
-        const indulgenceContract = new ethers.Contract(
-            indulgenceAddress,
-            INDULGENCE_ABI,
-            pontiffWallet
-        );
+        const account = privateKeyToAccount(pontiffKey as `0x${string}`);
+        const publicClient = createPublicClient({ chain: monadTestnet, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
+        const walletClient = createWalletClient({ account, chain: monadTestnet, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
+        const nftAbi = parseAbi(INDULGENCE_ABI);
 
         // Get next token ID before minting
-        const nextTokenId = await indulgenceContract.nextTokenId();
+        const nextTokenId = await publicClient.readContract({
+            address: indulgenceAddress as `0x${string}`,
+            abi: nftAbi,
+            functionName: 'nextTokenId',
+        });
 
         // Hash the conversionId (UUID) to a uint256 for the sinId
-        const sinIdBigInt = BigInt(ethers.keccak256(ethers.toUtf8Bytes(conversionId)));
+        const sinIdBigInt = BigInt(keccak256(toBytes(conversionId)));
 
         // Mint NFT (absolve the sin)
         console.log(`[Indulgence] Minting NFT for sin ${conversionId} (Hash: ${sinIdBigInt.toString()}), severity ${severity}`);
 
-        const tx = await indulgenceContract.absolve(sinIdBigInt, severity);
-        console.log(`[Indulgence] Transaction sent: ${tx.hash}`);
+        const txHash = await walletClient.writeContract({
+            address: indulgenceAddress as `0x${string}`,
+            abi: nftAbi,
+            functionName: 'absolve',
+            args: [sinIdBigInt, severity],
+        });
+        console.log(`[Indulgence] Transaction sent: ${txHash}`);
 
-        const receipt = await tx.wait();
-        console.log(`[Indulgence] Transaction confirmed: ${receipt.hash}`);
+        const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+        console.log(`[Indulgence] Transaction confirmed: ${receipt.transactionHash}`);
 
         return {
             success: true,
-            tokenId: Number(nextTokenId) + 1,
-            txHash: receipt.hash
+            tokenId: Number(nextTokenId as bigint) + 1,
+            txHash: receipt.transactionHash
         };
 
     } catch (error: any) {

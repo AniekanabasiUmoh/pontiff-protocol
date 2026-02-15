@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { playMatch, PvPAgent } from '@/lib/services/pvp-rps-engine';
 
 /**
  * POST /api/tournaments/:tournamentId/match-result
@@ -14,14 +15,7 @@ export async function POST(
         const { tournamentId } = await params;
         const body = await request.json();
 
-        const { matchId, winner, gameId } = body;
-
-        if (!matchId || !winner) {
-            return NextResponse.json(
-                { success: false, error: 'Missing required fields: matchId, winner' },
-                { status: 400 }
-            );
-        }
+        const { matchId, gameId } = body;
 
         // Get the match
         const { data: match, error: matchError } = await supabase
@@ -37,19 +31,48 @@ export async function POST(
             );
         }
 
-        // Validate winner is one of the players
-        if (winner !== match.player1_wallet && winner !== match.player2_wallet) {
-            return NextResponse.json(
-                { success: false, error: 'Winner must be one of the match participants' },
-                { status: 400 }
-            );
-        }
+        // Fetch agents for simulation
+        const { data: agents } = await supabase
+            .from('agent_sessions')
+            .select('*')
+            .in('owner_address', [match.player1_wallet, match.player2_wallet]);
+
+        const agent1Data = agents?.find(a => a.owner_address === match.player1_wallet);
+        const agent2Data = agents?.find(a => a.owner_address === match.player2_wallet);
+
+        // Default stats if agent not found (fallback)
+        const agent1: PvPAgent = {
+            id: match.player1_wallet,
+            sessionId: agent1Data?.id || 'unknown',
+            strategy: agent1Data?.strategy || 'balanced',
+            elo: agent1Data?.elo_rating || 1000,
+            balance: parseFloat(agent1Data?.total_earnings || '0'),
+            gamesPlayed: agent1Data?.total_matches || 0,
+            gameHistory: [] // Todo: fetch history if needed for advanced strategies
+        };
+
+        const agent2: PvPAgent = {
+            id: match.player2_wallet,
+            sessionId: agent2Data?.id || 'unknown',
+            strategy: agent2Data?.strategy || 'balanced',
+            elo: agent2Data?.elo_rating || 1000,
+            balance: parseFloat(agent2Data?.total_earnings || '0'),
+            gamesPlayed: agent2Data?.total_matches || 0,
+            gameHistory: []
+        };
+
+        // Simulate Match
+        const matchResult = playMatch(matchId, agent1, agent2, 3); // Best of 3
+        const resultWinnerId = matchResult.winnerId;
+
+        // Fallback for draw: Pick Random (House rule: pure random if engine draws)
+        const finalWinner = resultWinnerId || (Math.random() > 0.5 ? match.player1_wallet : match.player2_wallet);
 
         // Update match with result
         const { error: updateError } = await supabase
             .from('tournament_brackets')
             .update({
-                winner_wallet: winner,
+                winner_wallet: finalWinner,
                 status: 'completed'
                 // game_id removed - column doesn't exist in schema
             })
@@ -86,7 +109,7 @@ export async function POST(
 
                 await supabase
                     .from('tournament_brackets')
-                    .update({ [updateField]: winner })
+                    .update({ [updateField]: finalWinner })
                     .eq('id', nextMatch.id);
             } else {
                 // Create new match for next round
@@ -96,8 +119,8 @@ export async function POST(
                         tournament_id: tournamentId,
                         bracket_number: nextBracketNumber,
                         round_number: nextRound,
-                        player1_wallet: match.bracket_number % 2 === 1 ? winner : null,
-                        player2_wallet: match.bracket_number % 2 === 0 ? winner : null,
+                        player1_wallet: match.bracket_number % 2 === 1 ? finalWinner : null,
+                        player2_wallet: match.bracket_number % 2 === 0 ? finalWinner : null,
                         status: 'pending'
                     })
                     .select()
@@ -120,7 +143,7 @@ export async function POST(
                 .insert({
                     tournament_id: tournamentId,
                     rank: 1,
-                    wallet_address: winner,
+                    wallet_address: finalWinner,
                     games_won: 1,
                     games_played: 1,
                     win_rate: 100.0
@@ -130,7 +153,8 @@ export async function POST(
         return NextResponse.json({
             success: true,
             matchId,
-            winner,
+            winner: finalWinner,
+            simulation: matchResult,
             nextRound: match.round_number > 1 ? match.round_number - 1 : null,
             nextMatchScheduled,
             bracketUpdated: true,

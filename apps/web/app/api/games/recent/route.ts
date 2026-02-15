@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
-// Initialize Supabase client
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Initialize Supabase client
 
 // GET: Fetch recent game activity for Live Game Feed
 export async function GET(req: NextRequest) {
@@ -88,6 +84,32 @@ export async function GET(req: NextRequest) {
             }
         } catch (e) {
             // Ignore if debates table has issues
+        }
+
+        // 4. Fetch from game_history (ACTUAL GAMES)
+        try {
+            const { data: history } = await supabase
+                .from('game_history')
+                .select('id, game_type, wager_amount, profit_loss, result, created_at, player_address')
+                .order('created_at', { ascending: false })
+                .limit(limit);
+
+            if (history?.length) {
+                history.forEach(h => {
+                    games.push({
+                        id: `game-${h.id}`,
+                        agent: getAgentFromWallet(h.player_address) || 'Agent',
+                        game: h.game_type || 'RPS',
+                        wager: `${formatAmount(h.wager_amount)} GUILT`,
+                        result: h.result ? h.result.toUpperCase() : 'PLAYED',
+                        profit: `${formatSignedAmount(h.profit_loss)} GUILT`,
+                        time: formatTimeAgo(new Date(h.created_at)),
+                        timestamp: new Date(h.created_at).getTime()
+                    });
+                });
+            }
+        } catch (e) {
+            console.error('Failed to fetch game_history:', e);
         }
 
         // Sort all games by timestamp and limit

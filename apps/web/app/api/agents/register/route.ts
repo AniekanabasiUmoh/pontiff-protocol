@@ -7,20 +7,22 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ethers } from 'ethers';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import {
+    isAddress,
+    keccak256,
+    toBytes,
+    toHex,
+    recoverTypedDataAddress,
+} from 'viem';
+import { createServerSupabase } from '@/lib/db/supabase-server';
+
 
 // EIP-712 Domain for agent registration
 const DOMAIN = {
     name: 'The Pontiff Protocol',
     version: '1',
     chainId: 10143, // Monad Testnet
-    verifyingContract: process.env.NEXT_PUBLIC_SESSION_WALLET_FACTORY_ADDRESS!
+    verifyingContract: process.env.NEXT_PUBLIC_SESSION_WALLET_FACTORY_ADDRESS! as `0x${string}`
 };
 
 // EIP-712 Type for agent registration
@@ -54,14 +56,14 @@ export async function POST(request: Request) {
             );
         }
 
-        if (!sessionWallet || !ethers.isAddress(sessionWallet)) {
+        if (!sessionWallet || !isAddress(sessionWallet)) {
             return NextResponse.json(
                 { error: 'Invalid session wallet address' },
                 { status: 400 }
             );
         }
 
-        if (!ownerAddress || !ethers.isAddress(ownerAddress)) {
+        if (!ownerAddress || !isAddress(ownerAddress)) {
             return NextResponse.json(
                 { error: 'Invalid owner address' },
                 { status: 400 }
@@ -93,13 +95,13 @@ export async function POST(request: Request) {
             nonce
         };
 
-        const digest = ethers.TypedDataEncoder.hash(
-            DOMAIN,
-            AGENT_REGISTRATION_TYPE,
-            message
-        );
-
-        const recoveredAddress = ethers.recoverAddress(digest, signature);
+        const recoveredAddress = await recoverTypedDataAddress({
+            domain: DOMAIN,
+            types: AGENT_REGISTRATION_TYPE,
+            primaryType: 'AgentRegistration',
+            message,
+            signature: signature as `0x${string}`,
+        });
 
         if (recoveredAddress.toLowerCase() !== ownerAddress.toLowerCase()) {
             return NextResponse.json(
@@ -123,7 +125,8 @@ export async function POST(request: Request) {
         }
 
         // Generate API key
-        const apiKey = `pontiff_${ethers.hexlify(ethers.randomBytes(32)).slice(2)}`;
+        const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+        const apiKey = `pontiff_${toHex(randomBytes).slice(2)}`;
 
         // Register agent in database
         const { data: agent, error: dbError } = await supabase
@@ -132,7 +135,7 @@ export async function POST(request: Request) {
                 agent_name: agentName,
                 session_wallet: sessionWallet.toLowerCase(),
                 owner_address: ownerAddress.toLowerCase(),
-                api_key_hash: ethers.keccak256(ethers.toUtf8Bytes(apiKey)),
+                api_key_hash: keccak256(toBytes(apiKey)),
                 is_active: true,
                 created_at: new Date().toISOString()
             })

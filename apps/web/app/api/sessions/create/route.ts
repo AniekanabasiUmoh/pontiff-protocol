@@ -6,14 +6,10 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ethers } from 'ethers';
+import { parseEther, isAddress } from 'viem';
 import { AgentManagerService } from '@/lib/services/agent-manager-service';
-import type { AgentStrategy } from '@/lib/services/agent-manager-service';
+import type { AgentStrategy } from '@/lib/services/strategies';
 
-const SESSION_WALLET_FACTORY_ABI = [
-    "function createSession(uint256 _depositAmount, uint256 _stopLoss, uint256 _sessionFee, uint256 _durationHours) external returns (address)",
-    "event SessionCreated(address indexed user, address indexed sessionWallet, uint256 depositAmount, uint256 stopLoss, uint256 expiresAt)"
-];
 
 export async function POST(request: Request) {
     try {
@@ -28,7 +24,7 @@ export async function POST(request: Request) {
         } = body;
 
         // Validation
-        if (!userWallet || !ethers.isAddress(userWallet)) {
+        if (!userWallet || !isAddress(userWallet)) {
             return NextResponse.json(
                 { error: 'Invalid user wallet address' },
                 { status: 400 }
@@ -56,8 +52,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Setup provider and factory contract
-        const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
         const factoryAddress = process.env.NEXT_PUBLIC_SESSION_WALLET_FACTORY_ADDRESS;
 
         if (!factoryAddress) {
@@ -66,12 +60,6 @@ export async function POST(request: Request) {
                 { status: 500 }
             );
         }
-
-        const factory = new ethers.Contract(
-            factoryAddress,
-            SESSION_WALLET_FACTORY_ABI,
-            provider
-        );
 
         // Calculate session fee (e.g., 1% of deposit or fixed amount)
         const sessionFeePercent = 0.01; // 1%
@@ -85,9 +73,9 @@ export async function POST(request: Request) {
             success: true,
             message: 'Session parameters calculated',
             params: {
-                depositAmount: ethers.parseEther(depositAmount.toString()).toString(),
-                stopLoss: ethers.parseEther(stopLoss.toString()).toString(),
-                sessionFee: ethers.parseEther(sessionFee.toString()).toString(),
+                depositAmount: parseEther(depositAmount.toString()).toString(),
+                stopLoss: parseEther(stopLoss.toString()).toString(),
+                sessionFee: parseEther(sessionFee.toString()).toString(),
                 durationHours,
                 factoryAddress,
                 estimatedGas: '500000' // Estimated gas for createSession
@@ -125,14 +113,14 @@ export async function PUT(request: Request) {
         } = body;
 
         // Validation
-        if (!sessionWallet || !ethers.isAddress(sessionWallet)) {
+        if (!sessionWallet || !isAddress(sessionWallet)) {
             return NextResponse.json(
                 { error: 'Invalid session wallet address' },
                 { status: 400 }
             );
         }
 
-        if (!userWallet || !ethers.isAddress(userWallet)) {
+        if (!userWallet || !isAddress(userWallet)) {
             return NextResponse.json(
                 { error: 'Invalid user wallet address' },
                 { status: 400 }
@@ -140,7 +128,7 @@ export async function PUT(request: Request) {
         }
 
         // Initialize agent manager and spawn agent
-        const agentManager = new AgentManagerService();
+        const agentManager = AgentManagerService.getInstance();
         const sessionId = await agentManager.startAgent(
             sessionWallet,
             userWallet,

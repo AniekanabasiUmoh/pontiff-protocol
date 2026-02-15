@@ -1,13 +1,14 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { validateAction } from '@/lib/middleware/validate-action';
 import { ChallengeAction } from '@/lib/types/actions';
 import { logWorldEvent } from '@/lib/services/world-event-service';
 import { ConversionService } from '@/lib/services/conversion-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { updateWorldState } from '@/lib/actions/update-world-state';
 
 export async function POST(request: Request) {
     try {
+        const supabase = createServerSupabase();
         const body: ChallengeAction = await request.json();
 
         // 1. Validate

@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { LeaderboardService } from '@/lib/services/leaderboard-service';
 import { updateWorldState } from '@/lib/actions/update-world-state';
 
 export async function POST(request: NextRequest) {
     try {
+        const supabase = createServerSupabase();
         const body = await request.json();
         const {
             playerAddress,
@@ -60,17 +61,7 @@ export async function POST(request: NextRequest) {
         // 3. Trigger World State Update
         updateWorldState().catch((err: any) => console.error('Failed to update world state:', err));
 
-        // 4. Update Leaderboard
-        try {
-            if (actionType === 'BETRAY') {
-                await LeaderboardService.updateLeaderboard(playerAddress, 'BETRAYAL', 0);
-            } else if (actionType === 'WITHDRAW' && amount > 0) {
-                await LeaderboardService.updateLeaderboard(playerAddress, 'WIN', amount);
-            }
-            // STAKE counts as participation, maybe we don't update score yet?
-        } catch (lbError) {
-            console.error("Failed to update leaderboard:", lbError);
-        }
+
 
         return NextResponse.json({ success: true, gameId: (game as any)?.id });
 

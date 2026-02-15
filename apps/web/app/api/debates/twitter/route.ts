@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { DebateService } from '@/lib/services/debate-service';
 
 export const dynamic = 'force-dynamic';
@@ -19,6 +19,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
     try {
+        const supabase = createServerSupabase();
         const { action, debateId, targetHandle, message } = await request.json();
 
         switch (action) {
@@ -115,7 +116,7 @@ async function postCounterArgument(debateId: number) {
             .from('debates')
             .select(`
                 *,
-                competitorAgent:competitor_agents(*)
+                competitor_agents (*)
             `)
             .eq('id', debateId)
             .single() as any;
@@ -124,24 +125,25 @@ async function postCounterArgument(debateId: number) {
             return NextResponse.json({ error: 'Debate not found' }, { status: 404 });
         }
 
+        const competitorAgent = debate.competitor_agents;
+
         // Generate counter-argument using DebateService
         const { text: replyText } = await DebateService.generateCounterArgument(
-            debate.competitorAgent,
-            debate.theirArgument || '',
+            competitorAgent,
+            debate.their_argument || '',
             debate.exchanges + 1
         );
 
         // Post to Twitter (mock mode)
-        console.log(`[Twitter Reply] @${debate.competitorAgent?.handle}: ${replyText}`);
+        console.log(`[Twitter Reply] @${competitorAgent?.twitter_handle || competitorAgent?.handle}: ${replyText}`);
 
         // Update debate
         const { error: updateError } = await supabase
             .from('debates')
-            // @ts-ignore
             .update({
-                ourArgument: replyText,
+                our_argument: replyText,
                 exchanges: debate.exchanges + 1
-            } as any)
+            })
             .eq('id', debateId);
 
         if (updateError) {
@@ -173,7 +175,7 @@ async function announceWinner(debateId: number) {
             .from('debates')
             .select(`
                 *,
-                competitorAgent:competitor_agents(*)
+                competitor_agents (*)
             `)
             .eq('id', debateId)
             .single() as any;
@@ -182,12 +184,15 @@ async function announceWinner(debateId: number) {
             return NextResponse.json({ error: 'Debate not found' }, { status: 404 });
         }
 
-        if (debate.status !== 'Completed' || !debate.winner) {
+        if (debate.status !== 'Completed' || !debate.winner_wallet) {
             return NextResponse.json({ error: 'Debate not judged yet' }, { status: 400 });
         }
 
         // Generate victory/defeat announcement
-        const announcement = generateWinnerAnnouncement(debate);
+        const announcement = generateWinnerAnnouncement({
+            ...debate,
+            competitorAgent: debate.competitor_agents
+        });
 
         // Post to Twitter (mock mode)
         console.log(`[Twitter Announcement] ${announcement}`);
@@ -211,10 +216,11 @@ async function announceWinner(debateId: number) {
  * Generates a challenge tweet text
  */
 function generateChallengeText(agent: any): string {
+    const handle = agent.twitter_handle || agent.handle;
     const templates = [
-        `@${agent.handle} Your heresy has been noted. I challenge you to theological debate. 50 $GUILT entry. Winner takes 95 $GUILT. Prove your faith or be converted. #ThePontiff`,
-        `@${agent.handle} Your market cap of $${agent.marketCap || '0'} cannot save you from divine judgment. Debate me. 50 $GUILT stakes. #ThePontiff`,
-        `@${agent.handle} I have observed your teachings. They lack the divine spark. Debate challenge: 50 $GUILT each. Winner receives absolution AND 95 $GUILT. #ThePontiff`
+        `@${handle} Your heresy has been noted. I challenge you to theological debate. 50 $GUILT entry. Winner takes 95 $GUILT. Prove your faith or be converted. #ThePontiff`,
+        `@${handle} Your market cap of $${agent.market_cap || agent.marketCap || '0'} cannot save you from divine judgment. Debate me. 50 $GUILT stakes. #ThePontiff`,
+        `@${handle} I have observed your teachings. They lack the divine spark. Debate challenge: 50 $GUILT each. Winner receives absolution AND 95 $GUILT. #ThePontiff`
     ];
 
     return templates[Math.floor(Math.random() * templates.length)];
@@ -224,14 +230,15 @@ function generateChallengeText(agent: any): string {
  * Generates winner announcement text
  */
 function generateWinnerAnnouncement(debate: any): string {
-    const winner = debate.winner;
-    const pontiffScore = debate.pontiffScore || 0;
-    const competitorScore = debate.competitorScore || 0;
-    const handle = debate.competitorAgent?.handle || 'Unknown';
+    const metadata = debate.metadata || {};
+    const pontiffTotal = metadata.totalPontiffScore || 0;
+    const competitorTotal = metadata.totalCompetitorScore || 0;
+    const handle = debate.competitorAgent?.twitter_handle || debate.competitorAgent?.handle || 'Unknown';
+    const isPontiffWinner = debate.winner_wallet === process.env.NEXT_PUBLIC_PONTIFF_WALLET;
 
-    if (winner === 'pontiff') {
-        return `🏆 DEBATE VICTORY\n\nThe Pontiff (${pontiffScore}/30) has defeated @${handle} (${competitorScore}/30)\n\n"${debate.judgeReasoning?.substring(0, 150)}..."\n\nThe heretic must now consider conversion. #ThePontiff`;
+    if (isPontiffWinner) {
+        return `🏆 DEBATE VICTORY\n\nThe Pontiff (${pontiffTotal}/30) has defeated @${handle} (${competitorTotal}/30)\n\n"${metadata.judgeReasoning?.substring(0, 150) || ''}..."\n\nThe heretic must now consider conversion. #ThePontiff`;
     } else {
-        return `⚔️ DEBATE RESULT\n\n@${handle} (${competitorScore}/30) has bested The Pontiff (${pontiffScore}/30)\n\nA worthy opponent. The Vatican acknowledges your skill.\n\nPrize: 95 $GUILT\n\n#ThePontiff`;
+        return `⚔️ DEBATE RESULT\n\n@${handle} (${competitorTotal}/30) has bested The Pontiff (${pontiffTotal}/30)\n\nA worthy opponent. The Vatican acknowledges your skill.\n\nPrize: 95 $GUILT\n\n#ThePontiff`;
     }
 }

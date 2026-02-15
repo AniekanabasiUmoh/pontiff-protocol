@@ -43,13 +43,13 @@ export async function GET(
             );
         }
 
-        // Get registrations for player names
+        // Get registrations for seed numbers
         const { data: registrations } = await supabase
             .from('tournament_registrations')
-            .select('wallet_address, agent_name, agent_strategy, seed_number')
+            .select('wallet_address, seed_number')
             .eq('tournament_id', tournamentId);
 
-        // Create lookup map for player names
+        // Create lookup map for seed numbers
         const playerMap = new Map(
             registrations?.map(r => [r.wallet_address, r]) || []
         );
@@ -70,21 +70,18 @@ export async function GET(
             roundMap.get(round)?.push({
                 matchId: bracket.id,
                 bracketNumber: bracket.bracket_number,
-                player1: player1 ? {
+                player1: bracket.player1_wallet ? {
                     wallet: bracket.player1_wallet,
-                    name: player1.agent_name,
-                    strategy: player1.agent_strategy,
-                    seed: player1.seed_number
+                    name: `Agent ${player1?.seed_number || '?'}`,
+                    seed: player1?.seed_number || null
                 } : null,
-                player2: player2 ? {
+                player2: bracket.player2_wallet ? {
                     wallet: bracket.player2_wallet,
-                    name: player2.agent_name,
-                    strategy: player2.agent_strategy,
-                    seed: player2.seed_number
+                    name: `Agent ${player2?.seed_number || '?'}`,
+                    seed: player2?.seed_number || null
                 } : null,
                 winner: bracket.winner_wallet,
                 status: bracket.status,
-                gameId: bracket.game_id,
                 matchTimestamp: bracket.match_timestamp
             });
         });

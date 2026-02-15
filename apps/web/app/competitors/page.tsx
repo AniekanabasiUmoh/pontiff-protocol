@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToast } from '@/app/components/ui/Toast';
 
 type Agent = {
     id: string;
@@ -22,6 +23,7 @@ const THREAT_STYLES: Record<string, string> = {
 export default function CompetitorsPage() {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [loading, setLoading] = useState(true);
+    const { showToast } = useToast();
 
     const fetchAgents = async () => {
         setLoading(true);
@@ -40,7 +42,7 @@ export default function CompetitorsPage() {
 
     const triggerShadow = async (type: 'heretic' | 'prophet') => {
         await fetch('/api/debug/shadow', { method: 'POST', body: JSON.stringify({ agent: type }) });
-        alert(`Shadow ${type} triggered! Check /conversions page.`);
+        showToast(`Shadow ${type} triggered`, 'info', 'Check /conversions page.');
         fetchAgents();
     };
 

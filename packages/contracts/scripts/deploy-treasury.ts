@@ -1,63 +1,128 @@
+
 import { ethers } from "hardhat";
+import * as fs from "fs";
+import * as path from "path";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const STATE_FILE = path.join(__dirname, "treasury-deploy-state.json");
+
+interface DeployState {
+    treasuryAddress?: string;
+    deployedAt?: string;
+    signerAddress?: string;
+    guiltAddress?: string;
+}
+
+function loadState(): DeployState {
+    if (fs.existsSync(STATE_FILE)) {
+        return JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
+    }
+    return {};
+}
+
+function saveState(state: DeployState) {
+    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+    console.log("💾 State saved to", STATE_FILE);
+}
 
 async function main() {
-    console.log("Deploying Treasury contract...");
+    console.log("🏛️  Deploying Pontiff Treasury (Casino Vault)...");
+    console.log("Using resilient deployment pattern (auto-resume on failure)\n");
 
+    const state = loadState();
+
+    // Check if already deployed
+    if (state.treasuryAddress) {
+        console.log("✅ Treasury already deployed at:", state.treasuryAddress);
+        console.log("   Deployed at:", state.deployedAt);
+        console.log("   Signer:", state.signerAddress);
+        console.log("   GUILT:", state.guiltAddress);
+        console.log("\nTo redeploy, delete:", STATE_FILE);
+        return;
+    }
+
+    // Get signers
     const [deployer] = await ethers.getSigners();
     console.log("Deployer:", deployer.address);
 
-    // Contract addresses from previous deployments
-    const GUILT_TOKEN = "0x3ba95dB0F41E81d71bCee84fAabb20F047b8d9fA";
-    const STAKING_POOL = "0x6a0375cc5d837ef0c27c6ced1e0a94d24aa80f1e"; // Cathedral V2
-    const TEAM_WALLET = deployer.address;
-    const OPS_WALLET = deployer.address;
+    const balance = await deployer.provider.getBalance(deployer.address);
+    console.log("Balance:", ethers.formatEther(balance), "MON");
 
-    const Treasury = await ethers.getContractFactory("Treasury");
-    const treasury = await Treasury.deploy(
-        GUILT_TOKEN,
-        STAKING_POOL,
-        TEAM_WALLET,
-        OPS_WALLET
-    );
+    if (balance === 0n) {
+        throw new Error("Deployer has no MON for gas!");
+    }
 
-    await treasury.waitForDeployment();
-    const treasuryAddress = await treasury.getAddress();
+    // Config
+    const GUILT_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_GUILT_ADDRESS;
+    if (!GUILT_TOKEN_ADDRESS) {
+        throw new Error("Missing NEXT_PUBLIC_GUILT_ADDRESS in .env");
+    }
 
-    console.log("\n✅ Treasury deployed to:", treasuryAddress);
+    // The backend signer (Pontiff) — signs withdrawal permits
+    const PONTIFF_SIGNER = process.env.PONTIFF_PRIVATE_KEY
+        ? new ethers.Wallet(process.env.PONTIFF_PRIVATE_KEY).address
+        : deployer.address;
 
-    // Setup revenue sources
-    console.log("\nSetting up revenue sources...");
+    console.log("\nConfig:");
+    console.log("  GUILT Token:", GUILT_TOKEN_ADDRESS);
+    console.log("  Backend Signer:", PONTIFF_SIGNER);
+    console.log("");
 
-    const RPS_GAME = "0x32354721c0b31e04a0cb71e7d2ec98c81f105ea3";
-    const SESSION_FACTORY = "0xe4d64436c8e5f38256e224ad5a71a1b606ff96dd";
+    // Deploy with retry
+    let attempts = 0;
+    const MAX_ATTEMPTS = 5;
 
-    await treasury.setRevenueSource(RPS_GAME, "RPS", true);
-    console.log("✅ RPS Game authorized as revenue source");
+    while (attempts < MAX_ATTEMPTS) {
+        attempts++;
+        console.log(`\n🚀 Deploy attempt ${attempts}/${MAX_ATTEMPTS}...`);
 
-    await treasury.setRevenueSource(SESSION_FACTORY, "SESSIONS", true);
-    console.log("✅ Session Factory authorized as revenue source");
+        try {
+            const Treasury = await ethers.getContractFactory("PontiffTreasury");
+            const treasury = await Treasury.deploy(GUILT_TOKEN_ADDRESS, PONTIFF_SIGNER);
 
-    console.log("\n📊 Treasury Configuration:");
-    console.log("- GUILT Token:", GUILT_TOKEN);
-    console.log("- Staking Pool (60%):", STAKING_POOL);
-    console.log("- Team Wallet (30%):", TEAM_WALLET);
-    console.log("- Operations Wallet (10%):", OPS_WALLET);
-    console.log("\n💰 Revenue Sources:");
-    console.log("- RPS Game:", RPS_GAME);
-    console.log("- Session Factory:", SESSION_FACTORY);
+            console.log("⏳ Waiting for confirmation...");
+            await treasury.waitForDeployment();
 
-    console.log("\n⚠️ Next Steps:");
-    console.log("1. Update RPSGame treasury address:");
-    console.log(`   npx hardhat run scripts/update-rps-treasury.ts --network monad-testnet`);
-    console.log("2. Add TREASURY_ADDRESS to .env files:");
-    console.log(`   TREASURY_ADDRESS=${treasuryAddress}`);
-    console.log("3. Test revenue distribution:");
-    console.log(`   npx hardhat run scripts/test-treasury.ts --network monad-testnet`);
+            const address = await treasury.getAddress();
+
+            // Save state immediately
+            state.treasuryAddress = address;
+            state.deployedAt = new Date().toISOString();
+            state.signerAddress = PONTIFF_SIGNER;
+            state.guiltAddress = GUILT_TOKEN_ADDRESS;
+            saveState(state);
+
+            console.log("\n✅ ════════════════════════════════════════");
+            console.log("   PontiffTreasury deployed successfully!");
+            console.log("   Address:", address);
+            console.log("   ════════════════════════════════════════\n");
+
+            console.log("📋 Add to your .env.local:");
+            console.log(`   NEXT_PUBLIC_TREASURY_ADDRESS="${address}"`);
+            console.log("");
+            console.log("📋 Add to .env.contracts:");
+            console.log(`   NEXT_PUBLIC_TREASURY_ADDRESS=${address}`);
+
+            return;
+        } catch (error: any) {
+            console.error(`❌ Attempt ${attempts} failed:`, error.message?.substring(0, 100));
+
+            if (attempts < MAX_ATTEMPTS) {
+                const delay = attempts * 5000; // Exponential backoff
+                console.log(`⏳ Retrying in ${delay / 1000}s...`);
+                await new Promise((r) => setTimeout(r, delay));
+            }
+        }
+    }
+
+    console.error("\n💀 All deployment attempts failed.");
+    console.error("The Monad testnet may be congested. Try again later.");
+    process.exitCode = 1;
 }
 
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error);
-        process.exit(1);
-    });
+main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});

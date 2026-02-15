@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { WorldEventType } from './world-event-service';
 
 /**
@@ -28,6 +28,7 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 export async function determinePontiffMove(opponentAddress: string): Promise<Move> {
+    const supabase = createServerSupabase();
     const startTime = Date.now();
     try {
         // 1. Check Cache (<500ms requirement)

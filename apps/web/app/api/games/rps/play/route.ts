@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { createWalletClient, http, createPublicClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { monadTestnet } from 'viem/chains';
 import { determinePontiffMove } from '@/lib/services/rps-service';
 import { LeaderboardService } from '@/lib/services/leaderboard-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { updateWorldState } from '@/lib/actions/update-world-state';
 import { PONTIFF_RPS_ABI } from '@/lib/abi/PontiffRPS';
 
@@ -14,6 +14,7 @@ const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_RPS_CONTRACT_ADDRESS as `0x${st
 
 export async function POST(request: Request) {
     try {
+        const supabase = createServerSupabase();
         const body = await request.json();
         const { gameId, playerAddress, wager, playerMove, txHash } = body;
 
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
                     payout: payout.toString()
                 },
                 created_at: new Date().toISOString()
-            }])
+            }] as any)
             .select()
             .single();
 

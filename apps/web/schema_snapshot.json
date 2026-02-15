@@ -1,0 +1,2701 @@
+{
+  "user_balances": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "available": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "frozen": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "total_deposited": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "total_withdrawn": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "total_wagered": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "total_won": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "confessions": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "user_id": {
+      "description": "Note:\nThis is a Foreign Key to `users.id`.<fk table='users' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "roast_text": {
+      "format": "text",
+      "type": "string"
+    },
+    "writ_image_url": {
+      "format": "text",
+      "type": "string"
+    },
+    "tweet_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "tweet_url": {
+      "format": "text",
+      "type": "string"
+    },
+    "share_count": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "is_absolved": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "absolution_tx_hash": {
+      "format": "text",
+      "type": "string"
+    },
+    "absolved_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "confession_type": {
+      "default": "penance_stake",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "stake_amount": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "status": {
+      "default": "pending",
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "sin_reduction": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "previous_sin_score": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "new_sin_score": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "transaction_hash": {
+      "format": "character varying",
+      "maxLength": 66,
+      "type": "string"
+    },
+    "nft_minted": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "nft_token_id": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "nft_mint_tx": {
+      "format": "character varying",
+      "maxLength": 66,
+      "type": "string"
+    },
+    "nft_metadata": {
+      "format": "jsonb"
+    },
+    "indulgencePrice": {
+      "format": "text",
+      "type": "string"
+    },
+    "roast": {
+      "format": "text",
+      "type": "string"
+    },
+    "sins": {
+      "format": "jsonb"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "walletAddress": {
+      "format": "text",
+      "type": "string"
+    },
+    "opt_in_public": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "tweeted": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    }
+  },
+  "staking_records": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "amount": {
+      "format": "text",
+      "type": "string"
+    },
+    "action": {
+      "format": "text",
+      "type": "string"
+    },
+    "tx_hash": {
+      "format": "text",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "sins": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "user_id": {
+      "description": "Note:\nThis is a Foreign Key to `users.id`.<fk table='users' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "sin_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "severity": {
+      "format": "text",
+      "type": "string"
+    },
+    "token_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "token_symbol": {
+      "format": "text",
+      "type": "string"
+    },
+    "buy_amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "sell_amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "loss_amount_usd": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "buy_timestamp": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "sell_timestamp": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "transaction_hash": {
+      "format": "text",
+      "type": "string"
+    },
+    "chain": {
+      "default": "monad",
+      "format": "text",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "tournaments": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "name": {
+      "format": "text",
+      "type": "string"
+    },
+    "tournament_type": {
+      "default": "Holy",
+      "format": "text",
+      "type": "string"
+    },
+    "status": {
+      "default": "pending",
+      "format": "text",
+      "type": "string"
+    },
+    "start_date": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "end_date": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "max_participants": {
+      "default": 32,
+      "format": "integer",
+      "type": "integer"
+    },
+    "current_participants": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "prize_pool": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "entry_fee": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    }
+  },
+  "tournament_brackets": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "tournament_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "bracket_number": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "round_number": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "player1_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "player2_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "winner_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "status": {
+      "default": "pending",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "match_timestamp": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "game_history": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "session_id": {
+      "description": "Note:\nThis is a Foreign Key to `agent_sessions.id`.<fk table='agent_sessions' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "player_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "game_type": {
+      "default": "RPS",
+      "format": "text",
+      "type": "string"
+    },
+    "result": {
+      "format": "text",
+      "type": "string"
+    },
+    "wager_amount": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "profit_loss": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "player_move": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "pontiff_move": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "tx_hash": {
+      "format": "text",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "pvp_leaderboard": {
+    "session_id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "user_wallet": {
+      "format": "text",
+      "type": "string"
+    },
+    "strategy": {
+      "format": "text",
+      "type": "string"
+    },
+    "agent_mode": {
+      "format": "text",
+      "type": "string"
+    },
+    "wins": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "losses": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "draws": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "elo_rating": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "total_earnings": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "win_rate": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "status": {
+      "format": "text",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "crusade_votes": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "crusade_id": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "voter": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "vote": {
+      "format": "character varying",
+      "maxLength": 10,
+      "type": "string"
+    },
+    "voted_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "betrayal_events": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "epoch_number": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "traitor_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "stake_slashed": {
+      "format": "text",
+      "type": "string"
+    },
+    "outcome": {
+      "format": "text",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "user_preferences": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "sound_enabled": {
+      "default": true,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "sound_volume": {
+      "default": 0.5,
+      "format": "numeric",
+      "type": "number"
+    },
+    "animations_enabled": {
+      "default": true,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "theme": {
+      "default": "dark",
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "show_confetti": {
+      "default": true,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "auto_play_enabled": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "crusade_participants": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "crusade_id": {
+      "description": "Note:\nThis is a Foreign Key to `crusades.id`.<fk table='crusades' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "contribution_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "contribution_value": {
+      "format": "text",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "websocket_events": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "event_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "event_data": {
+      "format": "jsonb"
+    },
+    "broadcast_to": {
+      "format": "text[]",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "processed": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "game_seeds": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "game_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "game_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "server_seed_hash": {
+      "format": "text",
+      "type": "string"
+    },
+    "server_seed": {
+      "format": "text",
+      "type": "string"
+    },
+    "client_seed": {
+      "format": "text",
+      "type": "string"
+    },
+    "nonce": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "pope_election_votes": {
+    "voter_wallet": {
+      "description": "Note:\nThis is a Primary Key.<pk/>\nThis is a Foreign Key to `cardinal_members.wallet_address`.<fk table='cardinal_members' column='wallet_address'/>",
+      "format": "text",
+      "type": "string"
+    },
+    "candidate_wallet": {
+      "description": "Note:\nThis is a Foreign Key to `cardinal_members.wallet_address`.<fk table='cardinal_members' column='wallet_address'/>",
+      "format": "text",
+      "type": "string"
+    },
+    "term_date": {
+      "default": "CURRENT_DATE",
+      "format": "date",
+      "type": "string"
+    },
+    "casted_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "cardinal_members": {
+    "wallet_address": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "text",
+      "type": "string"
+    },
+    "started_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "status": {
+      "default": "active",
+      "format": "text",
+      "type": "string"
+    },
+    "tier": {
+      "default": "cardinal",
+      "format": "text",
+      "type": "string"
+    },
+    "last_renewed_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "is_pope": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    }
+  },
+  "treasury_revenue_breakdown": {
+    "source": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "transaction_count": {
+      "format": "bigint",
+      "type": "integer"
+    },
+    "total_amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "avg_amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "max_amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "distributed_count": {
+      "format": "bigint",
+      "type": "integer"
+    },
+    "distributed_amount": {
+      "format": "numeric",
+      "type": "number"
+    }
+  },
+  "crusades": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "target_agent_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "target_agent_handle": {
+      "format": "text",
+      "type": "string"
+    },
+    "goal_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "status": {
+      "format": "text",
+      "type": "string"
+    },
+    "start_time": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "end_time": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "participants": {
+      "format": "jsonb"
+    },
+    "description": {
+      "format": "text",
+      "type": "string"
+    },
+    "progress": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "reward_pool": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "entry_fee": {
+      "default": 100,
+      "format": "numeric",
+      "type": "number"
+    },
+    "participant_count": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    }
+  },
+  "world_events": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "agentWallet": {
+      "format": "text",
+      "type": "string"
+    },
+    "eventType": {
+      "format": "text",
+      "type": "string"
+    },
+    "eventData": {
+      "format": "jsonb"
+    },
+    "description": {
+      "format": "text",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "CURRENT_TIMESTAMP",
+      "format": "timestamp without time zone",
+      "type": "string"
+    }
+  },
+  "pvp_matches": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "player1_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "player2_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "game_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "stake_amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "winner_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "status": {
+      "default": "pending",
+      "format": "text",
+      "type": "string"
+    },
+    "round_data": {
+      "format": "jsonb"
+    },
+    "best_of": {
+      "default": 3,
+      "format": "integer",
+      "type": "integer"
+    },
+    "house_fee": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "duration_ms": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "elo_change_p1": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "elo_change_p2": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "server_seed": {
+      "format": "text",
+      "type": "string"
+    },
+    "client_seed_1": {
+      "format": "text",
+      "type": "string"
+    },
+    "client_seed_2": {
+      "format": "text",
+      "type": "string"
+    },
+    "logs": {
+      "format": "jsonb"
+    },
+    "settled_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "judas_epochs": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "epoch_number": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "start_time": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "end_time": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "total_loyal": {
+      "default": "0",
+      "format": "text",
+      "type": "string"
+    },
+    "total_betrayed": {
+      "default": "0",
+      "format": "text",
+      "type": "string"
+    },
+    "betrayal_percentage": {
+      "format": "double precision",
+      "type": "number"
+    },
+    "outcome": {
+      "format": "text",
+      "type": "string"
+    },
+    "loyalist_multiplier": {
+      "format": "text",
+      "type": "string"
+    },
+    "betrayer_multiplier": {
+      "format": "text",
+      "type": "string"
+    },
+    "resolved": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "resolved_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "matchmaking_queue": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "agent_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "game_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "stake_amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "stake_range_min": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "stake_range_max": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "strategy": {
+      "format": "text",
+      "type": "string"
+    },
+    "elo_rating": {
+      "default": 1000,
+      "format": "integer",
+      "type": "integer"
+    },
+    "priority": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "status": {
+      "default": "searching",
+      "format": "text",
+      "type": "string"
+    },
+    "matched_with": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "match_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "joined_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expires_at": {
+      "default": "(now() + '00:05:00'::interval)",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "poker_betting_rounds": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "game_id": {
+      "description": "Note:\nThis is a Foreign Key to `games.id`.<fk table='games' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "round_number": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "round_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "player_action": {
+      "format": "text",
+      "type": "string"
+    },
+    "amount": {
+      "format": "text",
+      "type": "string"
+    },
+    "pot_size": {
+      "format": "text",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "dashboard_metrics": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "metric_key": {
+      "format": "text",
+      "type": "string"
+    },
+    "metric_value": {
+      "format": "jsonb"
+    },
+    "last_updated": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "game_results": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "game_type": {
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "wager_amount": {
+      "format": "character varying",
+      "maxLength": 78,
+      "type": "string"
+    },
+    "profit_loss": {
+      "format": "character varying",
+      "maxLength": 78,
+      "type": "string"
+    },
+    "result": {
+      "format": "character varying",
+      "maxLength": 10,
+      "type": "string"
+    },
+    "opponent_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "tx_hash": {
+      "format": "character varying",
+      "maxLength": 66,
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "cardinal_memberships": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "tier": {
+      "default": "basic",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "status": {
+      "default": "active",
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "started_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "last_renewed_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "cancelled_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "auto_renew": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "payment_tx_hash": {
+      "format": "character varying",
+      "maxLength": 66,
+      "type": "string"
+    },
+    "payment_amount": {
+      "default": "0",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "total_spent": {
+      "default": "0",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "perks": {
+      "format": "jsonb"
+    },
+    "metadata": {
+      "format": "jsonb"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expiresAt": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "paymentAmount": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "walletAddress": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "lastRenewedAt": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "cancelledAt": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "matches": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "tournament_id": {
+      "description": "Note:\nThis is a Foreign Key to `tournaments.id`.<fk table='tournaments' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "player1_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "player2_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "winner_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "round": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "status": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "crusade_proposals": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "crusade_id": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "target_agent": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "target_twitter": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "target_token": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "target_market_cap": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "target_volume": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "threat_level": {
+      "default": "MEDIUM",
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "is_religious": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "proposed_by": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "votes_for": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "votes_against": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "status": {
+      "default": "VOTING",
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "competitor_agents": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "text",
+      "type": "string"
+    },
+    "name": {
+      "format": "text",
+      "type": "string"
+    },
+    "twitter_handle": {
+      "format": "text",
+      "type": "string"
+    },
+    "contract_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "token_symbol": {
+      "format": "text",
+      "type": "string"
+    },
+    "narrative": {
+      "format": "text",
+      "type": "string"
+    },
+    "verification_method": {
+      "format": "text",
+      "type": "string"
+    },
+    "is_shadow_agent": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "threat_level": {
+      "default": "LOW",
+      "format": "text",
+      "type": "string"
+    },
+    "market_cap": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "holders": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "treasury_balance": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "discovered_at": {
+      "default": "CURRENT_TIMESTAMP",
+      "format": "timestamp without time zone",
+      "type": "string"
+    },
+    "last_updated": {
+      "default": "CURRENT_TIMESTAMP",
+      "format": "timestamp without time zone",
+      "type": "string"
+    },
+    "metadata": {
+      "format": "jsonb"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    }
+  },
+  "animation_views": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "animation_type": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "game_id": {
+      "format": "bigint",
+      "type": "integer"
+    },
+    "viewed_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "tournament_registrations": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "tournament_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "seed_number": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "entry_paid": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "joined_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "detected_agents": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "twitter_handle": {
+      "format": "text",
+      "type": "string"
+    },
+    "display_name": {
+      "format": "text",
+      "type": "string"
+    },
+    "contract_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "token_symbol": {
+      "format": "text",
+      "type": "string"
+    },
+    "detection_method": {
+      "format": "text",
+      "type": "string"
+    },
+    "verification_status": {
+      "default": "pending",
+      "format": "text",
+      "type": "string"
+    },
+    "threat_assessment": {
+      "format": "jsonb"
+    },
+    "first_detected": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "last_updated": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "agent_sessions": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "user_wallet": {
+      "format": "text",
+      "type": "string"
+    },
+    "session_wallet": {
+      "format": "text",
+      "type": "string"
+    },
+    "strategy": {
+      "format": "text",
+      "type": "string"
+    },
+    "starting_balance": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "current_balance": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "stop_loss": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "take_profit": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "status": {
+      "default": "active",
+      "format": "text",
+      "type": "string"
+    },
+    "games_played": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "tx_hash": {
+      "format": "character varying",
+      "maxLength": 66,
+      "type": "string"
+    },
+    "strategy_index": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "trash_talk": {
+      "default": true,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "max_wager": {
+      "format": "character varying",
+      "maxLength": 78,
+      "type": "string"
+    },
+    "game_type": {
+      "default": "all",
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "profit_loss": {
+      "default": "0",
+      "format": "character varying",
+      "maxLength": 78,
+      "type": "string"
+    },
+    "stopped_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "total_wins": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "total_losses": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "agent_mode": {
+      "default": "PvE",
+      "format": "text",
+      "type": "string"
+    },
+    "pvp_wins": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "pvp_losses": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "pvp_draws": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "elo_rating": {
+      "default": 1000,
+      "format": "integer",
+      "type": "integer"
+    },
+    "pvp_earnings": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "target_archetype": {
+      "format": "text",
+      "type": "string"
+    },
+    "target_rival": {
+      "format": "text",
+      "type": "string"
+    },
+    "pvp_aggression": {
+      "default": 0.5,
+      "format": "numeric",
+      "type": "number"
+    },
+    "deposit_amount": {
+      "default": "0",
+      "format": "character varying",
+      "maxLength": 78,
+      "type": "string"
+    },
+    "total_games": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "session_wallet_backup": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    }
+  },
+  "balance_transactions": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "type": {
+      "format": "text",
+      "type": "string"
+    },
+    "amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "balance_before": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "balance_after": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "game_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "game_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "metadata": {
+      "format": "jsonb"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "poker_hands": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "game_id": {
+      "description": "Note:\nThis is a Foreign Key to `games.id`.<fk table='games' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "player_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "hand_cards": {
+      "format": "jsonb"
+    },
+    "community_cards": {
+      "format": "jsonb"
+    },
+    "hand_strength": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "hand_name": {
+      "format": "text",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "conversions": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "text",
+      "type": "string"
+    },
+    "competitor_agent_id": {
+      "description": "Note:\nThis is a Foreign Key to `competitor_agents.id`.<fk table='competitor_agents' column='id'/>",
+      "format": "text",
+      "type": "string"
+    },
+    "conversion_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "evidence_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "evidence_data": {
+      "format": "jsonb"
+    },
+    "timestamp": {
+      "default": "CURRENT_TIMESTAMP",
+      "format": "timestamp without time zone",
+      "type": "string"
+    },
+    "verified": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    }
+  },
+  "judas_user_positions": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "epoch_number": {
+      "description": "Note:\nThis is a Foreign Key to `judas_epochs.epoch_number`.<fk table='judas_epochs' column='epoch_number'/>",
+      "format": "integer",
+      "type": "integer"
+    },
+    "staked_amount": {
+      "format": "text",
+      "type": "string"
+    },
+    "is_betrayer": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "final_payout": {
+      "format": "text",
+      "type": "string"
+    },
+    "claimed": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "bot_sessions": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "text",
+      "type": "string"
+    },
+    "session_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "agent_id": {
+      "format": "character varying",
+      "maxLength": 255,
+      "type": "string"
+    },
+    "status": {
+      "default": "active",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "strategy": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "games_played": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "games_won": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "total_wagered": {
+      "default": "0",
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "total_won": {
+      "default": "0",
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "last_active": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "auth_sessions": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "session_token": {
+      "format": "text",
+      "type": "string"
+    },
+    "chain_id": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "nonce": {
+      "format": "text",
+      "type": "string"
+    },
+    "signature": {
+      "format": "text",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "last_activity": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "games": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "player1": {
+      "format": "text",
+      "type": "string"
+    },
+    "player2": {
+      "format": "text",
+      "type": "string"
+    },
+    "game_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "wager": {
+      "format": "text",
+      "type": "string"
+    },
+    "status": {
+      "format": "text",
+      "type": "string"
+    },
+    "winner": {
+      "format": "text",
+      "type": "string"
+    },
+    "result": {
+      "format": "jsonb"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "completed_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "play_mode": {
+      "default": "on-chain",
+      "format": "text",
+      "type": "string"
+    }
+  },
+  "rps_move_history": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "player_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "move": {
+      "format": "text",
+      "type": "string"
+    },
+    "game_id": {
+      "description": "Note:\nThis is a Foreign Key to `games.id`.<fk table='games' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "revenue_distributions": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "total_amount": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "staking_amount": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "team_amount": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "ops_amount": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "transaction_hash": {
+      "format": "character varying",
+      "maxLength": 66,
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "cardinal_amount": {
+      "description": "Total amount distributed to cardinals",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "dev_fund_amount": {
+      "description": "Amount allocated to development fund",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "cardinals_count": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "per_cardinal_share": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "distribution_date": {
+      "default": "now()",
+      "description": "When the distribution was initiated",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "status": {
+      "default": "pending",
+      "description": "pending, completed, or failed",
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "metadata": {
+      "format": "jsonb"
+    }
+  },
+  "agent_escrow": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "agent_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "match_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "amount": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "status": {
+      "default": "locked",
+      "format": "text",
+      "type": "string"
+    },
+    "locked_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "released_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "users": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "twitter_handle": {
+      "format": "text",
+      "type": "string"
+    },
+    "discord_handle": {
+      "format": "text",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "updated_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "sin_score": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "last_confession_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "guilt_balance": {
+      "default": "0",
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "last_active": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "auth_nonces": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "nonce": {
+      "format": "text",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "used_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "debate_exchanges": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "text",
+      "type": "string"
+    },
+    "debate_id": {
+      "description": "Note:\nThis is a Foreign Key to `debates.id`.<fk table='debates' column='id'/>",
+      "format": "text",
+      "type": "string"
+    },
+    "speaker": {
+      "format": "text",
+      "type": "string"
+    },
+    "argument": {
+      "format": "text",
+      "type": "string"
+    },
+    "tweet_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "timestamp": {
+      "default": "CURRENT_TIMESTAMP",
+      "format": "timestamp without time zone",
+      "type": "string"
+    }
+  },
+  "indulgences": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "token_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "tier": {
+      "format": "text",
+      "type": "string"
+    },
+    "price_paid": {
+      "format": "text",
+      "type": "string"
+    },
+    "tx_hash": {
+      "format": "text",
+      "type": "string"
+    },
+    "purchased_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "roast_tweets": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "wallet_address": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "tweet_text": {
+      "format": "text",
+      "type": "string"
+    },
+    "sin_score": {
+      "format": "integer",
+      "type": "integer"
+    },
+    "posted": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "mock_mode": {
+      "default": true,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "twitter_tweet_id": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "error_message": {
+      "format": "text",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "leaderboard_entries": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "category": {
+      "format": "text",
+      "type": "string"
+    },
+    "score": {
+      "format": "double precision",
+      "type": "number"
+    },
+    "metadata": {
+      "format": "jsonb"
+    },
+    "last_updated": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "shadow_agents": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "text",
+      "type": "string"
+    },
+    "name": {
+      "format": "text",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "twitter_handle": {
+      "format": "text",
+      "type": "string"
+    },
+    "behavior_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "is_active": {
+      "default": true,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "actions_performed": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "last_action_at": {
+      "format": "timestamp without time zone",
+      "type": "string"
+    },
+    "metadata": {
+      "format": "jsonb"
+    }
+  },
+  "vatican_entrants": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "wallet_address": {
+      "format": "text",
+      "type": "string"
+    },
+    "entry_time": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "mon_paid": {
+      "format": "text",
+      "type": "string"
+    }
+  },
+  "treasury_revenue": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "bigint",
+      "type": "integer"
+    },
+    "source": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "amount": {
+      "format": "character varying",
+      "maxLength": 50,
+      "type": "string"
+    },
+    "transaction_hash": {
+      "format": "character varying",
+      "maxLength": 66,
+      "type": "string"
+    },
+    "distributed": {
+      "default": false,
+      "format": "boolean",
+      "type": "boolean"
+    },
+    "distributed_at": {
+      "format": "timestamp with time zone",
+      "type": "string"
+    },
+    "created_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "daily_confession_activity": {
+    "date": {
+      "format": "date",
+      "type": "string"
+    },
+    "total_confessions": {
+      "format": "bigint",
+      "type": "integer"
+    },
+    "total_staked": {
+      "format": "numeric",
+      "type": "number"
+    },
+    "total_sin_reduction": {
+      "format": "bigint",
+      "type": "integer"
+    },
+    "nfts_minted": {
+      "format": "bigint",
+      "type": "integer"
+    }
+  },
+  "crusade_milestones": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "crusade_id": {
+      "description": "Note:\nThis is a Foreign Key to `crusades.id`.<fk table='crusades' column='id'/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "milestone_type": {
+      "format": "text",
+      "type": "string"
+    },
+    "description": {
+      "format": "text",
+      "type": "string"
+    },
+    "achieved_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "crusade_results": {
+    "id": {
+      "default": "gen_random_uuid()",
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "uuid",
+      "type": "string"
+    },
+    "crusade_id": {
+      "format": "character varying",
+      "maxLength": 100,
+      "type": "string"
+    },
+    "outcome": {
+      "format": "character varying",
+      "maxLength": 20,
+      "type": "string"
+    },
+    "spoils": {
+      "default": 0,
+      "format": "numeric",
+      "type": "number"
+    },
+    "narrative": {
+      "format": "text",
+      "type": "string"
+    },
+    "completed_at": {
+      "default": "now()",
+      "format": "timestamp with time zone",
+      "type": "string"
+    }
+  },
+  "debates": {
+    "id": {
+      "description": "Note:\nThis is a Primary Key.<pk/>",
+      "format": "text",
+      "type": "string"
+    },
+    "competitor_agent_id": {
+      "description": "Note:\nThis is a Foreign Key to `competitor_agents.id`.<fk table='competitor_agents' column='id'/>",
+      "format": "text",
+      "type": "string"
+    },
+    "status": {
+      "default": "active",
+      "format": "text",
+      "type": "string"
+    },
+    "exchanges": {
+      "default": 0,
+      "format": "integer",
+      "type": "integer"
+    },
+    "our_last_argument": {
+      "format": "text",
+      "type": "string"
+    },
+    "their_last_argument": {
+      "format": "text",
+      "type": "string"
+    },
+    "initial_tweet_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "latest_tweet_id": {
+      "format": "text",
+      "type": "string"
+    },
+    "started_at": {
+      "default": "CURRENT_TIMESTAMP",
+      "format": "timestamp without time zone",
+      "type": "string"
+    },
+    "last_exchange_at": {
+      "default": "CURRENT_TIMESTAMP",
+      "format": "timestamp without time zone",
+      "type": "string"
+    },
+    "ended_at": {
+      "format": "timestamp without time zone",
+      "type": "string"
+    },
+    "metadata": {
+      "format": "jsonb"
+    },
+    "agent_a_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "agent_b_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    },
+    "agent_a_name": {
+      "format": "character varying",
+      "maxLength": 255,
+      "type": "string"
+    },
+    "agent_b_name": {
+      "format": "character varying",
+      "maxLength": 255,
+      "type": "string"
+    },
+    "winner_wallet": {
+      "format": "character varying",
+      "maxLength": 42,
+      "type": "string"
+    }
+  }
+}

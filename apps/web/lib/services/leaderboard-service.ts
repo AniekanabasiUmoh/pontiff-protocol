@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export type GameResultType = 'WIN' | 'LOSS' | 'BETRAYAL';
 
@@ -9,6 +9,7 @@ export class LeaderboardService {
      */
     static async updateLeaderboard(wallet_address: string, type: GameResultType, amount: number) {
         if (!wallet_address) return;
+        const supabase = createServerSupabase();
 
         // Find or create entry
         const { data: existingEntry, error: fetchError } = await supabase
@@ -90,6 +91,7 @@ export class LeaderboardService {
      * Returns top players for a specific category.
      */
     static async getLeaderboard(type: 'shame' | 'saints' | 'heretics') {
+        const supabase = createServerSupabase();
         let query = supabase.from('leaderboard_entries').select('*');
 
         if (type === 'saints') {

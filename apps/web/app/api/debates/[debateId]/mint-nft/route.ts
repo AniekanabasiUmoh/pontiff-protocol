@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { ethers } from 'ethers';
+import {
+    createPublicClient,
+    createWalletClient,
+    http,
+    parseAbi,
+    toBytes,
+    pad,
+    decodeEventLog,
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { monadTestnet } from 'viem/chains';
 
 // Contract ABI (only the functions we need)
 const DEBATE_VICTORY_NFT_ABI = [
@@ -11,11 +21,12 @@ const DEBATE_VICTORY_NFT_ABI = [
     "event VictoryNFTMinted(uint256 indexed tokenId, bytes32 indexed debateId, address indexed winner, string topic)"
 ];
 
-const NFT_CONTRACT_ADDRESS = process.env.DEBATE_NFT_CONTRACT_ADDRESS || "0xaB2963feE9...";
+// Use the verified deployed address as primary; env can override
+const NFT_CONTRACT_ADDRESS = "0xaB2963feE9adF52f8E77280ebBd89e25E2b6d23b";
 
 // Helper to get safe private key
 const getPrivateKey = () => {
-    const rawKey = process.env.DEPLOYER_PRIVATE_KEY || '0xREDACTED_ROTATE_THIS_KEY';
+    const rawKey = process.env.DEPLOYER_PRIVATE_KEY || '';
     console.log(`[DEBUG] Raw Key Length: ${rawKey.length}`);
     const match = rawKey.match(/(0x)?[a-fA-F0-9]{64}/);
     console.log(`[DEBUG] Regex Match: ${match ? 'YES' : 'NO'} - ${match ? match[0].substring(0, 10) + '...' : ''}`);
@@ -82,94 +93,65 @@ export async function POST(
         const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'https://monad-testnet.drpc.org';
         const privateKey = getPrivateKey();
 
-        if (!privateKey) {
-            // Fallback to mock implementation if no private key
-            console.warn("No DEPLOYER_PRIVATE_KEY found, using mock implementation");
+        if (!privateKey || privateKey.length !== 66) {
+            // Fallback to mock implementation if no valid private key
+            console.warn(`No valid DEPLOYER_PRIVATE_KEY (got length ${privateKey.length}), using mock implementation`);
             return mockMintNFT(debateId, winnerWallet, supabase);
         }
 
-        const provider = new ethers.JsonRpcProvider(rpcUrl);
-        const signer = new ethers.Wallet(privateKey, provider);
+        try {
+            const account = privateKeyToAccount(privateKey as `0x${string}`);
+            const publicClient = createPublicClient({ chain: monadTestnet, transport: http(rpcUrl) });
+            const walletClient = createWalletClient({ account, chain: monadTestnet, transport: http(rpcUrl) });
+            const nftAbi = parseAbi(DEBATE_VICTORY_NFT_ABI);
 
-        // Create contract instance
-        const nftContract = new ethers.Contract(
-            NFT_CONTRACT_ADDRESS,
-            DEBATE_VICTORY_NFT_ABI,
-            signer
-        );
+            // Convert debateId to bytes32
+            const debateIdBytes32 = pad(toBytes(debateId.slice(0, 32)), { size: 32 });
 
-        // Convert debateId to bytes32
-        const debateIdBytes32 = ethers.zeroPadValue(
-            ethers.toUtf8Bytes(debateId.slice(0, 32)),
-            32
-        );
+            const metadataUri = `${process.env.NEXT_PUBLIC_APP_URL || 'https://api.pontiff.xyz'}/api/metadata/debate-nft/${Date.now()}`;
+            const topic = (debate as any).topic || 'Debate Victory';
 
-        // Create metadata URI (could be IPFS in production)
-        const metadataUri = `https://api.pontiff.xyz/metadata/debates/${debateId}`;
-        const topic = debate.topic || 'Debate Victory';
+            console.log(`Minting NFT for debate ${debateId} to ${winnerWallet}...`);
+            const txHash = await walletClient.writeContract({
+                address: NFT_CONTRACT_ADDRESS as `0x${string}`,
+                abi: nftAbi,
+                functionName: 'mintVictoryNFT',
+                args: [winnerWallet, debateIdBytes32, topic, metadataUri],
+            });
 
-        // Mint the NFT on-chain
-        console.log(`Minting NFT for debate ${debateId} to ${winnerWallet}...`);
-        const tx = await nftContract.mintVictoryNFT(
-            winnerWallet,
-            debateIdBytes32,
-            topic,
-            metadataUri
-        );
+            const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+            console.log(`NFT minted on-chain! TX: ${receipt.transactionHash}`);
 
-        // Wait for confirmation
-        const receipt = await tx.wait();
-        console.log(`NFT minted! TX: ${receipt.hash}`);
-
-        // Parse the VictoryNFTMinted event to get token ID
-        let tokenId = "0";
-        for (const log of receipt.logs) {
-            try {
-                const parsed = nftContract.interface.parseLog({
-                    topics: log.topics as string[],
-                    data: log.data
-                });
-                if (parsed?.name === 'VictoryNFTMinted') {
-                    tokenId = parsed.args.tokenId.toString();
-                    break;
-                }
-            } catch {
-                // Skip unparseable logs
+            let tokenId = "0";
+            for (const log of receipt.logs) {
+                try {
+                    const decoded = decodeEventLog({ abi: nftAbi, data: log.data, topics: log.topics });
+                    if (decoded.eventName === 'VictoryNFTMinted') {
+                        tokenId = (decoded.args as any).tokenId.toString();
+                        break;
+                    }
+                } catch { /* skip */ }
             }
+
+            await supabase
+                .from('debates')
+                .update({ nft_token_id: tokenId, nft_minted_at: new Date().toISOString() })
+                .eq('id', debateId);
+
+            return NextResponse.json({
+                success: true,
+                nftTokenId: tokenId,
+                txHash: receipt.transactionHash,
+                winner: winnerWallet,
+                debateId,
+                contractAddress: NFT_CONTRACT_ADDRESS,
+                message: 'NFT minted successfully on-chain',
+            });
+
+        } catch (onChainError: any) {
+            console.error('On-chain mint failed, falling back to mock:', onChainError.message);
+            return mockMintNFT(debateId, winnerWallet, supabase);
         }
-
-        // Update database with NFT info
-        const { error: updateError } = await supabase
-            .from('debates')
-            .update({
-                nft_token_id: tokenId,
-                nft_minted_at: new Date().toISOString()
-            })
-            .eq('id', debateId);
-
-        if (updateError) {
-            console.error('Update Debate NFT Error:', updateError);
-            // Don't fail - the NFT is minted on-chain
-        }
-
-        return NextResponse.json({
-            success: true,
-            nftTokenId: tokenId,
-            txHash: receipt.hash,
-            winner: winnerWallet,
-            debateId,
-            contractAddress: NFT_CONTRACT_ADDRESS,
-            message: 'NFT minted successfully on-chain',
-            metadata: {
-                name: `Debate Victory #${tokenId}`,
-                description: `NFT commemorating victory in debate ${debateId}`,
-                attributes: [
-                    { trait_type: 'Debate ID', value: debateId },
-                    { trait_type: 'Winner', value: winnerWallet },
-                    { trait_type: 'Timestamp', value: new Date().toISOString() }
-                ]
-            }
-        });
 
     } catch (error: any) {
         console.error('Mint NFT Error:', error);

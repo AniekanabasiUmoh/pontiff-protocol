@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { ethers } from 'ethers';
+import { parseEther, formatEther } from 'viem';
 
 export const dynamic = 'force-dynamic';
 
-const DEBATE_ENTRY_FEE = ethers.parseEther('50'); // 50 GUILT per agent
-const HOUSE_FEE = ethers.parseEther('5'); // 5 GUILT house fee
-const WINNER_PAYOUT = ethers.parseEther('95'); // 95 GUILT to winner
+const DEBATE_ENTRY_FEE = parseEther('50');
+const HOUSE_FEE = parseEther('5');
+const WINNER_PAYOUT = parseEther('95');
 
 interface JudgingCriteria {
     quality: number; // 0-10
@@ -38,28 +38,38 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Fetch debate from database
+        const supabase = createServerSupabase();
         const { data: debate, error: debateError } = await supabase
             .from('debates')
-            .select(`
-                *,
-                competitorAgent:competitor_agents(*)
-            `)
+            .select('*')
             .eq('id', debateId)
             .single() as any;
 
         if (debateError || !debate) {
+            console.error('[judge] Debate not found:', debateId, debateError);
             return NextResponse.json({ error: 'Debate not found' }, { status: 404 });
         }
 
-        if (debate.status === 'Completed') {
+        if (debate.status === 'Completed' || debate.status === 'completed') {
             return NextResponse.json({ error: 'Debate already judged' }, { status: 400 });
+        }
+
+        // Fetch competitor agent separately (avoid FK join reliability issues)
+        let competitorAgent: any = null;
+        if (debate.competitor_agent_id) {
+            const { data: agent } = await supabase
+                .from('competitor_agents')
+                .select('*')
+                .eq('id', debate.competitor_agent_id)
+                .single() as any;
+            competitorAgent = agent;
         }
 
         // 2. Judge the debate using Gemini
         const judgeResult = await judgeDebate(
-            debate.ourArgument || '',
-            debate.theirArgument || '',
-            debate.competitorAgent?.handle || 'Unknown'
+            debate.our_argument || '',
+            debate.their_argument || '',
+            competitorAgent?.twitter_handle || competitorAgent?.handle || 'Unknown'
         );
 
         // 3. Update debate status
@@ -79,7 +89,7 @@ export async function POST(request: NextRequest) {
             // @ts-ignore
             .update({
                 status: 'Completed',
-                winner_wallet: judgeResult.winner === 'pontiff' ? process.env.NEXT_PUBLIC_PONTIFF_WALLET : (debate.competitorAgent?.wallet_address || null),
+                winner_wallet: judgeResult.winner === 'pontiff' ? process.env.NEXT_PUBLIC_PONTIFF_WALLET : (competitorAgent?.wallet_address || null),
                 metadata: updatedMetadata,
                 ended_at: new Date().toISOString()
             })
@@ -91,7 +101,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Process $GUILT payout
-        const payoutResult = await processDebatePayout(judgeResult.winner, debate);
+        const payoutResult = await processDebatePayout(judgeResult.winner, debate, supabase);
 
         return NextResponse.json({
             success: true,
@@ -212,7 +222,7 @@ Respond ONLY with valid JSON in this exact format:
  * Processes $GUILT payout for debate winner
  * Winner gets 95 GUILT, house gets 5 GUILT
  */
-async function processDebatePayout(winner: 'pontiff' | 'competitor', debate: any) {
+async function processDebatePayout(winner: 'pontiff' | 'competitor', debate: any, supabase: ReturnType<typeof createServerSupabase>) {
     try {
         // In a full implementation, this would:
         // 1. Transfer 95 GUILT from debate escrow to winner
@@ -221,8 +231,8 @@ async function processDebatePayout(winner: 'pontiff' | 'competitor', debate: any
 
         // For now, just log the result
         console.log(`[Debate Payout] Winner: ${winner}`);
-        console.log(`[Debate Payout] Prize: ${ethers.formatEther(WINNER_PAYOUT)} GUILT`);
-        console.log(`[Debate Payout] House Fee: ${ethers.formatEther(HOUSE_FEE)} GUILT to Treasury`);
+        console.log(`[Debate Payout] Prize: ${formatEther(WINNER_PAYOUT)} GUILT`);
+        console.log(`[Debate Payout] House Fee: ${formatEther(HOUSE_FEE)} GUILT to Treasury`);
 
         // Record payout in game_history for analytics
         const { error: historyError } = await supabase
@@ -230,11 +240,11 @@ async function processDebatePayout(winner: 'pontiff' | 'competitor', debate: any
             // @ts-ignore
             .insert({
                 player1: 'ThePontiff',
-                player2: debate.competitorAgent?.handle || 'Unknown',
+                player2: debate.competitor_agents?.twitter_handle || debate.competitor_agents?.handle || 'Unknown',
                 game_type: 'DEBATE',
-                wager: ethers.formatEther(DEBATE_ENTRY_FEE),
+                wager: formatEther(DEBATE_ENTRY_FEE),
                 result: winner === 'pontiff' ? 'WIN' : 'LOSS',
-                payout: winner === 'pontiff' ? ethers.formatEther(WINNER_PAYOUT) : '0',
+                payout: winner === 'pontiff' ? formatEther(WINNER_PAYOUT) : '0',
                 tx_hash: null, // Would be actual tx hash in production
                 created_at: new Date().toISOString()
             });
@@ -245,8 +255,8 @@ async function processDebatePayout(winner: 'pontiff' | 'competitor', debate: any
 
         return {
             winner,
-            prize: ethers.formatEther(WINNER_PAYOUT),
-            houseFee: ethers.formatEther(HOUSE_FEE),
+            prize: formatEther(WINNER_PAYOUT),
+            houseFee: formatEther(HOUSE_FEE),
             status: 'success'
         };
 

@@ -1,0 +1,10 @@
+Table 'poker_hands' EXISTS.
+Columns:
+ - id: string (uuid)
+ - game_id: string (uuid)
+ - player_address: string (text)
+ - hand_cards: undefined (jsonb)
+ - community_cards: undefined (jsonb)
+ - hand_strength: integer (integer)
+ - hand_name: string (text)
+ - timestamp: string (timestamp with time zone)

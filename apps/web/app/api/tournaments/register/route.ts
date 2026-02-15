@@ -40,9 +40,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Guard: Tournament must be in 'pending' status to accept registrations
         if (tournament.status !== 'pending') {
             return NextResponse.json(
-                { success: false, error: 'Tournament is not accepting registrations' },
+                { success: false, error: 'Tournament registration is closed' },
                 { status: 400 }
             );
         }
@@ -69,6 +70,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Check if tournament exists and is accepting registrations
+        // (Status guard is already present on line 43)
+
         // Register player
         const seedNumber = tournament.current_participants + 1;
 
@@ -77,11 +81,6 @@ export async function POST(request: NextRequest) {
             .insert({
                 tournament_id: tournamentId,
                 wallet_address: walletAddress.toLowerCase(),
-                // Schema mismatch: agent_name, agent_strategy, registration_fee columns do not exist in live DB
-                // Removing them to prevent 500 errors.
-                // agent_name: agentName || `Agent ${seedNumber}`,
-                // agent_strategy: agentStrategy,
-                // registration_fee: registrationFee,
                 entry_paid: registrationFee || '10', // Mapping fee to entry_paid (string)
                 seed_number: seedNumber
             })
@@ -110,7 +109,7 @@ export async function POST(request: NextRequest) {
             success: true,
             registrationId: registration.id,
             seedNumber,
-            agentName: registration.agent_name,
+            agentName: agentName || `Agent ${seedNumber}`,
             bracketPosition: `Round ${roundNumber}, Match ${matchNumber}`,
             currentParticipants: seedNumber,
             maxParticipants: tournament.max_participants

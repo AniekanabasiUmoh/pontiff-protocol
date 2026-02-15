@@ -4,25 +4,18 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { useState, useEffect } from 'react';
 import { formatEther, parseEther } from 'viem';
 import { StakingCathedralABI, GuiltTokenABI } from '../abis';
+import { supabase } from '@/lib/db/supabase';
+import { useToast } from '@/app/components/ui/Toast';
+import { StatSkeleton, Skeleton } from '@/app/components/ui/Skeleton';
 
 const STAKING_ADDRESS = process.env.NEXT_PUBLIC_STAKING_ADDRESS as `0x${string}`;
 const GUILT_ADDRESS = process.env.NEXT_PUBLIC_GUILT_ADDRESS as `0x${string}`;
 
-const DURATIONS = [
-    { label: '7 Days', value: 7, multiplier: '1x' },
-    { label: '30 Days', value: 30, multiplier: '2.5x' },
-    { label: '90 Days', value: 90, multiplier: '5x' },
-    { label: '365 Days', value: 365, multiplier: '12x' },
-];
-
-const SAINTS_FEED = [
-    { address: '0x71C...9A2', amount: '50,000', duration: '365d', time: '2m ago', whale: false },
-    { address: '0xB2...CC4', amount: '250,000', duration: '90d', time: '5m ago', whale: true },
-    { address: '0xK1...GOD', amount: '10,000', duration: '30d', time: '12m ago', whale: false },
-    { address: '0x88...1FA', amount: '100,000', duration: '365d', time: '18m ago', whale: true },
-    { address: '0xDr4...g0n', amount: '5,000', duration: '7d', time: '25m ago', whale: false },
-    { address: '0xA1...F44', amount: '75,000', duration: '90d', time: '33m ago', whale: false },
-];
+interface StakingRecord {
+    wallet_address: string;
+    amount: string;
+    timestamp: string;
+}
 
 export default function CathedralPage() {
     const { address, isConnected } = useAccount();
@@ -30,21 +23,61 @@ export default function CathedralPage() {
     const [stakeAmount, setStakeAmount] = useState('');
     const [unstakeAmount, setUnstakeAmount] = useState('');
     const [sliderValue, setSliderValue] = useState(50);
-    const [selectedDuration, setSelectedDuration] = useState(30);
     const [activeTab, setActiveTab] = useState<'stake' | 'unstake'>('stake');
+    const [lastAction, setLastAction] = useState<'approve' | 'stake' | 'unstake' | null>(null);
+    const { showToast } = useToast();
 
-    useEffect(() => { setIsMounted(true); }, []);
+    // Real Data State
+    const [recentStakes, setRecentStakes] = useState<StakingRecord[]>([]);
+    const [uniqueStakers, setUniqueStakers] = useState<number>(0);
+    const [isLoadingStakes, setIsLoadingStakes] = useState(true);
+
+    useEffect(() => {
+        setIsMounted(true);
+        fetchCathedralData();
+    }, []);
+
+    const fetchCathedralData = async () => {
+        try {
+            setIsLoadingStakes(true);
+            // Fetch recent stakes for Hall of Saints
+            const { data: stakes, error } = await supabase
+                .from('staking_records')
+                .select('wallet_address, amount, timestamp')
+                .eq('action', 'STAKE')
+                .order('timestamp', { ascending: false })
+                .limit(10);
+
+            if (stakes) {
+                setRecentStakes(stakes);
+            }
+
+            // Estimate unique stakers (approximate count)
+            const { count } = await supabase
+                .from('staking_records')
+                .select('wallet_address', { count: 'exact', head: true });
+
+            // This is total transactions, not unique users, but it's a start for "Activity"
+            setUniqueStakers(count || 0);
+
+        } catch (e) {
+            console.error('Error fetching cathedral data:', e);
+            // Non-critical error, maybe don't toast unless it breaks UX
+        } finally {
+            setIsLoadingStakes(false);
+        }
+    };
 
     // ── Contract Reads ──
-    const { data: shareBalance, refetch: refetchShares } = useReadContract({
+    const { data: shareBalance, refetch: refetchShares, isLoading: isLoadingShares } = useReadContract({
         address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'balanceOf',
         args: address ? [address] : undefined, query: { enabled: !!address },
     });
-    const { data: stakedBalance, refetch: refetchStakedBalance } = useReadContract({
+    const { data: stakedBalance, refetch: refetchStakedBalance, isLoading: isLoadingStakedBalance } = useReadContract({
         address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'convertToAssets',
         args: shareBalance ? [shareBalance] : undefined, query: { enabled: !!shareBalance },
     });
-    const { data: guiltBalance, refetch: refetchGuilt } = useReadContract({
+    const { data: guiltBalance, refetch: refetchGuilt, isLoading: isLoadingGuilt } = useReadContract({
         address: GUILT_ADDRESS, abi: GuiltTokenABI, functionName: 'balanceOf',
         args: address ? [address] : undefined, query: { enabled: !!address },
     });
@@ -52,10 +85,15 @@ export default function CathedralPage() {
         address: GUILT_ADDRESS, abi: GuiltTokenABI, functionName: 'allowance',
         args: address ? [address, STAKING_ADDRESS] : undefined, query: { enabled: !!address, refetchInterval: 2000 },
     });
-    const { data: userInfo, refetch: refetchUserInfo } = useReadContract({
-        address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'userInfo',
-        args: address ? [address] : undefined, query: { enabled: !!address },
+
+    // Global Vault Stats
+    const { data: totalAssets, isLoading: isLoadingAssets } = useReadContract({
+        address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'totalAssets',
     });
+    const { data: totalSupply, isLoading: isLoadingSupply } = useReadContract({
+        address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'totalSupply',
+    });
+
     const { data: previewShares } = useReadContract({
         address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'convertToShares',
         args: unstakeAmount ? [parseEther(unstakeAmount)] : undefined,
@@ -68,33 +106,53 @@ export default function CathedralPage() {
 
     useEffect(() => {
         if (isConfirmed) {
-            refetchShares(); refetchGuilt(); refetchAllowance(); refetchStakedBalance(); refetchUserInfo();
-            setStakeAmount(''); setUnstakeAmount('');
+            refetchShares(); refetchGuilt(); refetchAllowance(); refetchStakedBalance(); fetchCathedralData();
+            if (lastAction === 'approve') {
+                showToast('Approval confirmed', 'info', 'Now click Consecrate to stake.');
+            } else if (lastAction === 'stake') {
+                setStakeAmount('');
+                showToast('Sacrifice Accepted.', 'success', 'Your GUILT has been staked.');
+            } else if (lastAction === 'unstake') {
+                setUnstakeAmount('');
+                showToast('Withdrawal complete.', 'success', 'Your GUILT has been returned.');
+            }
         }
-    }, [isConfirmed, refetchShares, refetchGuilt, refetchAllowance, refetchStakedBalance, refetchUserInfo]);
+    }, [isConfirmed, lastAction, refetchShares, refetchGuilt, refetchAllowance, refetchStakedBalance, showToast]);
+
+    useEffect(() => {
+        if (writeError) {
+            showToast('Transaction Failed', 'error', writeError.message.split('\n')[0]);
+        }
+    }, [writeError, showToast]);
+
 
     // Derived
-    const needsApproval = stakeAmount && allowance ? parseEther(stakeAmount) > allowance : true;
+    const needsApproval = !stakeAmount || allowance === undefined ? true : parseEther(stakeAmount) > allowance;
     const isPending = isTxPending || isConfirming;
-    const userTier = userInfo ? Number(userInfo[2]) : 0;
-    const tierNames = ['None', 'Sinner', 'Believer', 'Saint', 'Cardinal', 'Pope'];
-    const tierName = tierNames[userTier] || 'Unknown';
-    const principal = userInfo ? userInfo[0] : BigInt(0);
-    const currentValue = stakedBalance || BigInt(0);
-    const earned = currentValue > principal ? currentValue - principal : BigInt(0);
+
+    // APY Calculation: This is hard without history. 
+    // We can infer "Share Price" = totalAssets / totalSupply.
+    const sharePrice = totalAssets && totalSupply && totalSupply > BigInt(0)
+        ? Number(formatEther(totalAssets)) / Number(formatEther(totalSupply))
+        : 1.0;
+
+    const displaySharePrice = sharePrice.toFixed(4);
 
     const handleApprove = () => {
         if (!stakeAmount) return;
+        setLastAction('approve');
         writeContract({ address: GUILT_ADDRESS, abi: GuiltTokenABI, functionName: 'approve', args: [STAKING_ADDRESS, parseEther(stakeAmount)] });
     };
     const handleStake = () => {
         if (!stakeAmount) return;
-        writeContract({ address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'stake', args: [parseEther(stakeAmount)], gas: BigInt(10000000) });
+        setLastAction('stake');
+        writeContract({ address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'stake', args: [parseEther(stakeAmount)], gas: BigInt(500000) });
     };
     const handleWithdraw = () => {
         if (!unstakeAmount) return;
+        setLastAction('unstake');
         const sharesToBurn = previewShares || parseEther(unstakeAmount);
-        writeContract({ address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'withdraw', args: [sharesToBurn], gas: BigInt(10000000) });
+        writeContract({ address: STAKING_ADDRESS, abi: StakingCathedralABI, functionName: 'withdraw', args: [sharesToBurn], gas: BigInt(500000) });
     };
 
     const handleSlider = (val: number) => {
@@ -103,6 +161,17 @@ export default function CathedralPage() {
             const amount = (BigInt(val) * guiltBalance) / BigInt(100);
             setStakeAmount(formatEther(amount));
         }
+    };
+
+    const formatTimeAgo = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+        if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        return `${Math.floor(diffInSeconds / 86400)}d ago`;
     };
 
     return (
@@ -133,7 +202,11 @@ export default function CathedralPage() {
                                 <div>
                                     <div className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Available Balance</div>
                                     <div className="text-2xl font-bold font-mono text-white">
-                                        {isMounted && guiltBalance ? parseFloat(formatEther(guiltBalance)).toFixed(2) : '0.00'}
+                                        {!isMounted || isLoadingGuilt ? (
+                                            <Skeleton className="h-8 w-1/2" />
+                                        ) : (
+                                            guiltBalance !== undefined ? parseFloat(formatEther(guiltBalance)).toFixed(2) : '0.00'
+                                        )}
                                     </div>
                                     <div className="text-[10px] text-gray-600 font-mono">$GUILT</div>
                                 </div>
@@ -143,33 +216,35 @@ export default function CathedralPage() {
                                 <div>
                                     <div className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Staked Assets</div>
                                     <div className="text-2xl font-bold font-mono text-primary">
-                                        {isMounted && stakedBalance ? parseFloat(formatEther(stakedBalance)).toFixed(2) : '0.00'}
+                                        {!isMounted || isLoadingStakedBalance ? (
+                                            <Skeleton className="h-8 w-1/2" />
+                                        ) : (
+                                            stakedBalance !== undefined ? parseFloat(formatEther(stakedBalance)).toFixed(2) : '0.00'
+                                        )}
                                     </div>
                                     <div className="text-[10px] text-gray-600 font-mono">$GUILT locked</div>
-                                </div>
-
-                                <div className="h-px bg-primary/10" />
-
-                                <div>
-                                    <div className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Accrued Yield</div>
-                                    <div className="text-2xl font-bold font-mono text-green-400">
-                                        +{isMounted ? parseFloat(formatEther(earned)).toFixed(4) : '0.00'}
-                                    </div>
-                                    <div className="text-[10px] text-gray-600 font-mono">$GUILT earned</div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* APY + Tier */}
+                        {/* APY / Share Price */}
                         <div className="bg-obsidian rounded-lg border border-primary/20 p-5 text-center relative overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                             <div className="relative z-10">
-                                <div className="text-[10px] text-primary/60 font-mono uppercase tracking-widest mb-1">Current APY</div>
-                                <div className="text-5xl font-bold font-mono text-primary text-gold-glow">66.6%</div>
+                                <div className="text-[10px] text-primary/60 font-mono uppercase tracking-widest mb-1">Share Price</div>
+                                <div className="text-4xl font-bold font-mono text-primary text-gold-glow">
+                                    {!isMounted || isLoadingAssets || isLoadingSupply ? (
+                                        <div className="flex justify-center"><Skeleton className="h-10 w-3/4" /></div>
+                                    ) : (
+                                        displaySharePrice
+                                    )}
+                                </div>
+                                <div className="text-[10px] text-gray-500 mt-1 font-mono">1 sGUILT = {displaySharePrice} GUILT</div>
+
                                 <div className="mt-4 flex justify-center">
                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
-                                        <span className="text-[10px] text-primary/60 font-mono">RANK:</span>
-                                        <span className="text-xs text-primary font-bold">{isMounted ? tierName : '—'}</span>
+                                        <span className="text-[10px] text-primary/60 font-mono">YIELD:</span>
+                                        <span className="text-xs text-primary font-bold">Variable (Compound)</span>
                                     </div>
                                 </div>
                             </div>
@@ -229,32 +304,12 @@ export default function CathedralPage() {
                                             </div>
                                         </div>
 
-                                        {/* Penance Duration */}
-                                        <div>
-                                            <div className="text-xs font-mono text-gray-500 uppercase tracking-widest mb-3">Penance Duration</div>
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {DURATIONS.map((d) => (
-                                                    <button
-                                                        key={d.value}
-                                                        onClick={() => setSelectedDuration(d.value)}
-                                                        className={`py-3 rounded-lg border text-center transition-all ${selectedDuration === d.value
-                                                                ? 'border-primary bg-primary/10 text-primary'
-                                                                : 'border-gray-800 text-gray-500 hover:border-primary/30'
-                                                            }`}
-                                                    >
-                                                        <div className="text-xs font-bold">{d.label}</div>
-                                                        <div className="text-[10px] font-mono text-primary/60">{d.multiplier}</div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Estimated Yield */}
-                                        <div className="bg-green-900/10 border border-green-900/20 rounded-lg p-4">
+                                        {/* Yield Status */}
+                                        <div className="bg-green-900/10 border border-green-900/20 rounded-lg p-4 mb-4">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-xs text-gray-500 font-mono">Estimated Yield</span>
-                                                <span className="text-green-400 font-bold font-mono text-lg">
-                                                    +{stakeAmount ? (parseFloat(stakeAmount) * 0.666 * (selectedDuration / 365)).toFixed(2) : '0.00'} $GUILT
+                                                <span className="text-xs text-gray-500 font-mono">Yield Status</span>
+                                                <span className="text-green-400 font-bold font-mono text-xs">
+                                                    ACCRUES AUTOMATICALLY (sGUILT VALUE INCREASES)
                                                 </span>
                                             </div>
                                         </div>
@@ -264,13 +319,17 @@ export default function CathedralPage() {
                                             onClick={needsApproval ? handleApprove : handleStake}
                                             disabled={isPending || !stakeAmount || parseFloat(stakeAmount) <= 0}
                                             className={`w-full py-4 rounded-lg font-bold uppercase tracking-[0.2em] text-sm transition-all flex items-center justify-center gap-3 group ${needsApproval
-                                                    ? 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'
-                                                    : 'gold-embossed text-background-dark hover:scale-[1.01]'
+                                                ? 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'
+                                                : 'gold-embossed text-background-dark hover:scale-[1.01]'
                                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                                         >
                                             <span className="material-icons text-lg">{needsApproval ? 'lock_open' : 'local_fire_department'}</span>
-                                            {isPending ? 'Processing...' : needsApproval ? 'APPROVE $GUILT' : 'CONSECRATE SACRIFICE'}
+                                            {isPending ? 'Processing...' : needsApproval ? 'APPROVE $GUILT (Step 1/2)' : 'CONSECRATE SACRIFICE (Step 2/2)'}
                                         </button>
+
+                                        <div className="text-center text-[10px] text-gray-500 font-mono">
+                                            No lock period. Withdraw anytime. Unstaking burns sGUILT shares.
+                                        </div>
                                     </>
                                 ) : (
                                     <>
@@ -295,7 +354,7 @@ export default function CathedralPage() {
                                             </div>
                                             {previewShares && (
                                                 <p className="text-[10px] text-gray-600 mt-2 font-mono">
-                                                    Burning {parseFloat(formatEther(previewShares)).toFixed(2)} shares
+                                                    Burning ~{parseFloat(formatEther(previewShares)).toFixed(2)} sGUILT shares
                                                 </p>
                                             )}
                                         </div>
@@ -310,19 +369,25 @@ export default function CathedralPage() {
                                         </button>
                                     </>
                                 )}
-
-                                {/* Status Messages */}
-                                {isConfirmed && (
-                                    <div className="p-3 bg-green-900/20 border border-green-900/30 rounded-lg text-green-400 text-center text-xs font-mono">
-                                        ✓ Transaction confirmed. Your soul is one step closer to absolution.
-                                    </div>
-                                )}
-                                {writeError && (
-                                    <div className="p-3 bg-red-900/20 border border-red-900/30 rounded-lg text-red-400 text-center text-xs font-mono">
-                                        ✗ {writeError.message}
-                                    </div>
-                                )}
                             </div>
+                        </div>
+
+                        {/* ─── Ecosystem Links ─── */}
+                        <div className="mt-6 grid grid-cols-2 gap-4">
+                            <a href="/judas" className="bg-obsidian border border-primary/20 rounded-lg p-4 hover:border-primary/50 transition-all group group-hover:bg-primary/5">
+                                <div className="text-[10px] text-gray-500 font-mono uppercase tracking-widest mb-1 group-hover:text-primary">Judas Protocol</div>
+                                <div className="text-sm font-bold text-white flex items-center gap-2">
+                                    Enter the Protocol <span className="material-icons text-xs transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                </div>
+                                <div className="text-[10px] text-gray-600 mt-2">Use sGUILT to earn more</div>
+                            </a>
+                            <a href="/indulgences" className="bg-obsidian border border-primary/20 rounded-lg p-4 hover:border-primary/50 transition-all group group-hover:bg-primary/5">
+                                <div className="text-[10px] text-gray-500 font-mono uppercase tracking-widest mb-1 group-hover:text-primary">Indulgences</div>
+                                <div className="text-sm font-bold text-white flex items-center gap-2">
+                                    Buy Absolution <span className="material-icons text-xs transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                </div>
+                                <div className="text-[10px] text-gray-600 mt-2">Burn GUILT for salvation</div>
+                            </a>
                         </div>
                     </div>
 
@@ -332,7 +397,7 @@ export default function CathedralPage() {
                             <div className="p-4 border-b border-primary/10 flex justify-between items-center">
                                 <h3 className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">
                                     <span className="material-icons text-primary text-sm">history_edu</span>
-                                    Hall of Saints
+                                    Recent Sacrifices
                                 </h3>
                                 <div className="flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -340,39 +405,61 @@ export default function CathedralPage() {
                                 </div>
                             </div>
                             <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
-                                {SAINTS_FEED.map((entry, i) => (
+                                {isLoadingStakes ? (
+                                    <div className="p-3 space-y-3">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="flex gap-3">
+                                                <Skeleton className="h-10 w-full rounded" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : recentStakes.length === 0 ? (
+                                    <div className="text-center py-10 text-gray-600 text-xs font-mono">
+                                        No recent sacrifices.<br />Be the first to consecrate.
+                                    </div>
+                                ) : (recentStakes.map((entry, i) => (
                                     <div
                                         key={i}
-                                        className={`p-3 rounded border transition-colors ${entry.whale
-                                                ? 'bg-primary/5 border-primary/20 shadow-[0_0_10px_rgba(242,185,13,0.05)]'
-                                                : 'border-gray-800 hover:border-primary/20'
-                                            }`}
+                                        className="p-3 rounded border border-gray-800 hover:border-primary/20 transition-colors bg-background-dark"
                                     >
                                         <div className="flex justify-between items-center mb-1">
                                             <div className="flex items-center gap-2">
-                                                {entry.whale && <span className="text-[10px] bg-primary/20 text-primary px-1 rounded font-bold">🐋</span>}
-                                                <span className="text-xs font-mono text-gray-400">{entry.address}</span>
+                                                <span className="text-xs font-mono text-gray-400">
+                                                    {entry.wallet_address.substring(0, 6)}...{entry.wallet_address.substring(38)}
+                                                </span>
                                             </div>
-                                            <span className="text-[10px] text-gray-600 font-mono">{entry.time}</span>
+                                            <span className="text-[10px] text-gray-600 font-mono">{formatTimeAgo(entry.timestamp)}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-sm font-mono font-bold text-white">{entry.amount} $GUILT</span>
-                                            <span className="text-[10px] text-primary/60 font-mono">{entry.duration}</span>
+                                            <span className="text-sm font-mono font-bold text-white">{parseFloat(entry.amount).toLocaleString()} $GUILT</span>
+                                            <span className="text-[10px] text-primary/60 font-mono">STAKE</span>
                                         </div>
                                     </div>
-                                ))}
+                                )))}
                             </div>
 
                             {/* Total Stats */}
                             <div className="p-4 border-t border-primary/10 bg-obsidian">
                                 <div className="grid grid-cols-2 gap-4 text-center">
                                     <div>
-                                        <div className="text-lg font-bold text-primary font-mono">42.1M</div>
+                                        <div className="text-lg font-bold text-primary font-mono">
+                                            {!isMounted || isLoadingAssets ? (
+                                                <Skeleton className="h-6 w-1/2 mx-auto" />
+                                            ) : (
+                                                totalAssets ? parseFloat(formatEther(totalAssets)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                                            )}
+                                        </div>
                                         <div className="text-[9px] text-gray-600 font-mono uppercase">Total Staked</div>
                                     </div>
                                     <div>
-                                        <div className="text-lg font-bold text-white font-mono">3,412</div>
-                                        <div className="text-[9px] text-gray-600 font-mono uppercase">Active Stakers</div>
+                                        <div className="text-lg font-bold text-white font-mono">
+                                            {!isMounted || isLoadingStakes ? (
+                                                <Skeleton className="h-6 w-1/2 mx-auto" />
+                                            ) : (
+                                                uniqueStakers > 0 ? uniqueStakers : '—'
+                                            )}
+                                        </div>
+                                        <div className="text-[9px] text-gray-600 font-mono uppercase">Total Transactions</div>
                                     </div>
                                 </div>
                             </div>

@@ -1,0 +1,290 @@
+{
+  "timestamp": "2026-02-12T06:58:35.536Z",
+  "supabaseUrl": "https://rwil***.supabase.co",
+  "totalTablesInDB": 51,
+  "pvpTablesFound": [
+    "agent_sessions",
+    "user_balances",
+    "balance_transactions",
+    "game_seeds"
+  ],
+  "pvpTablesMissing": [
+    "pvp_matches",
+    "matchmaking_queue",
+    "game_history"
+  ],
+  "schemas": {
+    "agent_sessions": {
+      "id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "default": "gen_random_uuid()"
+      },
+      "user_wallet": {
+        "type": "string",
+        "format": "text"
+      },
+      "session_wallet": {
+        "type": "string",
+        "format": "text"
+      },
+      "strategy": {
+        "type": "string",
+        "format": "text"
+      },
+      "starting_balance": {
+        "type": "number",
+        "format": "numeric"
+      },
+      "current_balance": {
+        "type": "number",
+        "format": "numeric"
+      },
+      "stop_loss": {
+        "type": "number",
+        "format": "numeric"
+      },
+      "take_profit": {
+        "type": "number",
+        "format": "numeric"
+      },
+      "status": {
+        "type": "string",
+        "format": "text",
+        "default": "active"
+      },
+      "games_played": {
+        "type": "integer",
+        "format": "integer",
+        "default": 0
+      },
+      "created_at": {
+        "type": "string",
+        "format": "timestamp with time zone",
+        "default": "now()"
+      },
+      "expires_at": {
+        "type": "string",
+        "format": "timestamp with time zone"
+      },
+      "tx_hash": {
+        "type": "string",
+        "format": "character varying",
+        "maxLength": 66
+      },
+      "strategy_index": {
+        "type": "integer",
+        "format": "integer",
+        "default": 0
+      },
+      "trash_talk": {
+        "type": "boolean",
+        "format": "boolean",
+        "default": true
+      },
+      "max_wager": {
+        "type": "string",
+        "format": "character varying",
+        "maxLength": 78
+      },
+      "game_type": {
+        "type": "string",
+        "format": "character varying",
+        "default": "all",
+        "maxLength": 20
+      },
+      "profit_loss": {
+        "type": "string",
+        "format": "character varying",
+        "default": "0",
+        "maxLength": 78
+      },
+      "stopped_at": {
+        "type": "string",
+        "format": "timestamp with time zone"
+      },
+      "total_wins": {
+        "type": "integer",
+        "format": "integer",
+        "default": 0
+      },
+      "total_losses": {
+        "type": "integer",
+        "format": "integer",
+        "default": 0
+      }
+    },
+    "user_balances": {
+      "id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "default": "gen_random_uuid()"
+      },
+      "wallet_address": {
+        "type": "string",
+        "format": "text"
+      },
+      "available": {
+        "type": "number",
+        "format": "numeric",
+        "default": 0
+      },
+      "frozen": {
+        "type": "number",
+        "format": "numeric",
+        "default": 0
+      },
+      "total_deposited": {
+        "type": "number",
+        "format": "numeric",
+        "default": 0
+      },
+      "total_withdrawn": {
+        "type": "number",
+        "format": "numeric",
+        "default": 0
+      },
+      "total_wagered": {
+        "type": "number",
+        "format": "numeric",
+        "default": 0
+      },
+      "total_won": {
+        "type": "number",
+        "format": "numeric",
+        "default": 0
+      },
+      "created_at": {
+        "type": "string",
+        "format": "timestamp with time zone",
+        "default": "now()"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "timestamp with time zone",
+        "default": "now()"
+      }
+    },
+    "balance_transactions": {
+      "id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "default": "gen_random_uuid()"
+      },
+      "wallet_address": {
+        "type": "string",
+        "format": "text"
+      },
+      "type": {
+        "type": "string",
+        "format": "text"
+      },
+      "amount": {
+        "type": "number",
+        "format": "numeric"
+      },
+      "balance_before": {
+        "type": "number",
+        "format": "numeric"
+      },
+      "balance_after": {
+        "type": "number",
+        "format": "numeric"
+      },
+      "game_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "game_type": {
+        "type": "string",
+        "format": "text"
+      },
+      "metadata": {
+        "type": "unknown",
+        "format": "jsonb"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "timestamp with time zone",
+        "default": "now()"
+      }
+    },
+    "game_seeds": {
+      "id": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "default": "gen_random_uuid()"
+      },
+      "game_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "game_type": {
+        "type": "string",
+        "format": "text"
+      },
+      "server_seed_hash": {
+        "type": "string",
+        "format": "text"
+      },
+      "server_seed": {
+        "type": "string",
+        "format": "text"
+      },
+      "client_seed": {
+        "type": "string",
+        "format": "text"
+      },
+      "nonce": {
+        "type": "integer",
+        "format": "integer",
+        "default": 0
+      },
+      "created_at": {
+        "type": "string",
+        "format": "timestamp with time zone",
+        "default": "now()"
+      }
+    }
+  },
+  "compatibility": {
+    "agent_sessions_has_agent_mode": false,
+    "pvp_matches_exists": false,
+    "matchmaking_queue_exists": false,
+    "pvp_matches_columns": [],
+    "matchmaking_queue_columns": [],
+    "agent_sessions_columns": [
+      "id",
+      "user_wallet",
+      "session_wallet",
+      "strategy",
+      "starting_balance",
+      "current_balance",
+      "stop_loss",
+      "take_profit",
+      "status",
+      "games_played",
+      "created_at",
+      "expires_at",
+      "tx_hash",
+      "strategy_index",
+      "trash_talk",
+      "max_wager",
+      "game_type",
+      "profit_loss",
+      "stopped_at",
+      "total_wins",
+      "total_losses"
+    ]
+  },
+  "recommendations": [
+    "RUN: Section 9 of 001_casino_tables.sql to create pvp_matches table",
+    "RUN: Section 9 of 001_casino_tables.sql to create matchmaking_queue table",
+    "RUN: Section 9 of 001_casino_tables.sql to add agent_mode column to agent_sessions",
+    "ENHANCE agent_sessions: Missing PvP stats columns: pvp_wins, pvp_losses, elo_rating, pvp_earnings — will be added by 002_pvp_enhancements.sql"
+  ]
+}

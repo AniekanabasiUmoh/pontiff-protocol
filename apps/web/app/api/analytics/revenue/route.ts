@@ -6,21 +6,21 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ethers } from 'ethers';
+import { createPublicClient, http, parseAbi, formatEther } from 'viem';
+import { monadTestnet } from 'viem/chains';
 
-const TREASURY_ABI = [
+const TREASURY_ABI = parseAbi([
     "function getRevenueStats() external view returns (uint256 total, uint256 distributed, uint256 pending, uint256 rpsRevenue, uint256 pokerRevenue, uint256 judasRevenue, uint256 sessionRevenue)",
     "function totalRevenue() external view returns (uint256)",
     "function totalDistributed() external view returns (uint256)",
     "function revenueByGame(string) external view returns (uint256)"
-];
+]);
 
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const period = searchParams.get('period') || 'all'; // all, daily, weekly, monthly
 
-        const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
         const treasuryAddress = process.env.TREASURY_ADDRESS;
 
         if (!treasuryAddress) {
@@ -30,35 +30,33 @@ export async function GET(request: Request) {
             );
         }
 
-        const treasury = new ethers.Contract(treasuryAddress, TREASURY_ABI, provider);
+        const publicClient = createPublicClient({
+            chain: monadTestnet,
+            transport: http(process.env.NEXT_PUBLIC_RPC_URL),
+        });
 
         // Get on-chain revenue stats
-        let stats;
+        let stats: any;
         try {
-            stats = await treasury.getRevenueStats();
+            stats = await publicClient.readContract({
+                address: treasuryAddress as `0x${string}`,
+                abi: TREASURY_ABI,
+                functionName: 'getRevenueStats',
+            });
         } catch (err) {
             console.warn('[API] Treasury contract call failed (likely empty/reverted), returning defaults:', err);
-            // Return zeroed stats if contract call fails (e.g. no revenue yet)
-            stats = {
-                total: 0n,
-                distributed: 0n,
-                pending: 0n,
-                rpsRevenue: 0n,
-                pokerRevenue: 0n,
-                judasRevenue: 0n,
-                sessionRevenue: 0n
-            };
+            stats = { total: 0n, distributed: 0n, pending: 0n, rpsRevenue: 0n, pokerRevenue: 0n, judasRevenue: 0n, sessionRevenue: 0n };
         }
 
         const revenue = {
-            total: parseFloat(ethers.formatEther(stats.total)),
-            distributed: parseFloat(ethers.formatEther(stats.distributed)),
-            pending: parseFloat(ethers.formatEther(stats.pending)),
+            total: parseFloat(formatEther(stats.total ?? stats[0] ?? 0n)),
+            distributed: parseFloat(formatEther(stats.distributed ?? stats[1] ?? 0n)),
+            pending: parseFloat(formatEther(stats.pending ?? stats[2] ?? 0n)),
             byGame: {
-                rps: parseFloat(ethers.formatEther(stats.rpsRevenue)),
-                poker: parseFloat(ethers.formatEther(stats.pokerRevenue)),
-                judas: parseFloat(ethers.formatEther(stats.judasRevenue)),
-                sessions: parseFloat(ethers.formatEther(stats.sessionRevenue))
+                rps: parseFloat(formatEther(stats.rpsRevenue ?? stats[3] ?? 0n)),
+                poker: parseFloat(formatEther(stats.pokerRevenue ?? stats[4] ?? 0n)),
+                judas: parseFloat(formatEther(stats.judasRevenue ?? stats[5] ?? 0n)),
+                sessions: parseFloat(formatEther(stats.sessionRevenue ?? stats[6] ?? 0n)),
             }
         };
 

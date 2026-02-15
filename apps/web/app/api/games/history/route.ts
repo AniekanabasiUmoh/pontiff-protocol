@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
+﻿import { NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export async function GET(request: Request) {
     try {
+        const supabase = createServerSupabase();
         const { searchParams } = new URL(request.url);
         const limit = parseInt(searchParams.get('limit') || '20');
         const offset = parseInt(searchParams.get('offset') || '0');

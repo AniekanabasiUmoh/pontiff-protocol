@@ -1,27 +1,33 @@
-'use client'
+'use client';
 
-import '@rainbow-me/rainbowkit/styles.css'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
-import { WagmiProvider } from 'wagmi'
-import { getWagmiConfig } from '../config/wagmi'
-import { ReactNode, useState, useEffect } from 'react'
+import '@rainbow-me/rainbowkit/styles.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import { State, WagmiProvider } from 'wagmi';
+import { config } from '../config/wagmi';
+import { ReactNode } from 'react';
 
-export function Web3Provider({ children }: { children: ReactNode }) {
-    const [queryClient] = useState(() => new QueryClient())
-    const [config] = useState(() => getWagmiConfig())
-    const [mounted, setMounted] = useState(false)
+// Create QueryClient outside component to prevent re-initialization
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false,
+        },
+    },
+});
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
-
-
+export function Web3Provider({
+    children,
+    initialState
+}: {
+    children: ReactNode;
+    initialState?: State;
+}) {
     return (
-        <WagmiProvider config={config}>
+        <WagmiProvider config={config} initialState={initialState}>
             <QueryClientProvider client={queryClient}>
                 <RainbowKitProvider
+                    initialChain={10143} // Monad Testnet
                     theme={darkTheme({
                         accentColor: '#8B0000', // Dark red for "Gothic" theme
                         accentColorForeground: 'white',
@@ -33,5 +39,5 @@ export function Web3Provider({ children }: { children: ReactNode }) {
                 </RainbowKitProvider>
             </QueryClientProvider>
         </WagmiProvider>
-    )
+    );
 }

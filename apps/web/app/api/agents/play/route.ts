@@ -7,19 +7,28 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ethers } from 'ethers';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import {
+    createPublicClient,
+    createWalletClient,
+    http,
+    parseAbi,
+    keccak256,
+    toBytes,
+    formatEther,
+    parseEther,
+    encodeFunctionData,
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { monadTestnet } from 'viem/chains';
+import { createServerSupabase } from '@/lib/db/supabase-server';
+
 
 const RPS_ABI = [
     "function playRPS(uint256 _move, uint256 _wager) external returns (bool)"
 ];
 
 export async function POST(request: Request) {
+    const supabase = createServerSupabase();
     try {
         // Extract API key from Authorization header
         const authHeader = request.headers.get('Authorization');
@@ -31,7 +40,7 @@ export async function POST(request: Request) {
         }
 
         const apiKey = authHeader.substring(7);
-        const apiKeyHash = ethers.keccak256(ethers.toUtf8Bytes(apiKey));
+        const apiKeyHash = keccak256(toBytes(apiKey));
 
         // Verify API key and get agent
         const { data: agent, error: authError } = await supabase
@@ -76,15 +85,15 @@ export async function POST(request: Request) {
         }
 
         // Check session wallet balance
-        const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-        const guiltToken = new ethers.Contract(
-            process.env.NEXT_PUBLIC_GUILT_TOKEN_ADDRESS!,
-            ['function balanceOf(address) view returns (uint256)'],
-            provider
-        );
-
-        const balance = await guiltToken.balanceOf(agent.session_wallet);
-        const balanceInGuilt = parseFloat(ethers.formatEther(balance));
+        const publicClient = createPublicClient({ chain: monadTestnet, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
+        const ERC20_ABI = parseAbi(['function balanceOf(address) view returns (uint256)']);
+        const balance = await publicClient.readContract({
+            address: process.env.NEXT_PUBLIC_GUILT_TOKEN_ADDRESS! as `0x${string}`,
+            abi: ERC20_ABI,
+            functionName: 'balanceOf',
+            args: [agent.session_wallet as `0x${string}`],
+        }) as bigint;
+        const balanceInGuilt = parseFloat(formatEther(balance));
 
         if (balanceInGuilt < wager) {
             return NextResponse.json(
@@ -95,32 +104,27 @@ export async function POST(request: Request) {
 
         // Execute game move (RPS only for now)
         if (game === 'RPS') {
-            const pontiffWallet = new ethers.Wallet(
-                process.env.PONTIFF_PRIVATE_KEY!,
-                provider
-            );
+            const account = privateKeyToAccount(process.env.PONTIFF_PRIVATE_KEY! as `0x${string}`);
+            const walletClient = createWalletClient({ account, chain: monadTestnet, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
 
-            const sessionWallet = new ethers.Contract(
-                agent.session_wallet,
-                [
-                    "function executeTransaction(address target, bytes calldata data, uint256 gasLimit) external returns (bool)"
-                ],
-                pontiffWallet
-            );
-
-            const rpsContract = new ethers.Interface(RPS_ABI);
-            const data = rpsContract.encodeFunctionData('playRPS', [
-                move,
-                ethers.parseEther(wager.toString())
+            const SESSION_WALLET_ABI = parseAbi([
+                "function executeTransaction(address target, bytes calldata data, uint256 gasLimit) external returns (bool)"
             ]);
+            const rpsAbi = parseAbi(RPS_ABI);
+            const data = encodeFunctionData({
+                abi: rpsAbi,
+                functionName: 'playRPS',
+                args: [move, parseEther(wager.toString())],
+            });
 
-            const tx = await sessionWallet.executeTransaction(
-                process.env.NEXT_PUBLIC_RPS_CONTRACT_ADDRESS!,
-                data,
-                500000
-            );
-
-            await tx.wait();
+            const txHash = await walletClient.writeContract({
+                address: agent.session_wallet as `0x${string}`,
+                abi: SESSION_WALLET_ABI,
+                functionName: 'executeTransaction',
+                args: [process.env.NEXT_PUBLIC_RPS_CONTRACT_ADDRESS! as `0x${string}`, data, BigInt(500000)],
+            });
+            const tx = { hash: txHash };
+            await publicClient.waitForTransactionReceipt({ hash: txHash });
 
             // Log the game
             await supabase.from('external_agent_games').insert({

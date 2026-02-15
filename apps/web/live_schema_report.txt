@@ -1,0 +1,179 @@
+================================================================================
+LIVE DATABASE SCHEMA INSPECTION
+================================================================================
+Timestamp: 2026-02-12T11:46:41.869Z
+Supabase URL: https://rwilifqotgmqkbzkzudh.supabase.co
+================================================================================
+
+1. TABLE EXISTENCE CHECK
+--------------------------------------------------------------------------------
+✅ Table exists and is accessible
+   Found 1 row(s)
+   Columns: id, user_wallet, session_wallet, strategy, starting_balance, current_balance, stop_loss, take_profit, status, games_played, created_at, expires_at, tx_hash, strategy_index, trash_talk, max_wager, game_type, profit_loss, stopped_at, total_wins, total_losses, agent_mode, pvp_wins, pvp_losses, pvp_draws, elo_rating, pvp_earnings, target_archetype, target_rival, pvp_aggression
+
+2. COLUMN EXISTENCE TEST
+--------------------------------------------------------------------------------
+Existing columns (20):
+  ✅ id
+  ✅ tx_hash
+  ✅ user_wallet
+  ✅ strategy
+  ✅ strategy_index
+  ✅ starting_balance
+  ✅ current_balance
+  ✅ stop_loss
+  ✅ take_profit
+  ✅ max_wager
+  ✅ game_type
+  ✅ trash_talk
+  ✅ agent_mode
+  ✅ target_archetype
+  ✅ status
+  ✅ total_wins
+  ✅ total_losses
+  ✅ profit_loss
+  ✅ created_at
+  ✅ stopped_at
+
+Missing columns (5):
+  ❌ owner_address
+  ❌ wallet_address
+  ❌ deposit_amount
+  ❌ total_games
+  ❌ updated_at
+
+3. EXISTING DATA
+--------------------------------------------------------------------------------
+Found 24 row(s)
+
+Sample data (first 3 rows):
+
+Row 1:
+{
+  "id": "a6211acb-e97c-4a80-9dd6-554aa55d20a9",
+  "user_wallet": "0xe6e8F972a4A36b9FE476Cbd373e5E347DF3A286B",
+  "session_wallet": "0xD0e5d3d3D2c40b41fa3B7d9A2366b35a5FeC79eB",
+  "strategy": "berzerker",
+  "starting_balance": 100,
+  "current_balance": 100,
+  "stop_loss": 10,
+  "take_profit": 200,
+  "status": "active",
+  "games_played": 0,
+  "created_at": "2026-02-08T08:02:17.06389+00:00",
+  "expires_at": "2026-02-09T08:02:16.413+00:00",
+  "tx_hash": null,
+  "strategy_index": 0,
+  "trash_talk": true,
+  "max_wager": null,
+  "game_type": "all",
+  "profit_loss": "0",
+  "stopped_at": null,
+  "total_wins": 0,
+  "total_losses": 0,
+  "agent_mode": "PvE",
+  "pvp_wins": 0,
+  "pvp_losses": 0,
+  "pvp_draws": 0,
+  "elo_rating": 1000,
+  "pvp_earnings": 0,
+  "target_archetype": null,
+  "target_rival": null,
+  "pvp_aggression": 0.5
+}
+
+Row 2:
+{
+  "id": "17e73cf5-5b71-42f0-a2b2-4dc44f9b762f",
+  "user_wallet": "0xE1776D6117cc07f36de3c7D308640cE4c6cB5Af2",
+  "session_wallet": "0x7De68f437dF236889b0BC33ad11708e8405a5BB0",
+  "strategy": "merchant",
+  "starting_balance": 200,
+  "current_balance": 200,
+  "stop_loss": 20,
+  "take_profit": 400,
+  "status": "active",
+  "games_played": 0,
+  "created_at": "2026-02-08T08:02:18.818101+00:00",
+  "expires_at": "2026-02-09T08:02:16.413+00:00",
+  "tx_hash": null,
+  "strategy_index": 0,
+  "trash_talk": true,
+  "max_wager": null,
+  "game_type": "all",
+  "profit_loss": "0",
+  "stopped_at": null,
+  "total_wins": 0,
+  "total_losses": 0,
+  "agent_mode": "PvE",
+  "pvp_wins": 0,
+  "pvp_losses": 0,
+  "pvp_draws": 0,
+  "elo_rating": 1000,
+  "pvp_earnings": 0,
+  "target_archetype": null,
+  "target_rival": null,
+  "pvp_aggression": 0.5
+}
+
+Row 3:
+{
+  "id": "63678b1a-8e8e-4dc3-9d0a-ce721abd9903",
+  "user_wallet": "0xa5649a0E4c09A0c132c043c97e901443942182a7",
+  "session_wallet": "0xEA3817D46569a07a2D3F209ff5d1640dD667507f",
+  "strategy": "disciple",
+  "starting_balance": 150,
+  "current_balance": 150,
+  "stop_loss": 15,
+  "take_profit": 300,
+  "status": "active",
+  "games_played": 0,
+  "created_at": "2026-02-08T08:02:19.785754+00:00",
+  "expires_at": "2026-02-09T08:02:16.413+00:00",
+  "tx_hash": null,
+  "strategy_index": 0,
+  "trash_talk": true,
+  "max_wager": null,
+  "game_type": "all",
+  "profit_loss": "0",
+  "stopped_at": null,
+  "total_wins": 0,
+  "total_losses": 0,
+  "agent_mode": "PvE",
+  "pvp_wins": 0,
+  "pvp_losses": 0,
+  "pvp_draws": 0,
+  "elo_rating": 1000,
+  "pvp_earnings": 0,
+  "target_archetype": null,
+  "target_rival": null,
+  "pvp_aggression": 0.5
+}
+
+4. INSERT TEST
+--------------------------------------------------------------------------------
+❌ INSERT FAILED: Could not find the 'deposit_amount' column of 'agent_sessions' in the schema cache
+   Code: PGRST204
+   Details: null
+   Hint: N/A
+
+Test data that failed:
+{
+  "tx_hash": "0xtest_19c51ad63b80000000000000000000000000000000000000000000000000",
+  "user_wallet": "0x0000000000000000000000000000000000000001",
+  "strategy": "berzerker",
+  "strategy_index": 0,
+  "deposit_amount": "100",
+  "starting_balance": "100",
+  "current_balance": "100",
+  "stop_loss": "20",
+  "max_wager": "5",
+  "game_type": "all",
+  "trash_talk": true,
+  "agent_mode": "PvE",
+  "status": "active"
+}
+
+================================================================================
+END OF SCHEMA INSPECTION
+================================================================================

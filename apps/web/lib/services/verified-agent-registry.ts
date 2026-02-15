@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export class VerifiedAgentRegistry {
 
@@ -50,6 +50,7 @@ export class VerifiedAgentRegistry {
         if (contractAddress) threatLevel = "High"; // Has a contract = High Threat
 
         // Check availability
+        const supabase = createServerSupabase();
         const { data: existing, error: fetchError } = await supabase
             .from('competitor_agents')
             .select('id')
@@ -86,6 +87,7 @@ export class VerifiedAgentRegistry {
     }
 
     static async markConverted(handle: string, amountPaid: string) {
+        const supabase = createServerSupabase();
         // Update status and add to guiltPaid
         // Requires Fetching current first
         const { data: agent, error } = await supabase

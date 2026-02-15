@@ -337,6 +337,56 @@ export interface Database {
                     timestamp?: string
                 }
             }
+            confessions: {
+                Row: {
+                    id: string
+                    wallet_address: string
+                    sins: Json | null
+                    roast_text: string | null
+                    stake_amount: string | null
+                    status: string
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    wallet_address: string
+                    sins?: Json | null
+                    roast_text?: string | null
+                    stake_amount?: string | null
+                    status?: string
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    wallet_address?: string
+                    sins?: Json | null
+                    roast_text?: string | null
+                    stake_amount?: string | null
+                    status?: string
+                    created_at?: string
+                }
+            }
+            rate_limits: {
+                Row: {
+                    key: string
+                    count: number
+                    window_start: string
+                    updated_at: string
+                }
+                Insert: {
+                    key: string
+                    count?: number
+                    window_start?: string
+                    updated_at?: string
+                }
+                Update: {
+                    key?: string
+                    count?: number
+                    window_start?: string
+                    updated_at?: string
+                }
+            }
         }
     }
 }
+

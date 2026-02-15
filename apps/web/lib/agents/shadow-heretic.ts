@@ -1,7 +1,7 @@
 import { VerifiedAgentRegistry } from '../services/verified-agent-registry';
 import { logWorldEvent } from '../services/world-event-service';
 import { ConversionService } from '../services/conversion-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 // Config
 const BOT_HANDLE = "Heretic_Bot_1";
@@ -36,6 +36,7 @@ export class ShadowHeretic {
     }
 
     private static async challengeAndLose() {
+        const supabase = createServerSupabase();
         // 1. Create a Game
         const { data: match, error: gameError } = await supabase.from('games').insert({
             player1: BOT_HANDLE, // Using handle as wallet for shadow
@@ -55,6 +56,7 @@ export class ShadowHeretic {
     }
 
     private static async confessAndConvert() {
+        const supabase = createServerSupabase();
         // 1. Buy Indulgence logic
         const price = "1000000000000000000"; // 1 MON
 

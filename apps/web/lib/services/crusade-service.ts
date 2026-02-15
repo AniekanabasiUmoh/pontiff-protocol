@@ -1,12 +1,12 @@
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { logWorldEvent } from './world-event-service';
 
 export interface Crusade {
     id: string;
-    targetAgent: string;
-    goalType: string; // "Convert" | "Destroy"
+    target_agent_handle: string;
+    goal_type: string; // "Convert" | "Destroy"
     status: string;   // "Active" | "Victory" | "Defeat"
-    startTime: Date;
+    start_time: Date;
     participants: any[];
 }
 
@@ -15,24 +15,24 @@ export class CrusadeService {
     /**
      * Launches a new Crusade against a target agent.
      */
-    static async createCrusade(targetAgent: string, goalType: string = "Convert") {
+    static async createCrusade(target_agent_handle: string, goal_type: string = "Convert") {
         // Check if active crusade already exists
-        const { data: existing, error: fetchError } = await supabase
+        const { data: existing, error: fetchError } = await createServerSupabase()
             .from('crusades')
             .select('*')
-            .eq('targetAgent', targetAgent)
+            .eq('target_agent_handle', target_agent_handle)
             .eq('status', 'Active')
             .single();
 
         if (existing) return existing;
 
-        const { data: crusade, error: createError } = await supabase
+        const { data: crusade, error: createError } = await createServerSupabase()
             .from('crusades')
             .insert([{
-                targetAgent,
-                goalType,
+                target_agent_handle,
+                goal_type,
                 status: "Active",
-                startTime: new Date().toISOString(),
+                start_time: new Date().toISOString(),
                 participants: []
             }])
             .select()
@@ -43,7 +43,7 @@ export class CrusadeService {
             throw createError;
         }
 
-        await logWorldEvent('ThePontiff', 'crusade_launched', { targetAgent, goalType, crusadeId: crusade.id });
+        await logWorldEvent('ThePontiff', 'crusade_launched', { target_agent_handle, goal_type, crusadeId: crusade.id });
         return crusade;
     }
 
@@ -51,11 +51,11 @@ export class CrusadeService {
      * Retrieves all active crusades for the dashboard.
      */
     static async getActiveCrusades(): Promise<Crusade[]> {
-        const { data: records, error } = await supabase
+        const { data: records, error } = await createServerSupabase()
             .from('crusades')
             .select('*')
             .eq('status', 'Active')
-            .order('startTime', { ascending: false });
+            .order('start_time', { ascending: false });
 
         if (error) {
             console.error('[Crusade] Fetch failed:', error);
@@ -66,7 +66,7 @@ export class CrusadeService {
         return (records || []).map((r: any) => ({
             ...r,
             participants: Array.isArray(r.participants) ? r.participants : [],
-            startTime: new Date(r.startTime)
+            start_time: new Date(r.start_time)
         }));
     }
 
@@ -74,7 +74,7 @@ export class CrusadeService {
      * Adds a participant to the crusade.
      */
     static async joinCrusade(crusadeId: string, agentWallet: string) {
-        const { data: crusade, error } = await supabase
+        const { data: crusade, error } = await createServerSupabase()
             .from('crusades')
             .select('*')
             .eq('id', crusadeId)
@@ -88,7 +88,7 @@ export class CrusadeService {
 
         if (!participants.includes(agentWallet)) {
             participants.push(agentWallet);
-            await supabase
+            await createServerSupabase()
                 .from('crusades')
                 .update({ participants })
                 .eq('id', crusadeId);
@@ -100,7 +100,7 @@ export class CrusadeService {
      * Calculates real-time progress of a crusade.
      */
     static async getProgress(crusadeId: string): Promise<number> {
-        const { data: crusade, error } = await supabase
+        const { data: crusade, error } = await createServerSupabase()
             .from('crusades')
             .select('*')
             .eq('id', crusadeId)
@@ -118,20 +118,20 @@ export class CrusadeService {
         // Conversion table uses `competitorAgentId`. We need to join.
 
         // Supabase join syntax:
-        const { data: conversion, error: convError } = await supabase
+        const { data: conversion } = await createServerSupabase()
             .from('conversions')
-            .select('id, CompetitorAgent!inner(handle)')
-            .eq('CompetitorAgent.handle', crusade.targetAgent)
+            .select('id, agent:competitor_agents!inner(twitter_handle)')
+            .eq('competitor_agents.twitter_handle', crusade.target_agent_handle)
             .limit(1)
             .maybeSingle();
 
         if (conversion) return 100;
 
         // 2. Check Debates (Partial Progress)
-        const { count: debates, error: debateError } = await supabase
+        const { count: debates } = await createServerSupabase()
             .from('debates')
-            .select('id, CompetitorAgent!inner(handle)', { count: 'exact', head: true })
-            .eq('CompetitorAgent.handle', crusade.targetAgent);
+            .select('id', { count: 'exact', head: true })
+            .eq('competitor_agent_id', crusade.target_agent_handle);
 
         const debateCount = debates || 0;
 
@@ -145,7 +145,7 @@ export class CrusadeService {
      * Distributes rewards to participants.
      */
     static async distributeRewards(crusadeId: string) {
-        const { data: crusade, error } = await supabase
+        const { data: crusade, error } = await createServerSupabase()
             .from('crusades')
             .select('*')
             .eq('id', crusadeId)
@@ -159,7 +159,7 @@ export class CrusadeService {
         // In a real app, this triggers a batch transfer via Smart Contract
         // Here we just log it as a World Event
         for (const p of participants) {
-            await logWorldEvent(p, 'reward_received', { amount: rewardPerUser, reason: `Crusade ${crusade.targetAgent} Victory` });
+            await logWorldEvent(p, 'reward_received', { amount: rewardPerUser, reason: `Crusade ${crusade.target_agent_handle} Victory` });
 
             // Update Leaderboard score
             // await LeaderboardService.addScore(p, 50); // Optional
@@ -170,26 +170,26 @@ export class CrusadeService {
      * Marks a crusade as resolved (Victory/Defeat).
      */
     static async resolveCrusade(id: string, outcome: "Victory" | "Defeat") {
-        await supabase
+        await createServerSupabase()
             .from('crusades')
             .update({
                 status: outcome,
-                endTime: new Date().toISOString()
+                end_time: new Date().toISOString()
             })
             .eq('id', id);
 
         // Fetch details for logging
-        const { data: crusade } = await supabase.from('crusades').select('*').eq('id', id).single();
+        const { data: crusade } = await createServerSupabase().from('crusades').select('*').eq('id', id).single();
         if (crusade) {
             await logWorldEvent('ThePontiff', 'crusade_resolved', {
-                targetAgent: crusade.targetAgent,
+                target_agent_handle: crusade.target_agent_handle,
                 outcome
             });
 
             if (outcome === 'Victory') {
                 await this.distributeRewards(id);
                 // Tweet Announcement
-                // await TwitterClient.post(`⚔️ CRUSADE VICTORY ⚔️\n\nThe heretic @${crusade.targetAgent} has been vanquished!\nRewards distributed to ${Array.isArray(crusade.participants) ? crusade.participants.length : 0} faithful warriors.`);
+                // await TwitterClient.post(`⚔️ CRUSADE VICTORY ⚔️\n\nThe heretic @${crusade.target_agent_handle} has been vanquished!\nRewards distributed to ${Array.isArray(crusade.participants) ? crusade.participants.length : 0} faithful warriors.`);
             }
         }
     }

@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useAccount, useDisconnect } from 'wagmi'
 import { SiweMessage } from 'siwe'
-import { createClient } from '@supabase/supabase-js'
 
 interface RoastData {
     sins: string[]
     verdict: string
     penance: string
     score: number
+    imageUrl?: string
 }
 
 export function Confessional() {

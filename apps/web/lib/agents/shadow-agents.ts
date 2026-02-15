@@ -1,6 +1,6 @@
 import { VerifiedAgentRegistry } from './verified-agent-registry';
 import { logWorldEvent } from '../services/world-event-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 // Simulation Configuration
 const SHADOW_AGENTS = [
@@ -25,6 +25,7 @@ export async function runShadowAgents() {
 
         // 2. Simulate Interaction based on Role
         if (agent.role === "Sinner") {
+            const supabase = createServerSupabase();
             // A. Enters Vatican (Mock Log)
             await logWorldEvent(agent.handle, "enter", {});
 

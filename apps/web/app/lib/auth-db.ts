@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-export const supabase = createClient(supabaseUrl, supabaseKey)
+function getDb() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+    )
+}
 
 export interface AuthSession {
     id: string
@@ -32,7 +35,7 @@ export async function createNonce(walletAddress: string): Promise<string> {
     const nonce = generateNonce()
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
 
-    const { error } = await supabase
+    const { error } = await getDb()
         .from('auth_nonces')
         .insert({
             nonce,
@@ -53,7 +56,7 @@ export async function createNonce(walletAddress: string): Promise<string> {
  */
 export async function verifyAndConsumeNonce(nonce: string, walletAddress: string): Promise<boolean> {
     // Check if nonce exists and is not expired
-    const { data: nonceData, error: fetchError } = await supabase
+    const { data: nonceData, error: fetchError } = await getDb()
         .from('auth_nonces')
         .select('*')
         .eq('nonce', nonce)
@@ -67,7 +70,7 @@ export async function verifyAndConsumeNonce(nonce: string, walletAddress: string
     }
 
     // Mark nonce as used
-    const { error: updateError } = await supabase
+    const { error: updateError } = await getDb()
         .from('auth_nonces')
         .update({ used_at: new Date().toISOString() })
         .eq('nonce', nonce)
@@ -91,7 +94,7 @@ export async function createSession(
 ): Promise<AuthSession | null> {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
-    const { data, error } = await supabase
+    const { data, error } = await getDb()
         .from('auth_sessions')
         .upsert({
             wallet_address: walletAddress,
@@ -114,11 +117,8 @@ export async function createSession(
     return data
 }
 
-/**
- * Get session by wallet address
- */
 export async function getSession(walletAddress: string, chainId: number): Promise<AuthSession | null> {
-    const { data, error } = await supabase
+    const { data, error } = await getDb()
         .from('auth_sessions')
         .select('*')
         .eq('wallet_address', walletAddress)
@@ -131,9 +131,33 @@ export async function getSession(walletAddress: string, chainId: number): Promis
     }
 
     // Update last_seen_at
-    await supabase
+    await getDb()
         .from('auth_sessions')
         .update({ last_seen_at: new Date().toISOString() })
+        .eq('id', data.id)
+
+    return data
+}
+
+/**
+ * Get session by session token (for API testing with Bearer tokens)
+ */
+export async function getSessionByToken(sessionToken: string): Promise<AuthSession | null> {
+    const { data, error } = await getDb()
+        .from('auth_sessions')
+        .select('*')
+        .eq('session_token', sessionToken)
+        .gt('expires_at', new Date().toISOString())
+        .single()
+
+    if (error || !data) {
+        return null
+    }
+
+    // Update last_activity
+    await getDb()
+        .from('auth_sessions')
+        .update({ last_activity: new Date().toISOString() })
         .eq('id', data.id)
 
     return data
@@ -143,7 +167,7 @@ export async function getSession(walletAddress: string, chainId: number): Promis
  * Delete session (logout)
  */
 export async function deleteSession(walletAddress: string, chainId: number): Promise<void> {
-    await supabase
+    await getDb()
         .from('auth_sessions')
         .delete()
         .eq('wallet_address', walletAddress)

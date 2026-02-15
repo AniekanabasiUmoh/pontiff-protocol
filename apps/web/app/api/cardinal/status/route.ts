@@ -18,22 +18,42 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // Check cardinal_memberships (written by subscribe flow) first
+        const { data: membership, error: memErr } = await supabase
+            .from('cardinal_memberships')
+            .select('*')
+            .eq('wallet_address', wallet.toLowerCase())
+            .eq('status', 'active')
+            .order('expires_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (memErr && memErr.code !== 'PGRST116') throw memErr;
+
+        if (membership) {
+            const now = new Date();
+            const expiresAt = new Date(membership.expires_at);
+            const isActive = expiresAt > now;
+            return NextResponse.json({
+                success: true,
+                isMember: isActive,
+                status: isActive ? 'active' : 'expired',
+                expiresAt: membership.expires_at,
+                tier: membership.tier || 'Cardinal'
+            });
+        }
+
+        // Fall back to cardinal_members table (election/governance records)
         const { data: member, error } = await supabase
             .from('cardinal_members')
             .select('*')
             .eq('wallet_address', wallet)
             .single();
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-            throw error;
-        }
+        if (error && error.code !== 'PGRST116') throw error;
 
         if (!member) {
-            return NextResponse.json({
-                success: true,
-                isMember: false,
-                status: 'none'
-            });
+            return NextResponse.json({ success: true, isMember: false, status: 'none' });
         }
 
         const now = new Date();

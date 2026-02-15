@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
+﻿import { NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export async function GET() {
     try {
+        const supabase = createServerSupabase();
         const { data: games, error } = await supabase
             .from('games')
             .select('winner, wager');
@@ -14,7 +15,7 @@ export async function GET() {
         let wins = 0;
         let losses = 0;
 
-        (games || []).forEach(g => {
+        ((games as any[]) || []).forEach(g => {
             totalWagered += parseFloat(g.wager || "0");
             if (g.winner === 'ThePontiff') wins++;
             else losses++;

@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createServerSupabase } from '@/lib/db/supabase-server';
+
 
 /**
  * GET /api/scan/[wallet]
@@ -20,6 +16,7 @@ export async function GET(
   { params }: { params: Promise<{ wallet: string }> }
 ) {
   try {
+    const supabase = createServerSupabase();
     const { wallet } = await params;
 
     if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {

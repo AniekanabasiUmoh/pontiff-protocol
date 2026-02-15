@@ -35,7 +35,7 @@ export default function LeaderboardPage() {
   async function fetchLeaderboard(type: LeaderboardType) {
     setLoading(true); setError(null);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/leaderboard/${type}`);
+      const response = await fetch(`/api/leaderboard?category=${type}`);
       if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
       const data = await response.json();
       setEntries(data.entries || []);
@@ -76,7 +76,7 @@ export default function LeaderboardPage() {
 
                 {/* Podium Bar */}
                 <div className={`${height} w-24 mt-2 rounded-t-lg ${p.rank === 1 ? 'bg-gradient-to-b from-primary/30 to-primary/10 border-x border-t border-primary/30' :
-                    'bg-gradient-to-b from-gray-800 to-gray-900 border-x border-t border-gray-700'
+                  'bg-gradient-to-b from-gray-800 to-gray-900 border-x border-t border-gray-700'
                   } flex items-center justify-center`}>
                   <span className="text-2xl font-bold font-mono text-white/30">#{p.rank}</span>
                 </div>
@@ -92,8 +92,8 @@ export default function LeaderboardPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-3 rounded-lg border text-xs font-mono uppercase tracking-widest transition-all ${activeTab === tab.id
-                  ? 'bg-primary/10 border-primary/30 text-primary'
-                  : 'bg-obsidian border-gray-800 text-gray-500 hover:border-primary/20 hover:text-white'
+                ? 'bg-primary/10 border-primary/30 text-primary'
+                : 'bg-obsidian border-gray-800 text-gray-500 hover:border-primary/20 hover:text-white'
                 }`}
             >
               <span className="material-icons text-sm">{tab.icon}</span>
@@ -153,24 +153,26 @@ export default function LeaderboardPage() {
                         <span className="material-icons text-primary text-sm">person</span>
                       </div>
                       <span className="font-mono text-sm text-gray-300 group-hover:text-white transition-colors">
-                        {entry.walletAddress.slice(0, 6)}...{entry.walletAddress.slice(-4)}
+                        {entry.walletAddress ?
+                          `${entry.walletAddress.slice(0, 6)}...${entry.walletAddress.slice(-4)}` :
+                          'Unknown Agent'}
                       </span>
                     </div>
                     <div className="col-span-3 flex items-center justify-end">
                       {activeTab === 'shame' && (
-                        <span className="text-red-400 font-bold font-mono">${entry.metadata.totalLoss?.toLocaleString() || '0'}</span>
+                        <span className="text-red-400 font-bold font-mono">${entry.metadata?.totalLoss?.toLocaleString() || '0'}</span>
                       )}
                       {activeTab === 'saints' && (
-                        <span className="text-green-400 font-bold font-mono">{entry.metadata.loyaltyScore?.toLocaleString() || '0'}</span>
+                        <span className="text-green-400 font-bold font-mono">{entry.metadata?.loyaltyScore?.toLocaleString() || '0'}</span>
                       )}
                       {activeTab === 'heretics' && (
-                        <span className="text-orange-400 font-bold font-mono">{entry.metadata.failedCoupCount || 0} coups</span>
+                        <span className="text-orange-400 font-bold font-mono">{entry.metadata?.failedCoupCount || 0} coups</span>
                       )}
                     </div>
                     <div className="col-span-3 flex items-center justify-end text-xs text-gray-500 font-mono">
                       {activeTab === 'shame' && 'Total Lost'}
-                      {activeTab === 'saints' && `${entry.metadata.stakeDays || 0}d staked`}
-                      {activeTab === 'heretics' && `$${entry.metadata.totalLoss?.toLocaleString() || '0'}`}
+                      {activeTab === 'saints' && `${entry.metadata?.stakeDays || 0}d staked`}
+                      {activeTab === 'heretics' && `$${entry.metadata?.totalLoss?.toLocaleString() || '0'}`}
                     </div>
                   </div>
                 );

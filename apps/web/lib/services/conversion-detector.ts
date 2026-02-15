@@ -1,6 +1,6 @@
 import { getTwitterClient } from '@/lib/clients/twitter';
 import { ConversionService } from './conversion-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export class ConversionDetector {
 
@@ -8,6 +8,7 @@ export class ConversionDetector {
      * Scans Twitter for acknowledgment phrases from known competitor agents.
      */
     static async scanForAcknowledgements() {
+        const supabase = createServerSupabase();
         const twitter = getTwitterClient();
         const phrases = ["pontiff is right", "i repent", "true chain", "monad god"];
 
@@ -48,6 +49,7 @@ export class ConversionDetector {
      * Uses Viem to check Transfer events to the Pontiff's burn address.
      */
     static async scanBlockchainForGuilt() {
+        const supabase = createServerSupabase();
         const { createPublicClient, http, parseAbiItem } = require('viem');
         const { monadTestnet } = require('viem/chains');
 

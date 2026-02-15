@@ -14,7 +14,10 @@ export function WritDisplay({ imageUrl, walletAddress, onReset }: WritDisplayPro
     const handleDownload = () => {
         const link = document.createElement('a')
         link.href = imageUrl
-        link.download = `writ-of-sin-${walletAddress.slice(0, 8)}.png`
+        // If it's a PNG from Imagen, download as PNG. If SVG, it's SVG.
+        // We'll just generic extension based on content if we could, but .png covers likely Imagen case.
+        // The browser handles data URI download correctly mostly.
+        link.download = `writ-of-sin.png`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -22,18 +25,27 @@ export function WritDisplay({ imageUrl, walletAddress, onReset }: WritDisplayPro
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="bg-[#1a1a1a] border-2 border-[#8B0000] rounded-lg p-8 shadow-[0_0_30px_rgba(139,0,0,0.3)]"
+            className="bg-obsidian border border-primary/30 rounded-lg p-6 lg:p-8 shadow-[0_0_50px_rgba(242,185,13,0.1)] relative"
         >
+            {/* Corner Accents */}
+            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/50" />
+            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/50" />
+            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/50" />
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary/50" />
+
             {/* Title */}
-            <h2 className="text-3xl font-bold text-center mb-6 font-cinzel text-[#8B0000]">
-                YOUR WRIT OF SIN
+            <h2 className="text-2xl lg:text-3xl font-bold text-center mb-6 font-display text-primary tracking-[0.2em] uppercase text-gold-glow">
+                Writ of Sin
             </h2>
 
             {/* Image Container with Zoom/Pan */}
-            <div className="mb-6 bg-[#0a0a0a] rounded-lg overflow-hidden border-2 border-[#8B0000]/30">
+            <div className="mb-6 bg-background-dark rounded border border-primary/20 overflow-hidden relative">
+                {/* Scanline effect overlay */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,11,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 pointer-events-none bg-[length:100%_4px,3px_100%]" />
+
                 <TransformWrapper
                     initialScale={1}
                     minScale={0.5}
@@ -41,54 +53,51 @@ export function WritDisplay({ imageUrl, walletAddress, onReset }: WritDisplayPro
                     centerOnInit
                 >
                     <TransformComponent
-                        wrapperClass="!w-full !h-[600px]"
+                        wrapperClass="!w-full !h-[500px] lg:!h-[600px]"
                         contentClass="!w-full !h-full flex items-center justify-center"
                     >
                         <img
                             src={imageUrl}
                             alt="Writ of Sin"
-                            className="max-w-full max-h-full object-contain"
+                            className="max-w-full max-h-full object-contain filter drop-shadow-[0_0_15px_rgba(242,185,13,0.2)]"
                         />
                     </TransformComponent>
                 </TransformWrapper>
             </div>
 
             {/* Zoom Instructions */}
-            <p className="text-center text-[#e0e0e0]/50 text-sm mb-6 font-inter">
-                Scroll to zoom • Drag to pan
+            <p className="text-center text-primary/40 text-[10px] uppercase tracking-widest mb-6 font-mono">
+                [ Scroll to zoom • Drag to pan ]
             </p>
 
             {/* Action Buttons */}
             <div className="space-y-3">
-                {/* Share on X */}
+                {/* Share on X - kept separate for logical grouping */}
                 <ShareButton imageUrl={imageUrl} walletAddress={walletAddress} />
 
                 {/* Download Button */}
                 <motion.button
                     onClick={handleDownload}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-3 bg-[#1a1a1a] hover:bg-[#2a2a2a] border-2 border-[#8B0000] text-[#8B0000] font-bold rounded-lg transition-all font-cinzel"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full py-4 bg-primary/10 hover:bg-primary/20 border border-primary/50 text-primary font-bold rounded transition-all font-mono text-sm uppercase tracking-widest flex items-center justify-center gap-2 group"
                 >
-                    DOWNLOAD WRIT
+                    <span className="material-icons text-lg group-hover:animate-bounce">download</span>
+                    Download Writ
                 </motion.button>
 
-                {/* Confess Another */}
+                {/* Confess Again */}
                 <motion.button
                     onClick={onReset}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-3 bg-transparent hover:bg-[#8B0000]/10 border-2 border-[#8B0000]/50 text-[#e0e0e0] font-bold rounded-lg transition-all font-inter"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full py-4 bg-transparent hover:bg-primary/5 border border-primary/30 text-primary/80 font-bold rounded transition-all font-mono text-sm uppercase tracking-widest"
                 >
-                    Confess Another Wallet
+                    Confess Again
                 </motion.button>
             </div>
 
-            {/* Wallet Address Display */}
-            <div className="mt-6 p-4 bg-[#0a0a0a] rounded border border-[#8B0000]/30">
-                <p className="text-[#e0e0e0]/50 text-xs mb-1 font-inter">Judged Wallet:</p>
-                <p className="text-[#8B0000] font-mono text-sm break-all">{walletAddress}</p>
-            </div>
+            {/* Wallet Address Display REMOVED as per user request */}
         </motion.div>
     )
 }

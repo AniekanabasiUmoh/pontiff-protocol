@@ -1,0 +1,85 @@
+{
+  "agent_sessions": {
+    "status": "EXISTS",
+    "columns": [
+      "id",
+      "user_wallet",
+      "session_wallet",
+      "strategy",
+      "starting_balance",
+      "current_balance",
+      "stop_loss",
+      "take_profit",
+      "status",
+      "games_played",
+      "created_at",
+      "expires_at",
+      "tx_hash",
+      "strategy_index",
+      "trash_talk",
+      "max_wager",
+      "game_type",
+      "profit_loss",
+      "stopped_at",
+      "total_wins",
+      "total_losses",
+      "agent_mode",
+      "pvp_wins",
+      "pvp_losses",
+      "pvp_draws",
+      "elo_rating",
+      "pvp_earnings",
+      "target_archetype",
+      "target_rival",
+      "pvp_aggression",
+      "deposit_amount",
+      "total_games",
+      "updated_at",
+      "wallet_address",
+      "session_wallet_backup"
+    ]
+  },
+  "game_history": {
+    "status": "EXISTS",
+    "columns": [
+      "id",
+      "session_id",
+      "player_address",
+      "game_type",
+      "result",
+      "wager_amount",
+      "profit_loss",
+      "player_move",
+      "pontiff_move",
+      "tx_hash",
+      "created_at"
+    ]
+  },
+  "pvp_matches": {
+    "status": "EXISTS",
+    "columns": [
+      "id",
+      "player1_id",
+      "player2_id",
+      "game_type",
+      "stake_amount",
+      "winner_id",
+      "status",
+      "round_data",
+      "best_of",
+      "house_fee",
+      "duration_ms",
+      "elo_change_p1",
+      "elo_change_p2",
+      "server_seed",
+      "client_seed_1",
+      "client_seed_2",
+      "logs",
+      "settled_at",
+      "created_at"
+    ]
+  },
+  "matchmaking_queue": {
+    "status": "EMPTY_BUT_EXISTS"
+  }
+}

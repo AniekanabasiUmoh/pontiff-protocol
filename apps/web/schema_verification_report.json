@@ -1,0 +1,29 @@
+{
+  "agent_sessions": {
+    "exists": true,
+    "rowCount": 18,
+    "status": "Exists",
+    "columns": {
+      "agent_mode": "Missing"
+    }
+  },
+  "pvp_matches": {
+    "exists": true,
+    "rowCount": null,
+    "status": "Exists",
+    "columns": {
+      "player1_id": "Missing",
+      "game_type": "Missing",
+      "winner_id": "Missing"
+    }
+  },
+  "matchmaking_queue": {
+    "exists": true,
+    "rowCount": null,
+    "status": "Exists",
+    "columns": {
+      "agent_id": "Missing",
+      "stake_range_min": "Missing"
+    }
+  }
+}

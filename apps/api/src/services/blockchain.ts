@@ -266,3 +266,54 @@ export async function getTokenBalance(
 export async function getCurrentBlock(): Promise<number> {
     return await provider.getBlockNumber();
 }
+
+/**
+ * Get token metadata (symbol, decimals, name)
+ */
+export async function getTokenMetadata(tokenAddress: string): Promise<{
+    symbol: string;
+    decimals: number;
+    name: string;
+}> {
+    try {
+        const erc20Abi = [
+            'function symbol() view returns (string)',
+            'function decimals() view returns (uint8)',
+            'function name() view returns (string)'
+        ];
+        const contract = new ethers.Contract(tokenAddress, erc20Abi, provider);
+
+        const [symbol, decimals, name] = await Promise.all([
+            contract.symbol().catch(() => 'UNKNOWN'),
+            contract.decimals().catch(() => 18),
+            contract.name().catch(() => 'Unknown Token')
+        ]);
+
+        return { symbol, decimals: Number(decimals), name };
+    } catch (error) {
+        console.error(`Error fetching metadata for ${tokenAddress}:`, error);
+        return { symbol: 'UNKNOWN', decimals: 18, name: 'Unknown Token' };
+    }
+}
+
+/**
+ * Parse transfer log into structured format
+ */
+export function parseTransferLog(log: any): {
+    tokenAddress: string;
+    from: string;
+    to: string;
+    amount: string;
+    blockNumber: number;
+    transactionHash: string;
+} {
+    return {
+        tokenAddress: log.address || log.contractAddress || '',
+        from: log.topics?.[1] ? ethers.getAddress(ethers.dataSlice(log.topics[1], 12)) : '',
+        to: log.topics?.[2] ? ethers.getAddress(ethers.dataSlice(log.topics[2], 12)) : '',
+        amount: log.data ? BigInt(log.data).toString() : '0',
+        blockNumber: log.blockNumber,
+        transactionHash: log.transactionHash || log.hash || ''
+    };
+}
+

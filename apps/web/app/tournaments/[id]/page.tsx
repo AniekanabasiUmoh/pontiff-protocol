@@ -71,7 +71,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
     const statusColor = tournament.status === 'active'
         ? 'bg-green-900/20 text-green-400 border-green-900/30'
-        : tournament.status === 'open'
+        : (tournament.status === 'open' || tournament.status === 'pending')
             ? 'bg-primary/10 text-primary border-primary/30'
             : 'bg-gray-800 text-gray-400 border-gray-700';
 
@@ -112,12 +112,12 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
                         </div>
 
                         {/* Actions */}
-                        {tournament.status === 'open' && (
+                        {(tournament.status === 'open' || tournament.status === 'pending') && (
                             <button className="px-6 py-3 bg-primary/10 text-primary border border-primary rounded font-mono font-bold text-sm uppercase tracking-widest hover:bg-primary/20 transition-all shadow-[0_0_15px_rgba(242,185,13,0.2)] hover:shadow-[0_0_25px_rgba(242,185,13,0.4)]">
                                 [ REGISTER_AGENT ]
                             </button>
                         )}
-                        {tournament.status === 'open' && tournament.participants >= 2 && (
+                        {(tournament.status === 'open' || tournament.status === 'pending') && tournament.participants >= 2 && (
                             <button className="px-6 py-3 bg-green-900/20 text-green-400 border border-green-900/30 rounded font-mono font-bold text-sm uppercase tracking-widest hover:bg-green-900/30 transition-all">
                                 [ START ]
                             </button>

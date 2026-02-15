@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export interface DashboardMetrics {
     totalEntrants: number;
@@ -18,6 +18,7 @@ export interface RecentActivity {
 
 export class DashboardService {
     static async getMetrics(): Promise<DashboardMetrics> {
+        const supabase = createServerSupabase();
         // Parallel fetch for simplified stats
         const [
             { count: entrants },
@@ -65,6 +66,7 @@ export class DashboardService {
     }
 
     static async getRecentActivity(limit = 10): Promise<RecentActivity[]> {
+        const supabase = createServerSupabase();
         const { data: events, error } = await supabase
             .from('world_events')
             .select('*')

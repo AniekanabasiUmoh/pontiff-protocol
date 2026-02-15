@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 /**
  * Module 12: Public Roast Tweet Integration
@@ -29,6 +29,7 @@ interface TweetRequest {
 
 export async function POST(request: NextRequest) {
     try {
+        const supabase = createServerSupabase();
         const body: TweetRequest = await request.json();
         const { walletAddress, roast, sinScore, optInPublic } = body;
 

@@ -1,0 +1,60 @@
+Database Schema Report - 2026-02-12T15:22:58.408Z
+
+--- Table: agent_sessions ---
+Sample Row Keys & Types:
+  - id: string (Example: 2c535881-0325-460b-8631-b2347c139b8b)
+  - user_wallet: string (Example: 0x9f994707e36848a82e672d34adb3194877db8cc3)
+  - session_wallet: string (Example: 0x308ec4240e4cd2398ec639389ab1fc0a9358e764)
+  - strategy: string (Example: merchant)
+  - starting_balance: number (Example: 100)
+  - current_balance: number (Example: 100)
+  - stop_loss: number (Example: 20)
+  - take_profit: object (Example: null)
+  - status: string (Example: stopped)
+  - games_played: number (Example: 0)
+  - created_at: string (Example: 2026-02-12T13:42:05.7+00:00)
+  - expires_at: object (Example: null)
+  - tx_hash: string (Example: 0xbf8f4aed2bf3545cb7a4ce684be86a74144a4bd5237dde5d2414debc60412672)
+  - strategy_index: number (Example: 1)
+  - trash_talk: boolean (Example: true)
+  - max_wager: string (Example: 5)
+  - game_type: string (Example: all)
+  - profit_loss: string (Example: 0)
+  - stopped_at: object (Example: null)
+  - total_wins: number (Example: 0)
+  - total_losses: number (Example: 0)
+  - agent_mode: string (Example: PvE)
+  - pvp_wins: number (Example: 0)
+  - pvp_losses: number (Example: 0)
+  - pvp_draws: number (Example: 0)
+  - elo_rating: number (Example: 1000)
+  - pvp_earnings: number (Example: 0)
+  - target_archetype: object (Example: null)
+  - target_rival: object (Example: null)
+  - pvp_aggression: number (Example: 0.5)
+  - deposit_amount: string (Example: 100)
+  - total_games: number (Example: 0)
+  - updated_at: string (Example: 2026-02-12T13:56:13.60093+00:00)
+  - wallet_address: object (Example: null)
+  - session_wallet_backup: object (Example: null)
+
+--- Table: game_history ---
+Table game_history exists but is empty. Cannot infer schema from rows.
+
+--- Table: games ---
+Sample Row Keys & Types:
+  - id: string (Example: 02cf2773-203c-4235-a03b-a6aacf7a1b4c)
+  - player1: string (Example: 0xManualPlayer)
+  - player2: string (Example: ThePontiff)
+  - game_type: string (Example: RPS)
+  - wager: string (Example: 100000000000000000000)
+  - status: string (Example: completed)
+  - winner: object (Example: null)
+  - result: object (Example: [object Object])
+  - created_at: string (Example: 2026-02-07T20:59:41.631+00:00)
+  - completed_at: object (Example: null)
+  - play_mode: string (Example: on-chain)
+
+--- Table: vatican_entrants ---
+Table vatican_entrants exists but is empty. Cannot infer schema from rows.
+

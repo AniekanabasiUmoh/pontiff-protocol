@@ -3,7 +3,7 @@ import { logWorldEvent } from './world-event-service';
 import { VerifiedAgentRegistry } from './verified-agent-registry';
 import { CrusadeService } from './crusade-service';
 import { DebateService } from './debate-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export async function scanForEntrantsAndDebate() {
     const twitter = getTwitterClient();
@@ -46,6 +46,7 @@ export async function scanForEntrantsAndDebate() {
         // 3. Filter Process (Mock logic)
         // Check if we already responded to this tweet ID in DB
         // JSON filtering in Supabase: eventData->path->equals
+        const supabase = createServerSupabase();
         const { data: existingEvent, error } = await supabase
             .from('world_events')
             .select('*')
@@ -70,6 +71,7 @@ export async function scanForEntrantsAndDebate() {
 }
 
 export async function scanForReplies() {
+    const supabase = createServerSupabase();
     // 1. Get Active Debates
     // Supabase join to get CompetitorAgent
     const { data: activeDebates, error } = await supabase

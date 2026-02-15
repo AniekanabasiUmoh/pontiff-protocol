@@ -83,7 +83,7 @@ contract StakingCathedral is ERC20, Ownable, ReentrancyGuard {
         if (totalSupply() == 0) {
             // First depositor: Burn minimal liquidity to prevent inflation attack
             shares = assets - MINIMUM_LIQUIDITY;
-            _mint(address(0), MINIMUM_LIQUIDITY); // Permanent lock
+            _mint(0x000000000000000000000000000000000000dEaD, MINIMUM_LIQUIDITY); // Permanent lock to Dead Address
         } else {
             shares = convertToShares(assets);
         }

@@ -163,7 +163,7 @@ describe('Price Service', () => {
         .mockResolvedValueOnce({ data: { price: 100 } }) // Historical
         .mockResolvedValueOnce({ data: { price: 0.5 } }); // Current
 
-      const isRug = await isLikelyRugPull(tokenAddress, 1000);
+      const isRug = await isLikelyRugPull(tokenAddress);
 
       expect(isRug).toBe(true);
     });
@@ -176,7 +176,7 @@ describe('Price Service', () => {
         .mockResolvedValueOnce({ data: { price: 100 } })
         .mockResolvedValueOnce({ data: { price: 70 } });
 
-      const isRug = await isLikelyRugPull(tokenAddress, 1000);
+      const isRug = await isLikelyRugPull(tokenAddress);
 
       expect(isRug).toBe(false);
     });

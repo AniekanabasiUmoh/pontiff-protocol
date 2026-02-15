@@ -69,19 +69,7 @@ export const StakingCathedralABI = [
         "outputs": [],
         "stateMutability": "nonpayable"
     },
-    {
-        "type": "function",
-        "name": "userInfo",
-        "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
-        "outputs": [
-            { "name": "assets", "type": "uint256", "internalType": "uint256" },
-            { "name": "shares", "type": "uint256", "internalType": "uint256" },
-            { "name": "tier", "type": "uint256", "internalType": "uint256" },
-            { "name": "depositTime", "type": "uint256", "internalType": "uint256" },
-            { "name": "rewards", "type": "uint256", "internalType": "uint256" }
-        ],
-        "stateMutability": "view"
-    },
+
     {
         "type": "function",
         "name": "totalAssets",
@@ -144,86 +132,96 @@ export const GuiltTokenABI = [
 
 export const JudasProtocolABI = [
     {
-        "inputs": [],
-        "name": "currentEpochId",
-        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-        "stateMutability": "view",
-        "type": "function"
+        inputs: [{ name: 'amount', type: 'uint256' }],
+        name: 'deposit',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
     },
     {
-        "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-        "name": "epochs",
-        "outputs": [
-            { "internalType": "uint256", "name": "startTime", "type": "uint256" },
-            { "internalType": "uint256", "name": "endTime", "type": "uint256" },
-            { "internalType": "uint256", "name": "totalLoyal", "type": "uint256" },
-            { "internalType": "uint256", "name": "totalBetrayed", "type": "uint256" },
-            { "internalType": "bool", "name": "resolved", "type": "bool" },
-            { "internalType": "uint256", "name": "loyalistMultiplier", "type": "uint256" },
-            { "internalType": "uint256", "name": "betrayerMultiplier", "type": "uint256" }
+        inputs: [],
+        name: 'signalBetrayal',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'resolveEpoch',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [{ name: 'amount', type: 'uint256' }],
+        name: 'withdraw',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [{ name: 'upToEpoch', type: 'uint256' }],
+        name: 'claimRewards',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getGameState',
+        outputs: [
+            { name: 'epochId', type: 'uint256' },
+            { name: 'endTime', type: 'uint256' },
+            { name: 'totalLoyal', type: 'uint256' },
+            { name: 'totalBetrayed', type: 'uint256' },
+            { name: 'resolved', type: 'bool' },
+            { name: 'betrayalPct', type: 'uint256' }
         ],
-        "stateMutability": "view",
-        "type": "function"
+        stateMutability: 'view',
+        type: 'function',
     },
     {
-        "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-        "name": "userInfo",
-        "outputs": [
-            { "internalType": "uint256", "name": "stakedAmount", "type": "uint256" },
-            { "internalType": "uint256", "name": "lastEpochInteraction", "type": "uint256" },
-            { "internalType": "bool", "name": "isBetrayer", "type": "bool" }
+        inputs: [{ name: 'user', type: 'address' }],
+        name: 'getUserPosition',
+        outputs: [
+            { name: 'staked', type: 'uint256' },
+            { name: 'isBetrayer', type: 'bool' },
+            { name: 'lastEpochInteracted', type: 'uint256' }
         ],
-        "stateMutability": "view",
-        "type": "function"
+        stateMutability: 'view',
+        type: 'function',
     },
     {
-        "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
-        "name": "deposit",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "signalBetrayal",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "resolveEpoch",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
-        "name": "withdraw",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getTournamentState",
-        "outputs": [
-            { "internalType": "uint256", "name": "tournamentId", "type": "uint256" },
-            { "internalType": "uint256", "name": "round", "type": "uint256" },
-            { "internalType": "uint256", "name": "maxRounds", "type": "uint256" }
+        inputs: [],
+        name: 'getTournamentState',
+        outputs: [
+            { name: 'tournamentId', type: 'uint256' },
+            { name: 'currentRound', type: 'uint256' },
+            { name: 'maxRounds', type: 'uint256' }
         ],
-        "stateMutability": "view",
-        "type": "function"
+        stateMutability: 'view',
+        type: 'function',
     },
     {
-        "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
-        "name": "getReputation",
-        "outputs": [
-            { "internalType": "uint32", "name": "loyal", "type": "uint32" },
-            { "internalType": "uint32", "name": "betrayed", "type": "uint32" }
+        inputs: [{ name: 'user', type: 'address' }],
+        name: 'getReputation',
+        outputs: [
+            { name: 'loyal', type: 'uint32' },
+            { name: 'betrayed', type: 'uint32' }
         ],
-        "stateMutability": "view",
-        "type": "function"
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [{ name: 'user', type: 'address' }],
+        name: 'userInfo', // Keeping for legacy/compatibility if needed, but primarily using getUserPosition
+        outputs: [
+            { name: 'staked', type: 'uint256' },
+            { name: 'lastEpochInteracted', type: 'uint256' },
+            { name: 'isBetrayer', type: 'bool' }
+        ],
+        stateMutability: 'view',
+        type: 'function',
     }
 ] as const;
 
@@ -233,6 +231,13 @@ export const IndulgenceABI = [
         "name": "checkPrice",
         "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint8", "name": "tier", "type": "uint8" }],
+        "name": "absolve",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -262,5 +267,91 @@ export const IndulgenceABI = [
         "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
         "stateMutability": "view",
         "type": "function"
+    }
+] as const;
+
+export const RPSGameABI = [
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "commitment", "type": "bytes32" },
+            { "internalType": "uint256", "name": "wagerAmount", "type": "uint256" },
+            { "internalType": "address", "name": "token", "type": "address" }
+        ],
+        "name": "createGame",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "gameId", "type": "uint256" },
+            { "internalType": "uint8", "name": "move", "type": "uint8" },
+            { "internalType": "uint256", "name": "wagerAmount", "type": "uint256" }
+        ],
+        "name": "joinGame",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "gameId", "type": "uint256" },
+            { "internalType": "uint8", "name": "move", "type": "uint8" },
+            { "internalType": "bytes32", "name": "salt", "type": "bytes32" }
+        ],
+        "name": "revealMove",
+        "outputs": [{ "internalType": "address", "name": "winner", "type": "address" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "gameId", "type": "uint256" }],
+        "name": "timeout",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "name": "games",
+        "outputs": [
+            { "internalType": "address", "name": "player1", "type": "address" },
+            { "internalType": "address", "name": "player2", "type": "address" },
+            { "internalType": "uint256", "name": "wagerAmount", "type": "uint256" },
+            { "internalType": "bytes32", "name": "commitment1", "type": "bytes32" },
+            { "internalType": "uint8", "name": "move2", "type": "uint8" },
+            { "internalType": "bool", "name": "isRevealed", "type": "bool" },
+            { "internalType": "address", "name": "token", "type": "address" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "uint256", "name": "gameId", "type": "uint256" },
+            { "indexed": true, "internalType": "address", "name": "player1", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "wager", "type": "uint256" }
+        ],
+        "name": "GameCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "uint256", "name": "gameId", "type": "uint256" },
+            { "indexed": true, "internalType": "address", "name": "player2", "type": "address" }
+        ],
+        "name": "GameJoined",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "uint256", "name": "gameId", "type": "uint256" },
+            { "indexed": false, "internalType": "address", "name": "winner", "type": "address" }
+        ],
+        "name": "GameResolved",
+        "type": "event"
     }
 ] as const;

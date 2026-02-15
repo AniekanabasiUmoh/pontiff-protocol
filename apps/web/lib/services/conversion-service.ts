@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { VerifiedAgentRegistry } from './verified-agent-registry';
 import { logWorldEvent } from './world-event-service';
 
@@ -14,6 +14,7 @@ export class ConversionService {
         amount?: string,
         evidence?: any
     ) {
+        const supabase = createServerSupabase();
         // 1. Resolve Handle/Wallet
         // Quick heuristic: If starts with 0x, try to find handle. Else assume handle.
         let handle = walletOrHandle;
@@ -67,6 +68,7 @@ export class ConversionService {
     }
 
     private static async updateCrusadeStatus(targetAgent: string, outcome: "Victory" | "Defeat") {
+        const supabase = createServerSupabase();
         // Find active crusade
         const { data: crusade, error } = await supabase
             .from('crusades')
@@ -90,6 +92,7 @@ export class ConversionService {
      * Records the evidence of conversion in the database.
      */
     private static async recordEvidence(agentId: string, type: string, amount: string | undefined, evidence: any) {
+        const supabase = createServerSupabase();
         await supabase
             .from('conversions')
             .insert([{

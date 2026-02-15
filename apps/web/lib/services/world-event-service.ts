@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export type WorldEventType = 'confess' | 'stake' | 'betray' | 'challenge' | 'buyIndulgence' | 'enter' | 'debate_initiated' | 'agent_converted' | 'crusade_launched' | 'crusade_resolved' | 'reward_received' | 'poker_move';
 
@@ -8,6 +8,7 @@ export async function logWorldEvent(
     eventData: any
 ) {
     try {
+        const supabase = createServerSupabase();
         const { error } = await supabase.from('world_events').insert([{
             agentWallet,
             eventType,

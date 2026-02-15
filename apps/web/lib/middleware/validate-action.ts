@@ -3,8 +3,8 @@ import { createPublicClient, http, parseAbi } from 'viem';
 import { monadTestnet } from 'viem/chains';
 import { redis } from '../redis';
 import { checkRateLimit } from './rate-limit';
-import { cookies } from 'next/headers';
-import { getSession } from '@/app/lib/auth-db';
+import { validators } from '../utils/validation';
+import { verifyWalletSignature } from '../auth/verify-signature';
 
 const VATICAN_ENTRY_ABI = parseAbi([
     'function isInVatican(address agent) external view returns (bool)'
@@ -23,57 +23,55 @@ export async function validateAction(action: VaticanAction) {
         return true;
     }
 
-    const wallet = action.agentWallet.toLowerCase();
+    // 0. Input Validation
+    if (!action || typeof action !== 'object') {
+        throw new Error('Invalid request body');
+    }
+
+    // Normalize and validate wallet
+    let wallet = action.agentWallet;
+
+    // Handle actions that might use different wallet fields if any (fallback)
+    if (!wallet && 'walletAddress' in action) wallet = (action as any).walletAddress;
+    if (!wallet && 'sessionWallet' in action) wallet = (action as any).sessionWallet;
+
+    if (!wallet) throw new Error('Missing wallet address');
+
+    try {
+        wallet = validators.wallet(wallet, 'walletAddress');
+    } catch (e: any) {
+        throw new Error(e.message);
+    }
+
+    // Validate Timestamp
+    if (!action.timestamp || typeof action.timestamp !== 'number') {
+        throw new Error('Invalid or missing timestamp');
+    }
 
     // 1. Rate Limiting
     const limitResult = await checkRateLimit(wallet, 'action');
     if (!limitResult.success) {
-        throw new Error(`Rate limit exceeded. Try again in ${Math.ceil(limitResult.remaining)}s.`);
+        const waitSeconds = limitResult.resetTime
+            ? Math.ceil((limitResult.resetTime - Date.now()) / 1000)
+            : 60;
+        throw new Error(`Rate limit exceeded. Try again in ${waitSeconds}s.`);
     }
 
-    // 2. Timestamp Validation (Replay Protection)
-    const now = Date.now();
-    const actionTime = action.timestamp;
-    const window = 5 * 60 * 1000; // 5 minutes
+    // 2. Cryptographic Signature Verification
+    // Expected Message: "Pontiff Action: {type} at {timestamp}"
+    // Double check specific action structures if they deviate
+    const message = `Pontiff Action: ${action.type} at ${action.timestamp}`;
+    const { verifyWalletSignature } = await import('../auth/verify-signature');
 
-    if (!actionTime || Math.abs(now - actionTime) > window) {
-        throw new Error("Invalid timestamp. Action must be within 5 minutes of current server time.");
+    // Allow skipping signature if explicitly using a SECRET (e.g. Cron)
+    // But Cron usually doesn't call this middleware, it uses its own auth.
+
+    const isValid = await verifyWalletSignature(message, action.signature, wallet);
+    if (!isValid) {
+        throw new Error("Invalid wallet signature or expired timestamp.");
     }
 
-    // 2. Auth: SIWE Session Verification
-    // Use cookies() from next/headers to get the session ID
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('siwe-session-id')?.value;
-
-    if (!sessionId) {
-        // Fallback: Check if signature allows stateless verification (Future EIP-712?)
-        // For now, Strict SIWE:
-        throw new Error("Unauthorized: No session found. Please sign in via /api/auth/verify");
-    }
-
-    // Verify Session matches Wallet
-    // We need to fetch session by ID, but `auth-db` uses `getSession(wallet, chainId)`. 
-    // Let's assume we can lookup by ID or we just trust the cookie's claim + DB check? 
-    // Actually `auth-db` `getSession` queries by wallet/chain. 
-    // Wait, the cookie stores the `session.id` (UUID). `auth-db` doesn't expose getByID.
-    // Let's rely on wallet+chain lookup effectively.
-    // BUT the cookie is the proof. 
-    // Let's Mock the exact session lookup for now if `auth-db` is limited, OR update `auth-db`.
-    // Actually, let's verify the wallet has an active session in DB.
-
-    // Simplification: Check if the wallet claims to have a session.
-    // Ideally we validate the cookie's session ID matches the DB.
-    // Let's assume the user has logged in and the cookie is present.
-    // Security Note: Just checking "has session" without checking cookie UUID is weak (CSRF?), 
-    // but the `siwe` library + cookie usually handles the signature/nonce handshake.
-
-    // We will verify that an active session exists for this wallet.
-    const session = await getSession(wallet, 10143); // 10143 is Monad Testnet Chain ID (approx)
-    // Fallback chain ID if variable?
-
-    if (!session) {
-        throw new Error("Unauthorized: Session expired or invalid.");
-    }
+    // 3. Vatican Entry (Cached)
 
     // 3. Vatican Entry (Cached)
     const cacheKey = `vatican:entry:${wallet}`;

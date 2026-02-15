@@ -82,6 +82,43 @@ async function main() {
     if (eventError) console.error('Error seeding WorldEvents:', eventError);
     else console.log('✅ Seeded 100 WorldEvents');
 
+    // 5. Agent Sessions (Dashboard Data)
+    const testWallet = '0xmanualuser'; // Lowercase for consistency
+    const sessions = [
+        {
+            tx_hash: '0x123...abc',
+            owner_address: testWallet,
+            strategy: '1', // Berzerker
+            strategy_index: 0,
+            deposit_amount: '1000000000000000000', // 1 ETH
+            stop_loss: '20',
+            take_profit: '50',
+            max_wager: '5',
+            game_type: 'rps',
+            trash_talk: true,
+            status: 'active',
+            created_at: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
+        },
+        {
+            tx_hash: '0x456...def',
+            owner_address: testWallet,
+            strategy: '2', // Merchant
+            strategy_index: 1,
+            deposit_amount: '500000000000000000', // 0.5 ETH
+            stop_loss: '10',
+            take_profit: '20',
+            max_wager: '2',
+            game_type: 'poker',
+            trash_talk: false,
+            status: 'completed', // Simulation finished
+            created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+        }
+    ];
+
+    const { error: sessionError } = await supabase.from('agent_sessions').insert(sessions);
+    if (sessionError) console.error('Error seeding Agent Sessions:', sessionError);
+    else console.log(`✅ Seeded ${sessions.length} Agent Sessions for ${testWallet}`);
+
     console.log('🌱 Seeding Complete!');
 }
 

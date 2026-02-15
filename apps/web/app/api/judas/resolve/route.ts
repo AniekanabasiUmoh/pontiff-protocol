@@ -1,28 +1,27 @@
 import { NextResponse } from 'next/server';
+import { createPublicClient, http, parseAbiItem, decodeEventLog } from 'viem';
+import { monadTestnet } from 'viem/chains';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 import { JudasStrategy } from '@/lib/ai/judas-strategy';
-import { LeaderboardService } from '@/lib/services/leaderboard-service';
-import { getContract } from 'viem'; // Mock import or real logic
-// In real app we'd use 'viem' to verify the contract event state, simplified here to trust client for hackathon demo speed or read chain
-// We will read chain state for security.
+import { JudasProtocolABI } from '@/app/abis';
+
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://monad-testnet.g.alchemy.com/v2/demo';
+
+const JUDAS_ADDRESS = process.env.NEXT_PUBLIC_JUDAS_ADDRESS as `0x${string}`;
 
 export async function POST(request: Request) {
+    const supabase = createServerSupabase();
     try {
         const body = await request.json();
-        // const { epochId, txHash, playerAddress } = body; // Removed to avoid dup
-
         const { epochId, txHash } = body;
 
         if (!txHash) {
             return NextResponse.json({ error: "txHash required for verification" }, { status: 400 });
         }
 
-        // 1. Verify Transaction & Parse Logs
-        const { createPublicClient, http, parseAbiItem, decodeEventLog } = await import('viem');
-        const { monadTestnet } = await import('viem/chains');
-
         const client = createPublicClient({
             chain: monadTestnet,
-            transport: http(process.env.NEXT_PUBLIC_RPC_URL)
+            transport: http(RPC_URL)
         });
 
         const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` });
@@ -31,11 +30,9 @@ export async function POST(request: Request) {
             throw new Error("Transaction failed on-chain");
         }
 
-        // Define Event ABI: event EpochResolved(uint256 indexed epochId, string outcome, uint256 betrayalPct, address[] winners)
-        // Adjust based on actual contract. Assuming structure.
-        const eventAbi = parseAbiItem('event EpochResolved(uint256 indexed epochId, string outcome, uint256 betrayalPct, address[] winners)');
+        // Event: event EpochResolved(uint256 indexed id, uint256 betrayalPct, string outcome);
+        const eventAbi = parseAbiItem('event EpochResolved(uint256 indexed id, uint256 betrayalPct, string outcome)');
 
-        // Find the log
         let resolvedLog: any = null;
         for (const log of receipt.logs) {
             try {
@@ -55,39 +52,52 @@ export async function POST(request: Request) {
             throw new Error("EpochResolved event not found in transaction logs");
         }
 
-        const realEpochId = Number(resolvedLog.epochId);
+
+        const realEpochId = Number(resolvedLog.id);
         const realOutcome = resolvedLog.outcome;
-        const realBetrayalPct = Number(resolvedLog.betrayalPct); // Assuming stored as integer (e.g. 50 = 50%) or basis points?
-        // Let's assume passed as percentage for now.
+        const realBetrayalPct = Number(resolvedLog.betrayalPct);
 
-        // 2. Process Result (DB + Tweet) using Verified Data
-        const tweetAttempt = await JudasStrategy.processEpochResult(realEpochId, realOutcome, realBetrayalPct);
-
-        // 3. Update Leaderboard (Based on Winners array from Log)
-        const winners = resolvedLog.winners as string[];
-        if (winners && winners.length > 0) {
-            // Batch update or single? 
-            // In a real app we might verify *if* the specific requesting player is in the list?
-            // Or just update everyone in the list?
-            // The endpoint is likely called once per Epoch by a worker or the Pontiff bot.
-            // If called by client, we only update THEM?
-            // User requirement: "Parse Judas contract events instead of trusting client"
-            // "Fix leaderboard inconsistencies"
-
-            // If body.playerAddress is provided, verify they are in winners
-            // If called by worker, update all?
-            // Let's assume this is a public trigger. We should update ALL winners found in log.
-
-            for (const winner of winners) {
-                await LeaderboardService.updateLeaderboard(
-                    winner,
-                    'WIN', // They are in the winners list
-                    100 // Real reward amount? Maybe derived from log?
-                );
-            }
+        // Fetch tournament state from contract
+        let tournamentId = 0;
+        let roundNumber = 0;
+        try {
+            const tournamentState = await client.readContract({
+                address: JUDAS_ADDRESS,
+                abi: JudasProtocolABI,
+                functionName: 'getTournamentState',
+            }) as readonly [bigint, bigint, bigint];
+            tournamentId = Number(tournamentState[0]);
+            roundNumber = Number(tournamentState[1]);
+        } catch (e) {
+            console.error('Failed to fetch tournament state:', e);
         }
 
-        return NextResponse.json({ success: true, message: tweetAttempt, verified: true });
+        // 1. Insert into DB (upsert to avoid duplicates)
+        const { error: dbError } = await supabase.from('judas_epochs').upsert({
+            epoch_id: realEpochId,
+            tournament_id: tournamentId,
+            round_number: roundNumber,
+            betrayal_pct: realBetrayalPct,
+            outcome: realOutcome,
+            tx_hash: txHash
+        }, { onConflict: 'epoch_id' });
+
+        if (dbError) {
+            console.error("Failed to insert judas_epoch:", dbError);
+        }
+
+        // 2. Process Strategy (Tweet/Log)
+        await JudasStrategy.processEpochResult(realEpochId, realOutcome, realBetrayalPct);
+
+        return NextResponse.json({
+            success: true,
+            message: "Epoch resolved successfully verified on-chain",
+            data: {
+                epochId: realEpochId,
+                outcome: realOutcome,
+                betrayalPct: realBetrayalPct
+            }
+        });
 
     } catch (error: any) {
         console.error("Judas Resolution API Error", error);

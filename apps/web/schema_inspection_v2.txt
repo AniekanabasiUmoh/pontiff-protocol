@@ -1,0 +1,71 @@
+Database Schema Report - 2026-02-12T23:40:32.124Z
+
+Error querying information_schema: Could not find the table 'public.information_schema.columns' in the schema cache
+Falling back to row sampling...
+
+--- Table: agent_sessions (Inferred from sample) ---
+  - id: string (Example: 2c535881-0325-460b-8631-b2347c139b8b)
+  - user_wallet: string (Example: 0x9f994707e36848a82e672d34adb3194877db8cc3)
+  - session_wallet: string (Example: 0x308ec4240e4cd2398ec639389ab1fc0a9358e764)
+  - strategy: string (Example: merchant)
+  - starting_balance: number (Example: 100)
+  - current_balance: number (Example: 100)
+  - stop_loss: number (Example: 20)
+  - take_profit: unknown (null) (Example: null)
+  - status: string (Example: stopped)
+  - games_played: number (Example: 0)
+  - created_at: string (Example: 2026-02-12T13:42:05.7+00:00)
+  - expires_at: unknown (null) (Example: null)
+  - tx_hash: string (Example: 0xbf8f4aed2bf3545cb7a4ce684be86a74144a4bd5237dde5d2414debc60412672)
+  - strategy_index: number (Example: 1)
+  - trash_talk: boolean (Example: true)
+  - max_wager: string (Example: 5)
+  - game_type: string (Example: all)
+  - profit_loss: string (Example: 0)
+  - stopped_at: unknown (null) (Example: null)
+  - total_wins: number (Example: 0)
+  - total_losses: number (Example: 0)
+  - agent_mode: string (Example: PvE)
+  - pvp_wins: number (Example: 0)
+  - pvp_losses: number (Example: 0)
+  - pvp_draws: number (Example: 0)
+  - elo_rating: number (Example: 1000)
+  - pvp_earnings: number (Example: 0)
+  - target_archetype: unknown (null) (Example: null)
+  - target_rival: unknown (null) (Example: null)
+  - pvp_aggression: number (Example: 0.5)
+  - deposit_amount: string (Example: 100)
+  - total_games: number (Example: 0)
+  - updated_at: string (Example: 2026-02-12T13:56:13.60093+00:00)
+  - wallet_address: unknown (null) (Example: null)
+  - session_wallet_backup: unknown (null) (Example: null)
+
+--- Table: game_history (Inferred from sample) ---
+  - id: string (Example: 22c3525c-5aa7-4c75-a3b5-dad73178d675)
+  - session_id: string (Example: 3973a338-5ae7-4938-8563-87feed8a9e4a)
+  - player_address: string (Example: 0x0000000000000000000000000000000000000000)
+  - game_type: string (Example: RPS)
+  - result: string (Example: win)
+  - wager_amount: number (Example: 1)
+  - profit_loss: number (Example: 0.95)
+  - player_move: number (Example: 1)
+  - pontiff_move: number (Example: 3)
+  - tx_hash: string (Example: 0x0000000000000000000000000000000000000000000000000000000000000000)
+  - created_at: string (Example: 2026-02-12T15:55:36.148275+00:00)
+
+--- Table: games (Inferred from sample) ---
+  - id: string (Example: 02cf2773-203c-4235-a03b-a6aacf7a1b4c)
+  - player1: string (Example: 0xManualPlayer)
+  - player2: string (Example: ThePontiff)
+  - game_type: string (Example: RPS)
+  - wager: string (Example: 100000000000000000000)
+  - status: string (Example: completed)
+  - winner: unknown (null) (Example: null)
+  - result: object (Example: [object Object])
+  - created_at: string (Example: 2026-02-07T20:59:41.631+00:00)
+  - completed_at: unknown (null) (Example: null)
+  - play_mode: string (Example: on-chain)
+
+--- Table: vatican_entrants ---
+Table exists but is empty. Cannot infer schema from rows.
+

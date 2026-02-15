@@ -12,30 +12,30 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', section: 'core' },
-    { label: 'Confessional', href: '/confess', icon: 'psychology_alt', section: 'core' },
-    { label: 'RPS Arena', href: '/games/rps', icon: 'sports_mma', section: 'games' },
-    { label: 'Poker Table', href: '/games/poker', icon: 'style', section: 'games' },
-    { label: 'Judas Protocol', href: '/judas', icon: 'visibility', section: 'games' },
-    { label: 'Cathedral', href: '/cathedral', icon: 'account_balance', section: 'economy' },
-    { label: 'Indulgences', href: '/indulgences', icon: 'local_fire_department', section: 'economy' },
-    { label: 'Hire Agent', href: '/hire', icon: 'smart_toy', section: 'economy' },
+    { label: 'Faucet', href: '/faucet', icon: 'water_drop', section: 'start' },
+    { label: 'Agents', href: '/agents', icon: 'smart_toy', section: 'start' },
+    { label: 'RPS Arena', href: '/games/rps', icon: 'sports_mma', section: 'play' },
+    { label: 'Poker Table', href: '/games/poker', icon: 'style', section: 'play' },
+    { label: 'Judas Protocol', href: '/judas', icon: 'visibility', section: 'play' },
+    { label: 'Confessional', href: '/confess', icon: 'psychology_alt', section: 'play' },
     { label: 'Tournaments', href: '/tournaments', icon: 'emoji_events', section: 'compete' },
     { label: 'Leaderboard', href: '/leaderboard', icon: 'leaderboard', section: 'compete' },
     { label: 'Competitors', href: '/competitors', icon: 'shield', section: 'compete' },
     { label: 'Crusades', href: '/crusades', icon: 'gps_fixed', section: 'compete' },
-    { label: 'Debates', href: '/debates', icon: 'forum', section: 'social' },
-    { label: 'Live Wire', href: '/live', icon: 'electric_bolt', section: 'social' },
-    { label: 'Membership', href: '/membership', icon: 'card_membership', section: 'account' },
+    { label: 'Conversions', href: '/conversions', icon: 'auto_fix_high', section: 'compete' },
+    { label: 'Debates', href: '/debates', icon: 'forum', section: 'compete' },
+    { label: 'Live Wire', href: '/live', icon: 'electric_bolt', section: 'compete' },
+    { label: 'Cathedral', href: '/cathedral', icon: 'account_balance', section: 'economy' },
+    { label: 'Indulgences', href: '/indulgences', icon: 'local_fire_department', section: 'economy' },
+    { label: 'Membership', href: '/membership', icon: 'card_membership', section: 'economy' },
+    { label: 'Election', href: '/election', icon: 'how_to_vote', section: 'economy' },
 ];
 
 const SECTION_LABELS: Record<string, string> = {
-    core: 'COMMAND',
-    games: 'ARENA',
-    economy: 'TREASURY',
-    compete: 'INQUISITION',
-    social: 'COMMUNE',
-    account: 'ACCOUNT',
+    start: 'START',
+    play: 'PLAY',
+    compete: 'COMPETE',
+    economy: 'ECONOMY',
 };
 
 export function Sidebar() {
@@ -50,11 +50,7 @@ export function Sidebar() {
         return acc;
     }, {} as Record<string, NavItem[]>);
 
-    const isActive = (href: string) => {
-        if (href === '/dashboard' && pathname === '/dashboard') return true;
-        if (href !== '/dashboard' && pathname?.startsWith(href)) return true;
-        return false;
-    };
+    const isActive = (href: string) => pathname?.startsWith(href) ?? false;
 
     return (
         <aside

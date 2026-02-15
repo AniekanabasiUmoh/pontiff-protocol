@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
-import { ethers } from 'ethers';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
+import { parseEther, formatEther, isAddress } from 'viem';
 
 /**
  * Module 12: Confession Staking System
@@ -11,7 +11,7 @@ import { ethers } from 'ethers';
  * - Confession NFT minted upon successful penance
  */
 
-const MIN_STAKE_AMOUNT = ethers.parseEther('100');
+const MIN_STAKE_AMOUNT = parseEther('100');
 const SIN_REDUCTION_RATE = 10; // 10 GUILT = 1 sin score point
 
 interface User {
@@ -22,6 +22,7 @@ interface User {
 
 export async function POST(request: NextRequest) {
     try {
+        const supabase = createServerSupabase();
         const body = await request.json();
         const { walletAddress, stakeAmount, txHash } = body;
 
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate wallet address format
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress)) {
             return NextResponse.json(
                 { error: 'Invalid wallet address format' },
                 { status: 400 }
@@ -48,15 +49,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     error: 'Insufficient stake amount',
-                    message: `Minimum stake is ${ethers.formatEther(MIN_STAKE_AMOUNT)} GUILT`,
-                    minimumStake: ethers.formatEther(MIN_STAKE_AMOUNT)
+                    message: `Minimum stake is ${formatEther(MIN_STAKE_AMOUNT)} GUILT`,
+                    minimumStake: formatEther(MIN_STAKE_AMOUNT)
                 },
                 { status: 400 }
             );
         }
 
         // Calculate sin score reduction
-        const stakeAmountEther = parseFloat(ethers.formatEther(stakeAmountBigInt));
+        const stakeAmountEther = parseFloat(formatEther(stakeAmountBigInt));
         const sinReduction = Math.floor(stakeAmountEther / SIN_REDUCTION_RATE);
 
         // Fetch user's current sin data
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
             .insert({
                 wallet_address: walletAddress.toLowerCase(),
                 confession_type: 'penance_stake',
-                stake_amount: ethers.formatEther(stakeAmountBigInt),
+                stake_amount: formatEther(stakeAmountBigInt),
                 sin_reduction: sinReduction,
                 previous_sin_score: currentSinScore,
                 new_sin_score: newSinScore,
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
             confession: {
                 id: confession.id,
                 walletAddress,
-                stakeAmount: ethers.formatEther(stakeAmountBigInt),
+                stakeAmount: formatEther(stakeAmountBigInt),
                 sinReduction,
                 previousSinScore: currentSinScore,
                 newSinScore,
@@ -176,7 +177,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({
                 eligible: false,
                 error: 'User not found. Please complete wallet scan first.',
-                minimumStake: ethers.formatEther(MIN_STAKE_AMOUNT),
+                minimumStake: formatEther(MIN_STAKE_AMOUNT),
                 sinReductionRate: SIN_REDUCTION_RATE
             });
         }
@@ -187,7 +188,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             eligible: currentSinScore > 0,
             currentSinScore,
-            minimumStake: ethers.formatEther(MIN_STAKE_AMOUNT),
+            minimumStake: formatEther(MIN_STAKE_AMOUNT),
             sinReductionRate: SIN_REDUCTION_RATE,
             costForFullAbsolution: costForFullAbsolution.toString(),
             lastConfession: userData.last_confession_at,

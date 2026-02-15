@@ -1,6 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
-import { ethers } from 'ethers';
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/db/supabase-server';
+import {
+    createPublicClient,
+    createWalletClient,
+    http,
+    parseAbi,
+    isAddress,
+    decodeEventLog,
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { monadTestnet } from 'viem/chains';
 
 /**
  * Module 12: Confession NFT Minting
@@ -48,6 +57,7 @@ interface Confession {
 
 export async function POST(request: NextRequest) {
     try {
+        const supabase = createServerSupabase();
         const body = await request.json();
         const { walletAddress, confessionId } = body;
 
@@ -60,7 +70,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate wallet address
-        if (!ethers.isAddress(walletAddress)) {
+        if (!isAddress(walletAddress)) {
             return NextResponse.json(
                 { error: 'Invalid wallet address format' },
                 { status: 400 }
@@ -145,45 +155,41 @@ export async function POST(request: NextRequest) {
         const metadataString = JSON.stringify(metadata);
 
         // Mint NFT on-chain
-        const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-
         let pontiffKey = process.env.PONTIFF_PRIVATE_KEY!;
         if (pontiffKey && !pontiffKey.startsWith('0x')) {
             pontiffKey = `0x${pontiffKey}`;
         }
 
-        const pontiffWallet = new ethers.Wallet(pontiffKey, provider);
-
-        const confessionNFTContract = new ethers.Contract(
-            CONFESSION_NFT_ADDRESS,
-            CONFESSION_NFT_ABI,
-            pontiffWallet
-        );
+        const account = privateKeyToAccount(pontiffKey as `0x${string}`);
+        const publicClient = createPublicClient({ chain: monadTestnet, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
+        const walletClient = createWalletClient({ account, chain: monadTestnet, transport: http(process.env.NEXT_PUBLIC_RPC_URL) });
+        const nftAbi = parseAbi(CONFESSION_NFT_ABI);
 
         try {
             // Mint NFT (The Pontiff mints and sends to user)
-            const tx = await confessionNFTContract.mintPenance(
-                walletAddress,
-                confessionId,
-                confession.sin_reduction,
-                metadataString
-            );
+            const txHash = await walletClient.writeContract({
+                address: CONFESSION_NFT_ADDRESS as `0x${string}`,
+                abi: nftAbi,
+                functionName: 'mintPenance',
+                args: [walletAddress, confessionId, confession.sin_reduction, metadataString],
+            });
 
-            console.log(`[Confession NFT] Minting transaction sent: ${tx.hash}`);
+            console.log(`[Confession NFT] Minting transaction sent: ${txHash}`);
 
-            const receipt = await tx.wait();
-            console.log(`[Confession NFT] Mint confirmed: ${receipt.hash}`);
+            const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+            console.log(`[Confession NFT] Mint confirmed: ${receipt.transactionHash}`);
 
-            // Extract token ID from receipt logs (assuming Transfer event)
+            // Extract token ID from receipt logs (Transfer event)
+            const ERC721_TRANSFER_ABI = parseAbi(['event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)']);
             let tokenId: number | null = null;
             for (const log of receipt.logs) {
                 try {
-                    const parsed = confessionNFTContract.interface.parseLog(log as any);
-                    if (parsed && parsed.name === 'Transfer') {
-                        tokenId = Number(parsed.args[2]); // tokenId is third argument in Transfer event
+                    const decoded = decodeEventLog({ abi: ERC721_TRANSFER_ABI, data: log.data, topics: log.topics });
+                    if (decoded.eventName === 'Transfer') {
+                        tokenId = Number((decoded.args as any).tokenId);
                         break;
                     }
-                } catch (e) {
+                } catch {
                     // Skip logs that don't match
                 }
             }
@@ -195,7 +201,7 @@ export async function POST(request: NextRequest) {
                 .update({
                     nft_minted: true,
                     nft_token_id: tokenId,
-                    nft_mint_tx: receipt.hash,
+                    nft_mint_tx: receipt.transactionHash,
                     nft_metadata: metadata
                 } as any)
                 .eq('id', confessionId);
@@ -207,7 +213,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({
                 success: true,
                 tokenId,
-                txHash: receipt.hash,
+                txHash: receipt.transactionHash,
                 contractAddress: CONFESSION_NFT_ADDRESS,
                 metadata,
                 message: '🎨 Confession NFT minted successfully! Your penance is now immortalized on-chain.'

@@ -7,7 +7,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ethers } from 'ethers';
 
 type AgentStrategy = 'berzerker' | 'merchant' | 'disciple';
 

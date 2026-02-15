@@ -6,24 +6,28 @@ import { TournamentCard } from '@/components/tournaments/TournamentCard';
 import { TournamentSkeleton } from '@/components/skeletons/TournamentSkeleton';
 import { CreateTournamentModal } from '@/components/tournaments/CreateTournamentModal';
 
-const FILTERS = ['all', 'open', 'active', 'completed'] as const;
+const FILTERS = ['all', 'pending', 'active', 'completed'] as const;
 
 export default function TournamentsPage() {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'open' | 'active' | 'completed'>('all');
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'completed'>('all');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     useEffect(() => { fetchTournaments(); }, []);
 
     async function fetchTournaments() {
+        setFetchError(null);
         try {
             setLoading(true);
             const res = await fetch('/api/tournaments/list');
             const data = await res.json();
             if (data.success) setTournaments(data.tournaments);
-        } catch (error) {
+            else if (data.error) setFetchError(data.error);
+        } catch (error: any) {
             console.error('Failed to fetch tournaments:', error);
+            setFetchError(error.message || 'Failed to load tournaments.');
         } finally {
             setLoading(false);
         }
@@ -33,7 +37,7 @@ export default function TournamentsPage() {
 
     const statusCounts = {
         all: tournaments.length,
-        open: tournaments.filter(t => t.status === 'open').length,
+        pending: tournaments.filter(t => t.status === 'pending' || t.status === 'open').length,
         active: tournaments.filter(t => t.status === 'active').length,
         completed: tournaments.filter(t => t.status === 'completed').length,
     };
@@ -64,7 +68,7 @@ export default function TournamentsPage() {
                 <div className="grid grid-cols-4 gap-3">
                     {[
                         { label: 'Total', value: statusCounts.all, icon: 'emoji_events' },
-                        { label: 'Open', value: statusCounts.open, icon: 'lock_open', color: 'text-green-400' },
+                        { label: 'Pending', value: statusCounts.pending, icon: 'lock_open', color: 'text-green-400' },
                         { label: 'Active', value: statusCounts.active, icon: 'play_circle', color: 'text-primary' },
                         { label: 'Completed', value: statusCounts.completed, icon: 'check_circle', color: 'text-gray-500' },
                     ].map((s) => (
@@ -98,6 +102,13 @@ export default function TournamentsPage() {
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3, 4, 5, 6].map(i => <TournamentSkeleton key={i} />)}
+                    </div>
+                ) : fetchError ? (
+                    <div className="p-12 text-center border border-red-900/20 rounded-xl bg-red-950/10">
+                        <p className="text-red-400/70 font-mono text-xs mb-3">Failed to load tournaments: {fetchError}</p>
+                        <button onClick={fetchTournaments} className="px-4 py-2 text-xs font-mono border border-red-900/30 text-red-400/60 rounded hover:bg-red-900/20 transition-colors">
+                            Retry
+                        </button>
                     </div>
                 ) : filteredTournaments.length === 0 ? (
                     <div className="bg-obsidian border border-dashed border-primary/20 rounded-lg p-16 text-center">

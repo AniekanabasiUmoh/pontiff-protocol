@@ -1,4 +1,4 @@
-export type ActionType = 'confess' | 'buyIndulgence' | 'stake' | 'signalBetrayal' | 'challengePontiff' | 'vote';
+export type ActionType = 'confess' | 'buyIndulgence' | 'stake' | 'signalBetrayal' | 'challengePontiff' | 'vote' | 'start_agent' | 'stop_agent' | 'deploy_agent' | 'poker_action';
 
 export interface BaseAction {
     type: ActionType;
@@ -31,8 +31,35 @@ export interface ChallengeAction extends BaseAction {
     txHash: string; // Proof of on-chain join
 }
 
+export interface StartAgentAction extends BaseAction {
+    type: 'start_agent';
+    sessionId: string;
+    strategy: string;
+}
+
+export interface StopAgentAction extends BaseAction {
+    type: 'stop_agent';
+    sessionId: string;
+}
+
+export interface DeployAgentAction extends BaseAction {
+    type: 'deploy_agent';
+    name: string;
+}
+
+export interface PokerGameAction extends BaseAction {
+    type: 'poker_action';
+    gameId: string;
+    action: string;
+    amount?: number;
+}
+
 export type VaticanAction =
     | ConfessAction
     | BuyIndulgenceAction
     | StakeAction
-    | ChallengeAction;
+    | ChallengeAction
+    | StartAgentAction
+    | StopAgentAction
+    | DeployAgentAction
+    | PokerGameAction;

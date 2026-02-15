@@ -1,0 +1,137 @@
+
+=== STARTING PONTIFF API TESTS ===
+
+Testing Confess (POST)... [FAIL]
+Error: The remote server returned an error: (400) Bad Request.
+Response: {"error":"TypeError: fetch failed"}
+False
+Testing Scan Wallet (GET)... [FAIL]
+Error: The remote server returned an error: (400) Bad Request.
+Response: {"error":"Invalid wallet address"}
+False
+Testing Buy Indulgence (POST)... [PASS]
+True
+Testing Leaderboard: Shame (GET)... [PASS]
+True
+Testing Leaderboard: Saints (GET)... [PASS]
+True
+Testing Leaderboard: Heretics (GET)... [PASS]
+True
+Testing Vatican State (GET)... [PASS]
+True
+Testing Game History (GET)... [PASS]
+True
+Testing Revenue Analytics (GET)... [PASS]
+True
+Testing Competitors (GET)... [FAIL]
+Error: The remote server returned an error: (500) Internal Server Error.
+Response: {"error":"Could not find a relationship between 'competitor_agents' and 'Conversion' in the schema cache"}
+False
+Testing Distribute Revenue (POST)... [PASS]
+True
+Testing All Debates (GET)... [FAIL]
+Error: The remote server returned an error: (500) Internal Server Error.
+Response: {"error":"Could not find a relationship between 'debates' and 'CompetitorAgent' in the schema cache"}
+False
+Testing Judge Debate (POST - Mock ID)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"error":"Debate not found"}
+False
+Testing Create Session (POST)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+False
+Testing Competitor Scan (GET)... [FAIL]
+Error: The remote server returned an error: (500) Internal Server Error.
+Response: {"error":"Could not find the 'goalType' column of 'crusades' in the schema cache"}
+False
+Testing Mint NFT (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"error":"Conversion not found"}
+False
+Testing Create Tournament (POST)... [FAIL]
+Error: The remote server returned an error: (400) Bad Request.
+Response: {"success":false,"error":"Missing required fields: name, prizePool, startDate, endDate"}
+False
+Testing Get Tournaments (GET)... [PASS]
+True
+Testing Start Tournament (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"success":false,"error":"Tournament not found"}
+False
+Testing Get Bracket (GET - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"success":false,"error":"Tournament not found"}
+False
+Testing Record Match (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"success":false,"error":"Match not found"}
+False
+Testing Get Results (GET - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"success":false,"error":"Tournament not found"}
+False
+Testing Stake Penance (POST)... [FAIL]
+Error: The remote server returned an error: (400) Bad Request.
+Response: {"error":"Insufficient stake amount","message":"Minimum stake is 100.0 GUILT","minimumStake":"100.0"}
+False
+Testing Tweet Roast (POST - Mock)... [PASS]
+True
+Testing Subscribe Cardinal (POST)... [FAIL]
+Error: The remote server returned an error: (500) Internal Server Error.
+Response: {"error":"Failed to activate membership","details":"Could not find the table 'public.cardinal_memberships' in the schema cache"}
+False
+Testing Get Membership (GET)... [PASS]
+True
+Testing Register Tournament (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"success":false,"error":"Tournament not found"}
+False
+Testing Deploy Agent (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+False
+Testing Agent Status (GET - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+False
+Testing Stop Agent (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+False
+Testing Twitter Challenge (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"error":"Competitor agent not found"}
+False
+Testing Twitter Announce (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"error":"Debate not found"}
+False
+Testing Renew Cardinal (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"error":"No active membership found"}
+False
+Testing Cancel Cardinal (POST - Mock)... [FAIL]
+Error: The remote server returned an error: (404) Not Found.
+Response: {"error":"No active membership found"}
+False
+Testing Scan Wallet (GET)... [FAIL]
+Error: The remote server returned an error: (400) Bad Request.
+Response: {"error":"Invalid wallet address"}
+False
+Testing Treasury History (GET)... [FAIL]
+Error: The remote server returned an error: (500) Internal Server Error.
+Response: {"error":"Failed to fetch distributions","details":"Failed to fetch distributions: column revenue_distributions.distribution_date does not exist"}
+False
+Testing Game Stats (GET)... [PASS]
+True
+
+=== TESTS COMPLETED ===
+
+Total Tests: 37
+Passed: 12
+Failed: 25
+Pass Rate: 32.43%
+
+TIP: Deploy bot swarm for demo day:
+  cd apps/web/scripts/bots
+  npm run fund-bots
+  npm run spawn-swarm
+
+

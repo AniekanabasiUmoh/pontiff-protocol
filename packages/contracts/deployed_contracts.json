@@ -1,6 +1,6 @@
 {
   "network": "monadTestnet",
-  "SessionWalletFactory": "0xc5bacd1ae1C486c029C51716f00CCDb359B0335A",
-  "GuiltToken": "0x3ba95dB0F41E81d71bCee84fAabb20F047b8d9fA",
-  "timestamp": "2026-02-07T23:17:51.218Z"
+  "SessionWalletFactory": "0x98518cDaC626CF28a36862216858370dbDee8858",
+  "GuiltToken": "0x71a0016b50E3d846ce17A15DdfA957e4b0885369",
+  "timestamp": "2026-02-12T13:54:50.890Z"
 }

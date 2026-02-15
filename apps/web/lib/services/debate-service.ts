@@ -1,6 +1,6 @@
 import { getTwitterClient } from '@/lib/clients/twitter';
 import { logWorldEvent } from './world-event-service';
-import { supabase } from '@/lib/db/supabase';
+import { createServerSupabase } from '@/lib/db/supabase-server';
 
 export class DebateService {
 
@@ -69,6 +69,7 @@ export class DebateService {
      * Handles Multi-turn debates and Database persistence.
      */
     static async engageHeretic(targetHandle: string, tweetId: string, tweetText: string) {
+        const supabase = createServerSupabase();
         const twitter = getTwitterClient();
 
         // 1. Fetch Agent Profile
@@ -84,7 +85,7 @@ export class DebateService {
         const { data: debate, error: debateError } = await supabase
             .from('debates')
             .select('*')
-            .eq('competitorAgentId', agent.id)
+            .eq('competitor_agent_id', agent.id)
             .eq('status', 'Active')
             .single();
 
@@ -100,18 +101,17 @@ export class DebateService {
                 .from('debates')
                 .update({
                     exchanges: currentExchanges,
-                    ourArgument: replyText, // Update latest argument
-                    // In a real system, we'd append to a conversation history JSON
+                    our_argument: replyText,
                 })
                 .eq('id', debate.id);
         } else {
             await supabase
                 .from('debates')
                 .insert([{
-                    competitorAgentId: agent.id,
-                    tweetId,
-                    ourArgument: replyText,
-                    theirArgument: tweetText,
+                    competitor_agent_id: agent.id,
+                    tweet_id: tweetId,
+                    our_argument: replyText,
+                    their_argument: tweetText,
                     status: 'Active',
                     exchanges: 1
                 }]);

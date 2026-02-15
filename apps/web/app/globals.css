@@ -18,7 +18,7 @@
     --animate-float: float 6s ease-in-out infinite;
     --animate-scribe: scribe 2s steps(40, end);
     --animate-border-beam: border-beam 12s linear infinite;
-    --animate-marquee: marquee 25s linear infinite;
+    --animate-marquee: marquee 800s linear infinite;
     --animate-ticker: ticker 30s linear infinite;
 }
 

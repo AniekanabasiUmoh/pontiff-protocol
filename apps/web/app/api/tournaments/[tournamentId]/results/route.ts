@@ -55,8 +55,7 @@ export async function GET(
         registrations.forEach(reg => {
             playerStats.set(reg.wallet_address, {
                 wallet: reg.wallet_address,
-                agentName: reg.agent_name,
-                strategy: reg.agent_strategy,
+                agentName: `Agent ${reg.seed_number || '?'}`,
                 seed: reg.seed_number,
                 gamesPlayed: 0,
                 gamesWon: 0,
@@ -110,7 +109,6 @@ export async function GET(
                     rank,
                     wallet: player.wallet,
                     agentName: player.agentName,
-                    strategy: player.strategy,
                     seed: player.seed,
                     gamesPlayed: player.gamesPlayed,
                     gamesWon: player.gamesWon,

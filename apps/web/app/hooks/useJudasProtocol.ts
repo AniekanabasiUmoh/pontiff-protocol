@@ -1,121 +1,40 @@
 'use client'
 
+import { useCallback, useState } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { JudasProtocolABI } from '@/app/abis'
 
-// TODO: Import actual ABI when contracts are deployed
 const JUDAS_ADDRESS = process.env.NEXT_PUBLIC_JUDAS_ADDRESS as `0x${string}`
-
-// Minimal Judas Protocol ABI
-const JUDAS_ABI = [
-    {
-        inputs: [],
-        name: 'currentEpochEnd',
-        outputs: [{ name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [{ name: 'user', type: 'address' }],
-        name: 'hasBetrayed',
-        outputs: [{ name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getBetrayalPercentage',
-        outputs: [{ name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'betray',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'currentEpoch',
-        outputs: [{ name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getTournamentState',
-        outputs: [
-            { name: 'tournamentId', type: 'uint256' },
-            { name: 'round', type: 'uint256' },
-            { name: 'maxRounds', type: 'uint256' }
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [{ name: 'user', type: 'address' }],
-        name: 'getReputation',
-        outputs: [
-            { name: 'loyal', type: 'uint32' },
-            { name: 'betrayed', type: 'uint32' }
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [{ name: 'amount', type: 'uint256' }],
-        name: 'withdraw',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    }
-] as const
+const JUDAS_ABI = JudasProtocolABI
 
 export function useJudasProtocol() {
     const { address } = useAccount()
-    const { writeContract, data: hash, isPending } = useWriteContract()
+    const { writeContract, data: hash, isPending, error: writeError } = useWriteContract()
 
-    // Read epoch end time
-    const { data: epochEndTime, refetch: refetchEpochEnd } = useReadContract({
+    const [fallbackEndTime] = useState(Date.now() + 24 * 60 * 60 * 1000)
+
+    const { data: gameState, refetch: refetchGameState } = useReadContract({
         address: JUDAS_ADDRESS,
         abi: JUDAS_ABI,
-        functionName: 'currentEpochEnd',
+        functionName: 'getGameState',
     })
 
-    // Read current epoch number
-    const { data: epochNumber, refetch: refetchEpochNumber } = useReadContract({
+    const { data: userPosition, refetch: refetchUserPosition } = useReadContract({
         address: JUDAS_ADDRESS,
         abi: JUDAS_ABI,
-        functionName: 'currentEpoch',
-    })
-
-    // Check if user has betrayed
-    const { data: hasBetrayed, refetch: refetchHasBetrayed } = useReadContract({
-        address: JUDAS_ADDRESS,
-        abi: JUDAS_ABI,
-        functionName: 'hasBetrayed',
+        functionName: 'getUserPosition',
         args: address ? [address] : undefined,
         query: {
             enabled: !!address,
         },
     })
 
-    // Get betrayal percentage
-    const { data: betrayalPercentage, refetch: refetchBetrayalPercentage } = useReadContract({
-        address: JUDAS_ADDRESS,
-        abi: JUDAS_ABI,
-        functionName: 'getBetrayalPercentage',
-    })
-
-    // Get Tournament State
     const { data: tournamentState, refetch: refetchTournamentState } = useReadContract({
         address: JUDAS_ADDRESS,
         abi: JUDAS_ABI,
         functionName: 'getTournamentState',
     })
 
-    // Get Reputation
     const { data: reputation, refetch: refetchReputation } = useReadContract({
         address: JUDAS_ADDRESS,
         abi: JUDAS_ABI,
@@ -126,32 +45,54 @@ export function useJudasProtocol() {
         },
     })
 
-    // Wait for transaction
     const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
         hash,
     })
 
-    // Betray faith
-    const betray = async () => {
+    const deposit = useCallback(async (amount: bigint) => {
         return writeContract({
             address: JUDAS_ADDRESS,
             abi: JUDAS_ABI,
-            functionName: 'betray',
+            functionName: 'deposit',
+            args: [amount]
         })
-    }
+    }, [writeContract])
 
-    // Withdraw funds (and claim rewards)
-    const withdraw = async (amount: bigint) => {
+    const signalBetrayal = useCallback(async () => {
+        return writeContract({
+            address: JUDAS_ADDRESS,
+            abi: JUDAS_ABI,
+            functionName: 'signalBetrayal',
+        })
+    }, [writeContract])
+
+    const resolveEpoch = useCallback(async () => {
+        return writeContract({
+            address: JUDAS_ADDRESS,
+            abi: JUDAS_ABI,
+            functionName: 'resolveEpoch',
+        })
+    }, [writeContract])
+
+    const withdraw = useCallback(async (amount: bigint) => {
         return writeContract({
             address: JUDAS_ADDRESS,
             abi: JUDAS_ABI,
             functionName: 'withdraw',
             args: [amount]
         })
-    }
+    }, [writeContract])
 
-    // Record outcome to DB
-    const recordJudasOutcome = async (actionType: 'STAKE' | 'BETRAY' | 'WITHDRAW', amount: number, txHash: string) => {
+    const claimRewards = useCallback(async (upToEpoch: bigint) => {
+        return writeContract({
+            address: JUDAS_ADDRESS,
+            abi: JUDAS_ABI,
+            functionName: 'claimRewards',
+            args: [upToEpoch]
+        })
+    }, [writeContract])
+
+    const recordJudasOutcome = useCallback(async (actionType: 'STAKE' | 'BETRAY' | 'WITHDRAW', amount: number, txHash: string) => {
         try {
             await fetch('/api/games/judas/record', {
                 method: 'POST',
@@ -168,32 +109,45 @@ export function useJudasProtocol() {
         } catch (e) {
             console.error("Failed to record Judas outcome:", e)
         }
-    }
+    }, [address, tournamentState])
 
     return {
-        epochEndTime: epochEndTime ? Number(epochEndTime) * 1000 : Date.now() + 24 * 60 * 60 * 1000, // Convert to ms
-        epochNumber: epochNumber ? Number(epochNumber) : 0,
-        hasBetrayed: hasBetrayed ?? false,
-        betrayalPercentage: betrayalPercentage ? Number(betrayalPercentage) : 0,
+        epochId: gameState ? Number(gameState[0]) : 0,
+        epochEndTime: gameState ? Number(gameState[1]) * 1000 : fallbackEndTime,
+        totalLoyal: gameState ? gameState[2] : BigInt(0),
+        totalBetrayed: gameState ? gameState[3] : BigInt(0),
+        isResolved: gameState ? gameState[4] : false,
+        betrayalPct: gameState ? Number(gameState[5]) : 0,
+
+        userStaked: userPosition ? userPosition[0] : BigInt(0),
+        isBetrayer: userPosition ? userPosition[1] : false,
+        lastEpochInteracted: userPosition ? Number(userPosition[2]) : 0,
+
         tournamentId: tournamentState ? Number(tournamentState[0]) : 1,
         currentRound: tournamentState ? Number(tournamentState[1]) : 1,
         maxRounds: tournamentState ? Number(tournamentState[2]) : 5,
+
         reputation: {
             loyal: reputation ? Number(reputation[0]) : 0,
             betrayed: reputation ? Number(reputation[1]) : 0,
         },
-        betray,
+
+        deposit,
+        signalBetrayal,
         withdraw,
+        resolveEpoch,
+        claimRewards,
         recordJudasOutcome,
-        refetchEpochEnd,
-        refetchEpochNumber,
-        refetchHasBetrayed,
-        refetchBetrayalPercentage,
+
+        refetchGameState,
+        refetchUserPosition,
         refetchTournamentState,
         refetchReputation,
+
         isPending,
         isConfirming,
         isSuccess,
         hash,
+        writeError,
     }
 }

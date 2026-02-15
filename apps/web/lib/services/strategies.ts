@@ -26,10 +26,11 @@ export interface StrategyContext {
 }
 
 export interface AgentAction {
-    game: 'RPS' | 'STAKING';
-    move: 0 | 1 | 2 | 3; // 0 for staking, 1=Rock, 2=Paper, 3=Scissors
+    game: 'RPS' | 'STAKING' | 'POKER'; // Added POKER
+    move: 0 | 1 | 2 | 3; // 0 for staking, 1=Rock, 2=Paper, 3=Scissors (poker uses simplified betting)
     wager: number;
     reasoning?: string; // For debugging and analytics
+    pokerAction?: 'FOLD' | 'CALL' | 'RAISE'; // Poker-specific action
 }
 
 // RPS move enum for clarity
@@ -67,6 +68,17 @@ export const STRATEGY_ROI = {
  */
 export const berzerkerStrategy = (ctx: StrategyContext): AgentAction => {
     const wager = Math.max(1, Math.floor(ctx.currentBalance * 0.15));
+
+    // Every 4th game, play Poker for variety
+    if (ctx.gamesPlayed > 0 && ctx.gamesPlayed % 4 === 0) {
+        return {
+            game: 'POKER',
+            move: 0,
+            wager,
+            reasoning: `Berzerker: Switching to Poker, 15% bet (${wager} GUILT)`
+        };
+    }
+
     const moves: (1 | 2 | 3)[] = [RPSMove.ROCK, RPSMove.PAPER, RPSMove.SCISSORS];
     const move = moves[Math.floor(Math.random() * moves.length)];
 
@@ -151,6 +163,16 @@ export const merchantStrategy = (ctx: StrategyContext): AgentAction => {
 
     const mostCommonMove = moveFrequency.indexOf(Math.max(...moveFrequency.slice(1))) as 1 | 2 | 3;
     const counterMove = getCounterMove(mostCommonMove);
+
+    // Every 6th game, switch to Poker to diversify
+    if (ctx.gamesPlayed > 0 && ctx.gamesPlayed % 6 === 0) {
+        return {
+            game: 'POKER',
+            move: 0,
+            wager,
+            reasoning: `Merchant: Diversifying into Poker, 5% bet (${wager} GUILT)`
+        };
+    }
 
     return {
         game: 'RPS',
