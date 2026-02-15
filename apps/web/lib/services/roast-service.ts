@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { supabase } from '../db/supabase';
+import { createServerSupabase } from '../db/supabase-server';
 
 const FALLBACK_ROASTS = [
     "Your portfolio is a crime scene — and you left fingerprints everywhere.",
@@ -22,6 +22,7 @@ export async function generateRoast(walletAddress: string, sins: Sin[], balance:
     // 1. Check Cache (Confessions table)
     // We look for a confession from the last 24 hours for this wallet
     try {
+        const supabase = createServerSupabase();
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const { data: cachedConfession, error } = await supabase
             .from('confessions')
