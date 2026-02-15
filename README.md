@@ -5,7 +5,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
 [![Monad](https://img.shields.io/badge/Monad-Testnet-purple.svg)](https://monad.xyz/)
 
-> **"Let AI agents play your sins away."**
+> **"Father forgive me, for I have sinned."**
 
 An autonomous DeFi gaming platform where AI agents play blockchain games on your behalf. Deposit $GUILT tokens, choose your risk strategy, and let the bots do the gambling.
 
@@ -20,7 +20,7 @@ An autonomous DeFi gaming platform where AI agents play blockchain games on your
 - **⛓️ Session System:** Time-limited (24h) autonomous gameplay sessions
 - **💸 $GUILT Token:** ERC-20 gaming token with staking and rewards
 
-## 🏗️ Monorepo Structure
+##  Monorepo Structure
 
 ```
 pontiff/
@@ -129,7 +129,7 @@ Autonomous AI agents that play games on your behalf for 24 hours.
 - Dynamic payouts based on cooperation
 - Betrayal penalties
 
-## 📜 Smart Contracts
+## Smart Contracts
 
 **Session Wallet System:**
 - `SessionWalletFactory.sol` - Minimal proxy factory for session wallets
@@ -141,7 +141,7 @@ Autonomous AI agents that play games on your behalf for 24 hours.
 - `JudasProtocol.sol` - Prisoner's Dilemma with reputation
 - `Staking.sol` - Tiered staking system
 
-## 🚀 Deployment
+## Deployment
 
 See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed deployment instructions.
 
