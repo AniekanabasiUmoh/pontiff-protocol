@@ -41,6 +41,7 @@ const SECTION_LABELS: Record<string, string> = {
 export function Sidebar() {
     const pathname = usePathname();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     // Group nav items by section
     const sections = NAV_ITEMS.reduce((acc, item) => {
@@ -52,7 +53,88 @@ export function Sidebar() {
 
     const isActive = (href: string) => pathname?.startsWith(href) ?? false;
 
+    const navContent = (onLinkClick?: () => void) => (
+        <nav className="flex-1 overflow-y-auto custom-scrollbar py-2">
+            {Object.entries(sections).map(([section, items]) => (
+                <div key={section} className="mb-1">
+                    <div className={`px-4 py-2 transition-all duration-300 ${isExpanded || onLinkClick ? 'opacity-100' : 'opacity-0 h-0 py-0 overflow-hidden'}`}>
+                        <span className="text-[9px] font-mono tracking-[0.2em] text-primary/40 uppercase">
+                            {SECTION_LABELS[section] || section}
+                        </span>
+                    </div>
+                    {items.map((item) => {
+                        const active = isActive(item.href);
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={onLinkClick}
+                                className={`
+                    flex items-center gap-3 px-4 py-2.5 mx-1 rounded
+                    transition-all duration-200 group relative
+                    ${active
+                                        ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                                        : 'text-gray-500 hover:text-primary hover:bg-white/5 border-l-2 border-transparent'
+                                    }
+                  `}
+                            >
+                                <span className={`material-icons text-lg flex-shrink-0 transition-colors ${active ? 'text-primary' : 'text-gray-500 group-hover:text-primary'}`}>
+                                    {item.icon}
+                                </span>
+                                <span className={`text-xs font-medium tracking-wide whitespace-nowrap transition-all duration-300 ${isExpanded || onLinkClick ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+                                    {item.label}
+                                </span>
+                                {!isExpanded && !onLinkClick && (
+                                    <div className="absolute left-full ml-2 px-2 py-1 bg-obsidian border border-primary/30 rounded text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+                                        {item.label}
+                                    </div>
+                                )}
+                            </Link>
+                        );
+                    })}
+                </div>
+            ))}
+        </nav>
+    );
+
     return (
+        <>
+        {/* ── Mobile Floating Button ── */}
+        <button
+            onClick={() => setMobileOpen(true)}
+            className="lg:hidden fixed bottom-12 left-4 z-50 w-12 h-12 rounded-full bg-primary text-background-dark flex items-center justify-center shadow-[0_0_20px_rgba(242,185,13,0.4)] hover:scale-110 transition-transform"
+        >
+            <span className="material-icons text-xl">menu</span>
+        </button>
+
+        {/* ── Mobile Overlay ── */}
+        {mobileOpen && (
+            <div className="lg:hidden fixed inset-0 z-50 flex">
+                {/* Backdrop */}
+                <div
+                    className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                    onClick={() => setMobileOpen(false)}
+                />
+                {/* Drawer */}
+                <aside className="relative w-64 h-full bg-background-dark/98 border-r border-primary/20 flex flex-col z-10">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 h-14 border-b border-primary/10 flex-shrink-0">
+                        <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 group">
+                            <div className="w-8 h-8 border border-primary/50 rounded flex items-center justify-center bg-primary/5">
+                                <span className="material-icons text-primary text-lg">auto_awesome</span>
+                            </div>
+                            <span className="text-sm font-bold tracking-widest uppercase text-white">PONTIFF</span>
+                        </Link>
+                        <button onClick={() => setMobileOpen(false)} className="text-gray-500 hover:text-primary transition-colors">
+                            <span className="material-icons">close</span>
+                        </button>
+                    </div>
+                    {navContent(() => setMobileOpen(false))}
+                </aside>
+            </div>
+        )}
+
+        {/* ── Desktop Sidebar ── */}
         <aside
             onMouseEnter={() => setIsExpanded(true)}
             onMouseLeave={() => setIsExpanded(false)}
@@ -80,51 +162,7 @@ export function Sidebar() {
                 </span>
             </Link>
 
-            {/* Navigation Items */}
-            <nav className="flex-1 overflow-y-auto custom-scrollbar py-2">
-                {Object.entries(sections).map(([section, items]) => (
-                    <div key={section} className="mb-1">
-                        {/* Section Label — only visible when expanded */}
-                        <div className={`px-4 py-2 transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0 h-0 py-0 overflow-hidden'}`}>
-                            <span className="text-[9px] font-mono tracking-[0.2em] text-primary/40 uppercase">
-                                {SECTION_LABELS[section] || section}
-                            </span>
-                        </div>
-
-                        {items.map((item) => {
-                            const active = isActive(item.href);
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`
-                    flex items-center gap-3 px-4 py-2.5 mx-1 rounded
-                    transition-all duration-200 group relative
-                    ${active
-                                            ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                                            : 'text-gray-500 hover:text-primary hover:bg-white/5 border-l-2 border-transparent'
-                                        }
-                  `}
-                                >
-                                    <span className={`material-icons text-lg flex-shrink-0 transition-colors ${active ? 'text-primary' : 'text-gray-500 group-hover:text-primary'}`}>
-                                        {item.icon}
-                                    </span>
-                                    <span className={`text-xs font-medium tracking-wide whitespace-nowrap transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
-                                        {item.label}
-                                    </span>
-
-                                    {/* Tooltip when collapsed */}
-                                    {!isExpanded && (
-                                        <div className="absolute left-full ml-2 px-2 py-1 bg-obsidian border border-primary/30 rounded text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
-                                            {item.label}
-                                        </div>
-                                    )}
-                                </Link>
-                            );
-                        })}
-                    </div>
-                ))}
-            </nav>
+            {navContent()}
 
             {/* Bottom Collapse Button */}
             <div className="flex-shrink-0 border-t border-primary/10 p-2">
@@ -141,5 +179,6 @@ export function Sidebar() {
                 </button>
             </div>
         </aside>
+        </>
     );
 }
