@@ -78,6 +78,7 @@ export class AgentManagerService {
     private txMutex: Promise<void> = Promise.resolve();
 
     private constructor() {
+        if (!PONTIFF_PRIVATE_KEY) throw new Error('PONTIFF_PRIVATE_KEY is not set');
         this.account = privateKeyToAccount(PONTIFF_PRIVATE_KEY as `0x${string}`);
 
         this.publicClient = createPublicClient({
@@ -1006,5 +1007,14 @@ export class AgentManagerService {
     }
 }
 
-// Export singleton instance
-export const agentManager = AgentManagerService.getInstance();
+// Lazy singleton — only instantiated on first use at request time, not at module import
+let _agentManagerInstance: AgentManagerService | null = null;
+export const agentManager = new Proxy({} as AgentManagerService, {
+    get(_target, prop) {
+        if (!_agentManagerInstance) {
+            _agentManagerInstance = AgentManagerService.getInstance();
+        }
+        const value = (_agentManagerInstance as any)[prop];
+        return typeof value === 'function' ? value.bind(_agentManagerInstance) : value;
+    }
+});
